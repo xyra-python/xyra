@@ -6,24 +6,26 @@ xyra/docs/README.md
 Buat README.md utama dengan pendahuluan dan navigasi
 </edit_description>
 
-# Dokumentasi Framework Xyra
+# Xyra Framework Documentation
 
-Xyra adalah framework web Python yang ringan dan cepat, dibangun di atas socketify untuk performa tinggi. Framework ini menyediakan fitur-fitur modern seperti routing, templating, WebSocket, dan dokumentasi API otomatis.
+Xyra is a lightweight and fast Python web framework built on top of socketify for high performance. The framework provides modern features such as flexible routing, templating, WebSocket support, and automatic API documentation.
 
-## Fitur Utama
+## Key Features
 
-- 🚀 Performa tinggi dengan socketify
-- 🛣️ Routing yang fleksibel
-- 📝 Templating dengan Jinja2
-- 🔌 Dukungan WebSocket
-- 📚 Dokumentasi API otomatis dengan Swagger
-- 🔄 Asynchronous support
-- 🧩 Middleware support
+- 🚀 High performance with socketify
+- 🛣️ Flexible routing with parameters and query strings
+- 📝 Jinja2 templating engine
+- 🔌 WebSocket support for real-time applications
+- 📚 Automatic API documentation with Swagger/OpenAPI
+- 🔄 Asynchronous request handling
+- 🧩 Middleware support for cross-cutting concerns
+- 📁 Static file serving
+- 🔧 Type hints and modern Python support
 
-## Daftar Isi
+## Table of Contents
 
-- [Instalasi](installation.md)
-- [Memulai](getting-started.md)
+- [Installation](installation.md)
+- [Getting Started](getting-started.md)
 - [Routing](routing.md)
 - [Request & Response](request-response.md)
 - [Templating](templating.md)
@@ -31,7 +33,7 @@ Xyra adalah framework web Python yang ringan dan cepat, dibangun di atas socketi
 - [Swagger Documentation](swagger.md)
 - [Middleware](middleware.md)
 - [Static Files](static-files.md)
-- [Contoh Lengkap](examples.md)
+- [Complete Examples](examples.md)
 - [API Reference](api-reference.md)
 
 ## Quick Start
@@ -49,16 +51,61 @@ if __name__ == "__main__":
     app.listen(8000)
 ```
 
-Kunjungi `http://localhost:8000` untuk melihat hasilnya.
+Visit `http://localhost:8000` to see the result.
 
-## Kontribusi
+## Why Xyra?
 
-Kontribusi sangat diterima! Silakan buat issue atau pull request di repository GitHub.
+Xyra is designed to be simple yet powerful, providing the essential features you need for modern web development without unnecessary complexity. Built on socketify, it offers excellent performance while maintaining a clean, Pythonic API.
 
-## Lisensi
+### Performance
 
-MIT License - lihat file LICENSE untuk detail.
+Xyra leverages socketify's high-performance networking capabilities, making it suitable for applications requiring low latency and high throughput.
+
+### Developer Experience
+
+- Intuitive API design
+- Comprehensive documentation
+- Type hints support
+- Modern Python features
+- Easy testing and debugging
+
+### Production Ready
+
+- Built-in middleware for common tasks
+- WebSocket support for real-time features
+- Automatic API documentation
+- Static file serving
+- CORS support
+
+## Community & Support
+
+- 📖 [Documentation](https://xyra-framework.github.io/)
+- 💬 [Discord Community](https://discord.gg/xyra)
+- 🐛 [Issue Tracker](https://github.com/xyra-framework/xyra/issues)
+- 📧 [Mailing List](https://groups.google.com/g/xyra-framework)
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests on GitHub.
+
+### Development Setup
+
+```bash
+git clone https://github.com/xyra-framework/xyra.git
+cd xyra
+pip install -e .
+```
+
+### Running Tests
+
+```bash
+pytest
+```
+
+## License
+
+MIT License - see the LICENSE file for details.
 
 ---
 
-Dibuat dengan ❤️ menggunakan Xyra Framework
+Made with ❤️ using Xyra Framework
