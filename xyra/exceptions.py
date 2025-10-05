@@ -17,7 +17,17 @@ class XyraException(Exception):
 
 
 class HTTPException(XyraException):
-    """HTTP exception for handling HTTP error responses."""
+    """
+    HTTP exception for handling HTTP error responses.
+
+    This exception is raised to indicate HTTP errors that should result
+    in specific status codes and error messages in the response.
+
+    Attributes:
+        status_code: HTTP status code (e.g., 404, 500).
+        detail: Detailed error message.
+        headers: Additional headers to include in the error response.
+    """
 
     def __init__(
         self,
@@ -25,6 +35,14 @@ class HTTPException(XyraException):
         detail: Optional[str] = None,
         headers: Optional[Dict[str, str]] = None,
     ):
+        """
+        Initialize HTTP exception.
+
+        Args:
+            status_code: HTTP status code for the error.
+            detail: Custom error message. If None, uses default for status code.
+            headers: Optional headers to add to the response.
+        """
         self.status_code = status_code
         self.detail = detail or self._get_default_detail(status_code)
         self.headers = headers or {}
@@ -32,7 +50,15 @@ class HTTPException(XyraException):
 
     @staticmethod
     def _get_default_detail(status_code: int) -> str:
-        """Get default error message for HTTP status code."""
+        """
+        Get default error message for a given HTTP status code.
+
+        Args:
+            status_code: HTTP status code integer.
+
+        Returns:
+            Default error message string for the status code.
+        """
         status_messages = {
             400: "Bad Request",
             401: "Unauthorized",

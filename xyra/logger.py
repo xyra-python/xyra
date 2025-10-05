@@ -1,5 +1,6 @@
 import logging
 
+
 def get_logger(name="xyra"):
     return logging.getLogger(name)
 

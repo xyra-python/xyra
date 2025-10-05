@@ -8,7 +8,11 @@ with both decorator and function call patterns.
 from xyra import App, Request, Response
 
 # Create the application
-app = App()
+app = App(swagger_options={
+    "title": "Blog API",
+    "version": "1.0.0",
+    "description": "API for Blog Application",
+})
 
 
 # Example 1: Using decorator pattern (if working)
@@ -132,18 +136,6 @@ app.get("/error", error_demo)
 
 
 if __name__ == "__main__":
-    print("🚀 Starting Xyra Simple Example")
-    print("📍 Server will be available at: http://localhost:8000")
-    print("🌐 Available endpoints:")
-    print("  • GET  /           - Home (JSON)")
-    print("  • GET  /api/info   - API information")
-    print("  • GET  /hello/{name} - Greet by name")
-    print("  • POST /echo       - Echo JSON data")
-    print("  • GET  /page       - HTML page")
-    print("  • GET  /error      - Error handling demo")
-    print()
-    print("💡 Try visiting http://localhost:8000/page for a web interface")
-    print()
 
     # Start the server
-    app.listen(8000)
+    app.listen(8000, reload=True)

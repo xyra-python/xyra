@@ -3,6 +3,7 @@ from typing import Optional, Union
 from socketify import OpCode
 from socketify import WebSocket as SocketifyWebSocket
 
+
 class WebSocket:
     def __init__(self, ws: SocketifyWebSocket):
         self._ws = ws
@@ -39,24 +40,13 @@ class WebSocket:
 
     def close(self, code: int = 1000, message: Optional[str] = None) -> None:
         """Close the WebSocket connection."""
-        if message:
-            self._ws.close(code, message)
-        else:
-            self._ws.close()
+        self._ws.close()
 
     @property
     def closed(self) -> bool:
         """Check if the WebSocket is closed."""
         return self._ws.get_remote_address() is None
 
-    def get_remote_address(self) -> str:
+    def get_remote_address(self) -> Optional[str]:
         """Get the remote address of the WebSocket connection."""
         return self._ws.get_remote_address()
-
-    def ping(self, message: Union[str, bytes] = b"") -> None:
-        """Send a ping frame."""
-        self._ws.ping(message)
-
-    def pong(self, message: Union[str, bytes] = b"") -> None:
-        """Send a pong frame."""
-        self._ws.pong(message)

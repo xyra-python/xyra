@@ -11,39 +11,46 @@ app = App()
 
 
 # Test decorator pattern
-@app.get("/")
 def home(req: Request, res: Response):
-    """Home endpoint using decorator pattern."""
-    res.json({"message": "Hello from decorator!", "route": "/"})
+    """Home endpoint using method call pattern."""
+    res.json({"message": "Hello from method call!", "route": "/"})
 
 
-@app.get("/about")
+app.get("/", home)
+
+
 def about(req: Request, res: Response):
-    """About endpoint using decorator pattern."""
-    res.json({"message": "About page", "framework": "Xyra", "pattern": "decorator"})
+    """About endpoint using method call pattern."""
+    res.json({"message": "About page", "framework": "Xyra", "pattern": "method call"})
 
 
-@app.post("/test")
+app.get("/about", about)
+
+
 async def test_post(req: Request, res: Response):
-    """Test POST endpoint using decorator pattern."""
+    """Test POST endpoint using method call pattern."""
     try:
         data = await req.json()
-        res.json({"received": data, "method": "POST", "pattern": "decorator"})
+        res.json({"received": data, "method": "POST", "pattern": "method call"})
     except ValueError:
         res.status(400)
         res.json({"error": "Invalid JSON"})
 
 
-@app.get("/user/{user_id}")
+app.post("/test", test_post)
+
+
 def get_user(req: Request, res: Response):
-    """Get user by ID using decorator pattern."""
+    """Get user by ID using method call pattern."""
     user_id = req.params.get("user_id")
-    res.json({"user_id": user_id, "name": f"User {user_id}", "pattern": "decorator"})
+    res.json({"user_id": user_id, "name": f"User {user_id}", "pattern": "method call"})
 
 
-@app.put("/user/{user_id}")
+app.get("/user/{user_id}", get_user)
+
+
 async def update_user(req: Request, res: Response):
-    """Update user using decorator pattern."""
+    """Update user using method call pattern."""
     user_id = req.params.get("user_id")
     try:
         data = await req.json()
@@ -52,7 +59,7 @@ async def update_user(req: Request, res: Response):
                 "user_id": user_id,
                 "updated_data": data,
                 "status": "updated",
-                "pattern": "decorator",
+                "pattern": "method call",
             }
         )
     except ValueError:
@@ -60,11 +67,16 @@ async def update_user(req: Request, res: Response):
         res.json({"error": "Invalid JSON"})
 
 
-@app.delete("/user/{user_id}")
+app.put("/user/{user_id}", update_user)
+
+
 def delete_user(req: Request, res: Response):
-    """Delete user using decorator pattern."""
+    """Delete user using method call pattern."""
     user_id = req.params.get("user_id")
-    res.json({"user_id": user_id, "status": "deleted", "pattern": "decorator"})
+    res.json({"user_id": user_id, "status": "deleted", "pattern": "method call"})
+
+
+app.delete("/user/{user_id}", delete_user)
 
 
 if __name__ == "__main__":

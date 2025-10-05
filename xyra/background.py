@@ -1,5 +1,6 @@
 import asyncio
 
+
 class BackgroundTask:
     def __init__(self, func, *args, **kwargs):
         self.func = func

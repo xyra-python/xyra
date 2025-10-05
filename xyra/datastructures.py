@@ -1,5 +1,6 @@
 from multidict import CIMultiDict
 
+
 class Headers(CIMultiDict):
     pass
 

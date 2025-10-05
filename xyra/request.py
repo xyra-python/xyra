@@ -13,12 +13,16 @@ class Request:
     @property
     def method(self) -> str:
         """Get the HTTP method of the request."""
-        return self._req.get_method()
+        method = self._req.get_method()
+        assert method is not None
+        return method
 
     @property
     def url(self) -> str:
         """Get the URL of the request."""
-        return self._req.get_url()
+        url = self._req.get_url()
+        assert url is not None
+        return url
 
     @property
     def headers(self) -> Dict[str, str]:
@@ -31,8 +35,8 @@ class Request:
     def query(self) -> str:
         """Get the raw query string."""
         url = self._req.get_url()
-        if '?' in url:
-            return url.split('?', 1)[1]
+        if url and "?" in url:
+            return url.split("?", 1)[1]
         return ""
 
     @property
@@ -43,7 +47,7 @@ class Request:
             return {}
         return parse_qs(query_string)
 
-    def get_parameter(self, index: int) -> str:
+    def get_parameter(self, index: int) -> Optional[str]:
         """Get a URL parameter by index."""
         return self._req.get_parameter(index)
 
@@ -53,7 +57,7 @@ class Request:
 
     async def text(self) -> str:
         """Get the request body as text."""
-        return await self._req.get_text()
+        return await self._req.text()  # type: ignore
 
     async def json(self) -> Any:
         """Parse the request body as JSON."""

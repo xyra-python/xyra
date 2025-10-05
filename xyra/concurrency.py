@@ -1,6 +1,7 @@
 import asyncio
 from functools import wraps
 
+
 def to_thread(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):

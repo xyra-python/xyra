@@ -47,18 +47,18 @@ def infer_response_schema(handler_func) -> Dict[str, Any]:
     signature = inspect.signature(handler_func)
     return_annotation = signature.return_annotation
 
-    if return_annotation != inspect.Signature.empty:
+    if return_annotation is not inspect.Signature.empty:
         # Convert Python types to OpenAPI types
-        if return_annotation == dict:
+        if return_annotation is dict:
             responses["200"]["content"]["application/json"]["schema"] = {
                 "type": "object"
             }
-        elif return_annotation == list:
+        elif return_annotation is list:
             responses["200"]["content"]["application/json"]["schema"] = {
                 "type": "array",
                 "items": {"type": "object"},
             }
-        elif return_annotation == str:
+        elif return_annotation is str:
             responses["200"]["content"]["text/plain"]["schema"] = {"type": "string"}
 
     return responses
@@ -68,11 +68,6 @@ def extract_request_body_schema(handler_func, method: str) -> Optional[Dict[str,
     """Extract request body schema for POST/PUT/PATCH methods."""
     if method.upper() not in ["POST", "PUT", "PATCH"]:
         return None
-
-    # Look for async functions that likely use await req.json()
-    source = (
-        inspect.getsource(handler_func) if hasattr(handler_func, "__code__") else ""
-    )
 
     request_body = {
         "content": {
@@ -97,7 +92,7 @@ def extract_request_body_schema(handler_func, method: str) -> Optional[Dict[str,
     return request_body
 
 
-def parse_docstring(docstring: str) -> Dict[str, str]:
+def parse_docstring(docstring: Optional[str]) -> Dict[str, str]:
     """Parse docstring into summary and description."""
     if not docstring:
         return {"summary": "", "description": ""}
@@ -294,12 +289,12 @@ def extract_query_parameters(handler_func) -> List[Dict[str, Any]]:
                 param_schema = {"type": "string"}
 
                 # Try to infer type from annotation
-                if param.annotation != inspect.Parameter.empty:
-                    if param.annotation == int:
+                if param.annotation is not inspect.Parameter.empty:
+                    if param.annotation is int:
                         param_schema["type"] = "integer"
-                    elif param.annotation == float:
+                    elif param.annotation is float:
                         param_schema["type"] = "number"
-                    elif param.annotation == bool:
+                    elif param.annotation is bool:
                         param_schema["type"] = "boolean"
 
                 parameters.append(

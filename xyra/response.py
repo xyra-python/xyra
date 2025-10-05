@@ -5,7 +5,28 @@ from socketify import Response as SocketifyResponse
 
 
 class Response:
+    """
+    HTTP response wrapper for Xyra applications.
+
+    This class provides a convenient interface for building HTTP responses,
+    including setting status codes, headers, sending data, and rendering templates.
+
+    Attributes:
+        _res: The underlying socketify response object.
+        headers: Dictionary of response headers.
+        status_code: HTTP status code (default: 200).
+        templating: Templating engine instance.
+        _ended: Flag indicating if response has been sent.
+    """
+
     def __init__(self, res: SocketifyResponse, templating=None):
+        """
+        Initialize the Response object.
+
+        Args:
+            res: The underlying socketify response instance.
+            templating: Optional templating engine for rendering templates.
+        """
         self._res = res
         self.headers: Dict[str, str] = {}
         self.status_code: int = 200
@@ -37,9 +58,22 @@ class Response:
             self._res.write_header(key, value)
 
     def send(self, data: Union[str, bytes]) -> None:
-        """Send response data and end the response."""
+        """
+        Send response data and finalize the response.
+
+        This method writes the status code and headers to the response,
+        then sends the data and marks the response as ended.
+
+        Args:
+            data: The response body data (string or bytes).
+        """
         if self._ended:
             return
+
+        # Write status code
+        self._res.write_status(str(self.status_code))
+        # Write headers
+        self._write_headers()
 
         if isinstance(data, str):
             self._res.end(data)

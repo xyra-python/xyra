@@ -1,11 +1,40 @@
 class Router:
+    """
+    HTTP route manager for Xyra applications.
+
+    The Router class handles registration and organization of HTTP routes
+    with their corresponding handler functions. It supports both decorator
+    and method-based route registration.
+
+    Attributes:
+        routes: List of route dictionaries containing method, path, and handler.
+    """
+
     def __init__(self):
+        """Initialize an empty router with no routes."""
         self.routes = []
 
     def add_route(self, method: str, path: str, handler):
+        """
+        Add a new route to the router.
+
+        Args:
+            method: HTTP method (GET, POST, etc.).
+            path: URL path pattern.
+            handler: Function to handle requests for this route.
+        """
         self.routes.append({"method": method, "path": path, "handler": handler})
 
     def get(self, path: str):
+        """
+        Register a GET route.
+
+        Args:
+            path: URL path pattern for the route.
+
+        Returns:
+            Decorator function that registers the handler.
+        """
         def decorator(handler):
             self.add_route("GET", path, handler)
             return handler

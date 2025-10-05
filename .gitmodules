@@ -1,3 +1,0 @@
-[submodule "xyra/uWebSockets"]
-	path = xyra/uWebSockets
-	url = https://github.com/uNetworking/uWebSockets.git

@@ -1,5 +1,5 @@
 import os
-from typing import Any
+from typing import Any, Callable
 
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
@@ -112,7 +112,7 @@ class Templating:
         """Add a global variable or function to all templates."""
         self.env.globals[name] = value
 
-    def add_filter(self, name: str, func: callable):
+    def add_filter(self, name: str, func: Callable[..., Any]):
         """Add a custom filter to the template environment."""
         self.env.filters[name] = func
 
@@ -130,4 +130,5 @@ class Templating:
 
     def get_template_source(self, template_name: str) -> tuple:
         """Get the source code of a template (for debugging)."""
+        assert self.env.loader is not None
         return self.env.loader.get_source(self.env, template_name)
