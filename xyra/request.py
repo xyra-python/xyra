@@ -1,9 +1,10 @@
 from socketify import HttpRequest
 
 class Request:
-    def __init__(self, req: HttpRequest):
+    def __init__(self, req: HttpRequest, params=None):
         req.preserve()
         self._req = req
+        self.params = params or {}
 
     @property
     def method(self):
