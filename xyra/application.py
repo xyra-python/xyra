@@ -222,7 +222,7 @@ class App:
 
                 self._app.ws(
                     path,
-                    **{
+                    {
                         "open": open_handler,
                         "message": message_handler,
                         "close": close_handler,
@@ -231,7 +231,7 @@ class App:
             else:
                 # Single function handler - treat as open handler
                 open_handler = self._create_ws_handler(ws_handler)
-                self._app.ws(path, **{"open": open_handler})
+                self._app.ws(path, {"open": open_handler})
 
     def enable_swagger(self, host: str = "localhost", port: int = 8000):
         """
