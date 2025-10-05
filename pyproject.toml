@@ -9,3 +9,6 @@ dependencies = [
     "jinja2",
     "multidict",
 ]
+
+[tool.setuptools.packages.find]
+include = ["xyra*"]

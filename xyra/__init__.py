@@ -1,7 +1,9 @@
 from .application import App
 from .request import Request
 from .response import Response
+from .routing import Router
 from .websockets import WebSocket
-from .router import Router
+
+__version__ = "0.1.0"
 
 __all__ = ["App", "Request", "Response", "WebSocket", "Router"]
