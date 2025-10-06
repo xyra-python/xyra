@@ -21,7 +21,6 @@ jobs:
         cache-dependency-glob: "uv.lock"
     - name: Check version
       run: |
-        uv python list --project .
         grep "version" pyproject.toml
     - name: Clean dist
       run: rm -rf dist
