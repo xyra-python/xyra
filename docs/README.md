@@ -81,7 +81,7 @@ Xyra leverages socketify's high-performance networking capabilities, making it s
 
 - 📖 [Documentation](https://xyra-framework.github.io/)
 - 💬 [Discord Community](https://discord.gg/xyra)
-- 🐛 [Issue Tracker](https://github.com/xyra-framework/xyra/issues)
+- 🐛 [Issue Tracker](https://github.com/xyra-python/xyra/issues)
 - 📧 [Mailing List](https://groups.google.com/g/xyra-framework)
 
 ## Contributing
@@ -91,7 +91,7 @@ Contributions are welcome! Please feel free to submit issues, feature requests, 
 ### Development Setup
 
 ```bash
-git clone https://github.com/xyra-framework/xyra.git
+git clone https://github.com/xyra-python/xyra.git
 cd xyra
 pip install -e .
 ```

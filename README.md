@@ -1,6 +1,6 @@
 # Xyra Framework
 
-[![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PyPI version](https://badge.fury.io/py/xyra.svg)](https://pypi.org/project/xyra/)
 
@@ -29,7 +29,7 @@ pip install xyra
 Or install from source for the latest features:
 
 ```bash
-git clone https://github.com/xyra-framework/xyra.git
+git clone https://github.com/xyra-python/xyra.git
 cd xyra
 pip install -e .
 ```
@@ -172,7 +172,7 @@ We welcome contributions! Here's how you can help:
 ### Development Setup
 
 ```bash
-git clone https://github.com/xyra-framework/xyra.git
+git clone https://github.com/xyra-python/xyra.git
 cd xyra
 pip install -e .[dev]
 pytest
@@ -199,8 +199,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - 📖 [Documentation](docs/README.md)
-- 🐛 [Issues](https://github.com/xyra-framework/xyra/issues)
-- 💬 [Discussions](https://github.com/xyra-framework/xyra/discussions)
+- 🐛 [Issues](https://github.com/xyra-python/xyra/issues)
+- 💬 [Discussions](https://github.com/xyra-python/xyra/discussions)
 
 ---
 

@@ -29,7 +29,7 @@ pip install xyra
 Or install from source:
 
 ```bash
-git clone https://github.com/xyra-framework/xyra.git
+git clone https://github.com/xyra-python/xyra.git
 cd xyra
 pip install -e .
 ```
@@ -242,7 +242,7 @@ Create a `templates` directory and add `home.html`:
 ### Getting Help
 
 - Check the [API Reference](api-reference.md) for detailed documentation
-- Visit the [GitHub Issues](https://github.com/xyra-framework/xyra/issues) for common problems
+- Visit the [GitHub Issues](https://github.com/xyra-python/xyra/issues) for common problems
 - Join our [Discord Community](https://discord.gg/xyra) for support
 
 ---
