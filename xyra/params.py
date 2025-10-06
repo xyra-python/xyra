@@ -7,20 +7,21 @@ class Param:
         return f"<Param {self.name}>"
 
 
-def parse_path(path: str) -> tuple[str, dict[str, Param]]:
+def parse_path(path: str) -> tuple[str, list[str]]:
     """
     Parses a path and extracts parameters.
-    Returns a regex-compatible path and a dictionary of parameters.
+    Returns a socketify-compatible path and a list of parameter names in order.
     """
-    params = {}
-    regex_path = ""
-    for segment in path.split("/"):
-        if not segment:  # Skip empty segments
-            continue
+    param_names = []
+    socketify_path = ""
+    segments = [s for s in path.split("/") if s]  # Filter empty segments
+    for segment in segments:
         if segment.startswith("{") and segment.endswith("}"):
             param_name = segment[1:-1]
-            params[param_name] = Param(param_name)
-            regex_path += f"/(?P<{param_name}>[^/]+)"
+            param_names.append(param_name)
+            socketify_path += f"/:{param_name}"
         else:
-            regex_path += f"/{segment}"
-    return regex_path, params
+            socketify_path += f"/{segment}"
+    if not socketify_path:
+        socketify_path = "/"
+    return socketify_path, param_names
