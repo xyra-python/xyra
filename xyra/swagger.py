@@ -1,12 +1,12 @@
 import inspect
 import re
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from .application import App
 
 
-def extract_parameter_info(docstring: str) -> Dict[str, Dict[str, Any]]:
+def extract_parameter_info(docstring: str) -> dict[str, dict[str, Any]]:
     """Extract parameter information from docstring."""
     params = {}
     if not docstring:
@@ -34,7 +34,7 @@ def extract_parameter_info(docstring: str) -> Dict[str, Dict[str, Any]]:
     return params
 
 
-def infer_response_schema(handler_func) -> Dict[str, Any]:
+def infer_response_schema(handler_func) -> dict[str, Any]:
     """Infer response schema from function annotations and docstring."""
     responses = {
         "200": {
@@ -64,7 +64,7 @@ def infer_response_schema(handler_func) -> Dict[str, Any]:
     return responses
 
 
-def extract_request_body_schema(handler_func, method: str) -> Optional[Dict[str, Any]]:
+def extract_request_body_schema(handler_func, method: str) -> dict[str, Any] | None:
     """Extract request body schema for POST/PUT/PATCH methods."""
     if method.upper() not in ["POST", "PUT", "PATCH"]:
         return None
@@ -92,7 +92,7 @@ def extract_request_body_schema(handler_func, method: str) -> Optional[Dict[str,
     return request_body
 
 
-def parse_docstring(docstring: Optional[str]) -> Dict[str, str]:
+def parse_docstring(docstring: str | None) -> dict[str, str]:
     """Parse docstring into summary and description."""
     if not docstring:
         return {"summary": "", "description": ""}
@@ -129,7 +129,7 @@ def convert_path_to_openapi(path: str) -> str:
     return openapi_path
 
 
-def extract_path_parameters(path: str) -> List[Dict[str, Any]]:
+def extract_path_parameters(path: str) -> list[dict[str, Any]]:
     """Extract path parameters from route path."""
     parameters = []
 
@@ -155,11 +155,11 @@ def generate_swagger(
     title: str = "Xyra API",
     version: str = "1.0.0",
     description: str = "API documentation for Xyra application",
-    contact: Optional[Dict[str, str]] = None,
-    license_info: Optional[Dict[str, str]] = None,
-    servers: Optional[List[Dict[str, str]]] = None,
+    contact: dict[str, str] | None = None,
+    license_info: dict[str, str] | None = None,
+    servers: list[dict[str, str]] | None = None,
     **kwargs,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Generate OpenAPI 3.0 specification from Xyra app routes.
 
@@ -170,7 +170,7 @@ def generate_swagger(
         description: API description
         contact: Contact information dict with 'name', 'email', 'url'
         license_info: License information dict with 'name', 'url'
-        servers: List of server objects with 'url' and optional 'description'
+        servers: list of server objects with 'url' and optional 'description'
         **kwargs: Additional OpenAPI specification fields
 
     Returns:
@@ -275,7 +275,7 @@ def extract_tag_from_path(path: str) -> str:
     return "Default"
 
 
-def extract_query_parameters(handler_func) -> List[Dict[str, Any]]:
+def extract_query_parameters(handler_func) -> list[dict[str, Any]]:
     """Extract query parameters from function signature or docstring."""
     parameters = []
 
@@ -313,7 +313,7 @@ def extract_query_parameters(handler_func) -> List[Dict[str, Any]]:
     return parameters
 
 
-def add_common_responses(swagger_spec: Dict[str, Any]) -> Dict[str, Any]:
+def add_common_responses(swagger_spec: dict[str, Any]) -> dict[str, Any]:
     """Add common HTTP response definitions."""
     common_responses = {
         "400": {
@@ -378,7 +378,7 @@ def add_common_responses(swagger_spec: Dict[str, Any]) -> Dict[str, Any]:
     return swagger_spec
 
 
-def validate_swagger_spec(spec: Dict[str, Any]) -> bool:
+def validate_swagger_spec(spec: dict[str, Any]) -> bool:
     """Basic validation of OpenAPI specification."""
     required_fields = ["openapi", "info", "paths"]
 

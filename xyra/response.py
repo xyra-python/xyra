@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 from socketify import Response as SocketifyResponse
 
@@ -28,7 +28,7 @@ class Response:
             templating: Optional templating engine for rendering templates.
         """
         self._res = res
-        self.headers: Dict[str, str] = {}
+        self.headers: dict[str, str] = {}
         self.status_code: int = 200
         self.templating = templating
         self._ended = False
@@ -57,7 +57,7 @@ class Response:
         for key, value in self.headers.items():
             self._res.write_header(key, value)
 
-    def send(self, data: Union[str, bytes]) -> None:
+    def send(self, data: str | bytes) -> None:
         """
         Send response data and finalize the response.
 
@@ -108,13 +108,13 @@ class Response:
         self,
         name: str,
         value: str,
-        max_age: Optional[int] = None,
-        expires: Optional[str] = None,
+        max_age: int | None = None,
+        expires: str | None = None,
         path: str = "/",
-        domain: Optional[str] = None,
+        domain: str | None = None,
         secure: bool = False,
         http_only: bool = True,
-        same_site: Optional[str] = None,
+        same_site: str | None = None,
     ) -> "Response":
         """Set a cookie."""
         cookie_parts = [f"{name}={value}"]
@@ -145,7 +145,7 @@ class Response:
         return self
 
     def clear_cookie(
-        self, name: str, path: str = "/", domain: Optional[str] = None
+        self, name: str, path: str = "/", domain: str | None = None
     ) -> "Response":
         """Clear a cookie."""
         cookie_parts = [f"{name}=", "Expires=Thu, 01 Jan 1970 00:00:00 GMT"]

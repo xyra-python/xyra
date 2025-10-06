@@ -3,9 +3,8 @@ Gzip Middleware for Xyra Framework
 
 This middleware compresses response data using gzip compression.
 """
-
 import gzip
-from typing import Callable
+from collections.abc import Callable
 
 from ..request import Request
 from ..response import Response

@@ -1,4 +1,3 @@
-from typing import List, Optional, Union
 
 from ..request import Request
 from ..response import Response
@@ -9,9 +8,9 @@ class CorsMiddleware:
 
     def __init__(
         self,
-        allowed_origins: Optional[Union[str, List[str]]] = None,
-        allowed_methods: Optional[Union[str, List[str]]] = None,
-        allowed_headers: Optional[Union[str, List[str]]] = None,
+        allowed_origins: str | list[str] | None = None,
+        allowed_methods: str | list[str] | None = None,
+        allowed_headers: str | list[str] | None = None,
         allow_credentials: bool = False,
         max_age: int = 3600,
     ):
@@ -82,9 +81,9 @@ class CorsMiddleware:
 
 
 def cors(
-    allowed_origins: Optional[Union[str, List[str]]] = None,
-    allowed_methods: Optional[Union[str, List[str]]] = None,
-    allowed_headers: Optional[Union[str, List[str]]] = None,
+    allowed_origins: str | list[str] | None = None,
+    allowed_methods: str | list[str] | None = None,
+    allowed_headers: str | list[str] | None = None,
     allow_credentials: bool = False,
     max_age: int = 3600,
 ):

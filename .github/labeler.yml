@@ -1,0 +1,15 @@
+version: "1"
+
+labels:
+  - label: "documentation"
+    files:
+      - "docs/**"
+  - label: "tests"
+    files:
+      - "tests/**"
+  - label: "ci"
+    files:
+      - ".github/**"
+  - label: "core"
+    files:
+      - "xyra/**"

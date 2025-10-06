@@ -1,12 +1,12 @@
 import json
-from typing import Any, Dict, Optional
+from typing import Any
 from urllib.parse import parse_qs
 
 from socketify import Request as SocketifyRequest
 
 
 class Request:
-    def __init__(self, req: SocketifyRequest, params: Optional[Dict[str, str]] = None):
+    def __init__(self, req: SocketifyRequest, params: dict[str, str] | None = None):
         self._req = req
         self.params = params or {}
 
@@ -25,7 +25,7 @@ class Request:
         return url
 
     @property
-    def headers(self) -> Dict[str, str]:
+    def headers(self) -> dict[str, str]:
         """Get all headers as a dictionary."""
         headers = {}
         self._req.for_each_header(lambda key, value: headers.update({key: value}))
@@ -40,18 +40,18 @@ class Request:
         return ""
 
     @property
-    def query_params(self) -> Dict[str, list]:
+    def query_params(self) -> dict[str, list]:
         """Parse and return query parameters as a dictionary."""
         query_string = self.query
         if not query_string:
             return {}
         return parse_qs(query_string)
 
-    def get_parameter(self, index: int) -> Optional[str]:
+    def get_parameter(self, index: int) -> str | None:
         """Get a URL parameter by index."""
         return self._req.get_parameter(index)
 
-    def get_header(self, name: str, default: Optional[str] = None) -> Optional[str]:
+    def get_header(self, name: str, default: str | None = None) -> str | None:
         """Get a specific header value."""
         return self.headers.get(name.lower(), default)
 
@@ -67,9 +67,9 @@ class Request:
                 return {}
             return json.loads(text_content)
         except json.JSONDecodeError:
-            raise ValueError("Invalid JSON in request body")
+            raise ValueError("Invalid JSON in request body") from None
 
-    async def form(self) -> Dict[str, str]:
+    async def form(self) -> dict[str, str]:
         """Parse form data from the request body."""
         text_content = await self.text()
         if not text_content:
@@ -84,12 +84,12 @@ class Request:
         return form_data
 
     @property
-    def content_type(self) -> Optional[str]:
+    def content_type(self) -> str | None:
         """Get the content type of the request."""
         return self.get_header("content-type")
 
     @property
-    def content_length(self) -> Optional[int]:
+    def content_length(self) -> int | None:
         """Get the content length of the request."""
         length = self.get_header("content-length")
         return int(length) if length else None

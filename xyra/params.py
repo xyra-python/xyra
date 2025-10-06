@@ -1,6 +1,3 @@
-from typing import Dict
-
-
 class Param:
     def __init__(self, name: str, type: str = "string"):
         self.name = name
@@ -10,7 +7,7 @@ class Param:
         return f"<Param {self.name}>"
 
 
-def parse_path(path: str) -> tuple[str, Dict[str, Param]]:
+def parse_path(path: str) -> tuple[str, dict[str, Param]]:
     """
     Parses a path and extracts parameters.
     Returns a regex-compatible path and a dictionary of parameters.

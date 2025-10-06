@@ -12,7 +12,7 @@ def on_open(ws):
 
 def on_message(ws, message, opcode):
     print(f"Received: {message}")
-    
+
     # Broadcast message ke semua clients
     for client in connected_clients:
         if client != ws:  # Jangan kirim ke sender sendiri

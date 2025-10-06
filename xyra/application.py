@@ -1,6 +1,6 @@
 import os
-import os
-from typing import Any, Callable, Dict, List, Optional, Union
+from collections.abc import Callable
+from typing import Any, Union
 
 import socketify
 
@@ -23,8 +23,8 @@ class App:
     Attributes:
         _app: The underlying socketify application instance.
         _router: Router instance for managing HTTP routes.
-        _ws_routes: List of WebSocket routes.
-        _middlewares: List of middleware functions.
+        _ws_routes: list of WebSocket routes.
+        _middlewares: list of middleware functions.
         templates: Templating engine instance.
         swagger_options: Configuration for Swagger/OpenAPI documentation.
     """
@@ -33,7 +33,7 @@ class App:
         self,
         options=None,
         templates_directory: str = "templates",
-        swagger_options: Optional[Dict[str, Any]] = None,
+        swagger_options: dict[str, Any] | None = None,
     ):
         """
         Initialize the Xyra application.
@@ -41,17 +41,17 @@ class App:
         Args:
             options: Optional configuration for the underlying socketify app.
             templates_directory: Directory path for Jinja2 templates.
-            swagger_options: Dictionary with Swagger configuration options.
+            swagger_options: dictionary with Swagger configuration options.
         """
         self._app = socketify.App(options)
         self._router = Router()
-        self._ws_routes: List[Dict[str, Any]] = []
-        self._middlewares: List[Callable] = []
+        self._ws_routes: list[dict[str, Any]] = []
+        self._middlewares: list[Callable] = []
         self.templates = Templating(templates_directory)
         self.swagger_options = swagger_options
 
     def route(
-        self, method: str, path: str, handler: Optional[Callable] = None
+        self, method: str, path: str, handler: Callable | None = None
     ) -> Union[Callable, "App"]:
         """
         Register a route with the specified HTTP method.
@@ -88,33 +88,31 @@ class App:
             self._router.add_route(method.upper(), path, handler)
             return self
 
-    def get(
-        self, path: str, handler: Optional[Callable] = None
-    ) -> Union[Callable, "App"]:
+    def get(self, path: str, handler: Callable | None = None) -> Union[Callable, "App"]:
         """Register a GET route."""
         return self.route("GET", path, handler)
 
-    def post(self, path: str, handler: Optional[Callable] = None):
+    def post(self, path: str, handler: Callable | None = None):
         """Register a POST route."""
         return self.route("POST", path, handler)
 
-    def put(self, path: str, handler: Optional[Callable] = None):
+    def put(self, path: str, handler: Callable | None = None):
         """Register a PUT route."""
         return self.route("PUT", path, handler)
 
-    def delete(self, path: str, handler: Optional[Callable] = None):
+    def delete(self, path: str, handler: Callable | None = None):
         """Register a DELETE route."""
         return self.route("DELETE", path, handler)
 
-    def patch(self, path: str, handler: Optional[Callable] = None):
+    def patch(self, path: str, handler: Callable | None = None):
         """Register a PATCH route."""
         return self.route("PATCH", path, handler)
 
-    def head(self, path: str, handler: Optional[Callable] = None):
+    def head(self, path: str, handler: Callable | None = None):
         """Register a HEAD route."""
         return self.route("HEAD", path, handler)
 
-    def options(self, path: str, handler: Optional[Callable] = None):
+    def options(self, path: str, handler: Callable | None = None):
         """Register an OPTIONS route."""
         return self.route("OPTIONS", path, handler)
 
@@ -127,7 +125,7 @@ class App:
         """Serve static files from a directory."""
         return self._app.static(path, directory)
 
-    def websocket(self, path: str, handler: Union[Callable, Dict[str, Callable]]):
+    def websocket(self, path: str, handler: Callable | dict[str, Callable]):
         """Register a WebSocket route."""
         self._ws_routes.append({"path": path, "handler": handler})
         return self
@@ -154,7 +152,7 @@ class App:
         return ws_close_handler
 
     def _create_final_handler(
-        self, route_handler: Callable, middlewares: List[Callable]
+        self, route_handler: Callable, middlewares: list[Callable]
     ):
         def final_handler(res, req):
             request = Request(req)
@@ -269,7 +267,9 @@ class App:
                 swagger_spec = generate_swagger(self, **self.swagger_options)
                 res.json(swagger_spec)
             except Exception as e:
-                res.status(500).json({"error": "Failed to generate Swagger spec", "message": str(e)})
+                res.status(500).json(
+                    {"error": "Failed to generate Swagger spec", "message": str(e)}
+                )
 
         self.get(swagger_json_path, get_swagger_json)
 
@@ -317,16 +317,18 @@ class App:
 
         self.get(swagger_ui_path, get_swagger_ui)
 
-    def run_server(self, port: int = 8000, host: str = "localhost", reload: bool = False):
+    def run_server(
+        self, port: int = 8000, host: str = "localhost", reload: bool = False
+    ):
         """Start the server."""
-        if reload and os.environ.get('XYRA_RELOAD_CHILD') != '1':
+        if reload and os.environ.get("XYRA_RELOAD_CHILD") != "1":
             try:
-                import watchfiles
                 import subprocess
                 import sys
-                import signal
                 import time
-                
+
+                import watchfiles
+
             except ImportError:
                 print("watchfiles not installed, install with: pip install watchfiles")
                 return
@@ -341,17 +343,20 @@ class App:
                     current_proc.terminate()
                     current_proc.wait()
                 env = os.environ.copy()
-                env['XYRA_RELOAD_CHILD'] = '1'
+                env["XYRA_RELOAD_CHILD"] = "1"
                 current_proc = subprocess.Popen([sys.executable] + sys.argv, env=env)
 
             # Watch for file changes in current directory
             def watch_and_restart():
-                for changes in watchfiles.watch(os.getcwd(), watch_filter=watchfiles.PythonFilter()):
+                for _changes in watchfiles.watch(
+                    os.getcwd(), watch_filter=watchfiles.PythonFilter()
+                ):
                     print("🔄 Files changed, restarting server...")
                     start_server()
 
             # Start watcher in background
             import threading
+
             watcher_thread = threading.Thread(target=watch_and_restart, daemon=True)
             watcher_thread.start()
 
@@ -390,7 +395,7 @@ class App:
             swagger_ui_path = self.swagger_options.get("swagger_ui_path", "/docs")
             print(f"📚 API docs available at http://{host}:{port}{swagger_ui_path}")
 
-        self._app.listen(port, lambda config: print(f"Listening on port {port}"))
+        self._app.listen(port, lambda config: print(f"listening on port {port}"))
         self._app.run()
 
     def listen(self, port: int = 8000, host: str = "localhost", reload: bool = False):

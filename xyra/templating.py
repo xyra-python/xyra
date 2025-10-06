@@ -1,5 +1,6 @@
 import os
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
@@ -87,9 +88,11 @@ class Templating:
         except TemplateNotFound:
             raise TemplateNotFound(
                 f"Template '{template_name}' not found in directory '{self.directory}'"
-            )
+            ) from None
         except Exception as e:
-            raise Exception(f"Error rendering template '{template_name}': {str(e)}")
+            raise Exception(
+                f"Error rendering template '{template_name}': {str(e)}"
+            ) from e
 
     def render_string(self, template_string: str, **context) -> str:
         """
@@ -106,7 +109,7 @@ class Templating:
             template = self.env.from_string(template_string)
             return template.render(**context)
         except Exception as e:
-            raise Exception(f"Error rendering template string: {str(e)}")
+            raise Exception(f"Error rendering template string: {str(e)}") from e
 
     def add_global(self, name: str, value: Any):
         """Add a global variable or function to all templates."""

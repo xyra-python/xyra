@@ -4,16 +4,16 @@ Trusted Host Middleware for Xyra Framework
 This middleware validates that the request's Host header is in a list of allowed hosts.
 """
 
+from collections.abc import Callable
+
 from ..request import Request
 from ..response import Response
-from ..exceptions import HTTPException
-from typing import Callable, List
 
 
 class TrustedHostMiddleware:
     """Middleware for validating trusted hosts."""
 
-    def __init__(self, allowed_hosts: List[str]):
+    def __init__(self, allowed_hosts: list[str]):
         """
         Initialize trusted host middleware.
 
@@ -36,6 +36,6 @@ class TrustedHostMiddleware:
         next_handler()
 
 
-def trusted_host_middleware(allowed_hosts: List[str]) -> TrustedHostMiddleware:
+def trusted_host_middleware(allowed_hosts: list[str]) -> TrustedHostMiddleware:
     """Create a trusted host middleware instance."""
     return TrustedHostMiddleware(allowed_hosts)

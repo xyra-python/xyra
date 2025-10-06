@@ -4,9 +4,10 @@ HTTPS Redirect Middleware for Xyra Framework
 This middleware redirects HTTP requests to HTTPS.
 """
 
+from collections.abc import Callable
+
 from ..request import Request
 from ..response import Response
-from typing import Callable
 
 
 class HTTPSRedirectMiddleware:

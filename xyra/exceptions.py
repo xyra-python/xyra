@@ -5,7 +5,7 @@ This module defines custom exceptions used throughout the Xyra framework
 for handling various error conditions in web applications.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class XyraException(Exception):
@@ -32,8 +32,8 @@ class HTTPException(XyraException):
     def __init__(
         self,
         status_code: int,
-        detail: Optional[str] = None,
-        headers: Optional[Dict[str, str]] = None,
+        detail: str | None = None,
+        headers: dict[str, str] | None = None,
     ):
         """
         Initialize HTTP exception.
@@ -82,7 +82,7 @@ class HTTPException(XyraException):
 class WebSocketException(XyraException):
     """Exception for WebSocket-related errors."""
 
-    def __init__(self, code: int, reason: Optional[str] = None):
+    def __init__(self, code: int, reason: str | None = None):
         self.code = code
         self.reason = reason or self._get_default_reason(code)
         super().__init__(f"WebSocket Error {code}: {self.reason}")
@@ -110,7 +110,7 @@ class WebSocketException(XyraException):
 class ValidationException(XyraException):
     """Exception for request validation errors."""
 
-    def __init__(self, message: str, errors: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, errors: dict[str, Any] | None = None):
         self.errors = errors or {}
         super().__init__(message)
 
@@ -124,7 +124,7 @@ class MiddlewareException(XyraException):
 class TemplateException(XyraException):
     """Exception for template rendering errors."""
 
-    def __init__(self, message: str, template_name: Optional[str] = None):
+    def __init__(self, message: str, template_name: str | None = None):
         self.template_name = template_name
         super().__init__(message)
 

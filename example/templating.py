@@ -15,16 +15,16 @@ def home(req: Request, res: Response):
         {"name": "Book", "price": 50000, "category": "Education"},
         {"name": "Chair", "price": 750000, "category": "Furniture"}
     ]
-    
-    res.render("home.html", 
-              title="My Store", 
+
+    res.render("home.html",
+              title="My Store",
               products=products,
               featured_product=products[0])
 
 @app.get("/product/{product_id}")
 def product_detail(req: Request, res: Response):
     product_id = req.params.get("product_id")
-    
+
     # Simulasi get product from database
     product = {
         "id": product_id,
@@ -33,7 +33,7 @@ def product_detail(req: Request, res: Response):
         "description": f"This is product {product_id}",
         "category": "General"
     }
-    
+
     res.render("product.html", product=product)
 
 @app.get("/about")
