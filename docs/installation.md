@@ -37,7 +37,7 @@ pip install --pre xyra
 If you want to contribute to Xyra or need the latest development version:
 
 ```bash
-git clone https://github.com/xyra-framework/xyra.git
+git clone https://github.com/xyra-python/xyra.git
 cd xyra
 pip install -e .
 ```
@@ -55,7 +55,7 @@ poetry add xyra
 Or for development:
 
 ```bash
-git clone https://github.com/xyra-framework/xyra.git
+git clone https://github.com/xyra-python/xyra.git
 cd xyra
 poetry install
 ```
