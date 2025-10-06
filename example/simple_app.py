@@ -20,7 +20,7 @@ app = App()
 # Example 1: Using function call pattern
 def home(req: Request, res: Response):
     """Home endpoint that returns a welcome message."""
-    res.json({"message": "Hello from Xyra!", "framework": "Xyra", "version": "0.1.2"})
+    res.json({"message": "Hello from Xyra!", "framework": "Xyra", "version": "0.1.3"})
 
 
 app.get("/", home)
