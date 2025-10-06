@@ -28,6 +28,7 @@ dependencies = [
     "jinja2",
     "multidict",
     "watchfiles",
+    "pytest>=8.4.2",
 ]
 
 [project.optional-dependencies]
@@ -45,11 +46,11 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/xyra/xyra"
+Homepage = "https://github.com/xyra-python/xyra"
 Documentation = "https://xyra.dev/docs"
-Repository = "https://github.com/xyra/xyra"
-Issues = "https://github.com/xyra/xyra/issues"
-Changelog = "https://github.com/xyra/xyra/blob/main/CHANGELOG.md"
+Repository = "https://github.com/xyra-python/xyra"
+Issues = "https://github.com/xyra-python/xyra/issues"
+Changelog = "https://github.com/xyra-python/xyra/blob/main/CHANGELOG.md"
 
 [project.scripts]
 xyra = "xyra.__main__:main"
@@ -128,7 +129,11 @@ addopts = [
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
+    "asyncio: marks tests as async tests",
 ]
+
+[tool.pytest-asyncio]
+mode = "strict"
 
 [tool.coverage.run]
 source = ["xyra"]

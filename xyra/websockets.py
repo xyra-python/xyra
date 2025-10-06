@@ -1,4 +1,3 @@
-
 from socketify import OpCode
 from socketify import WebSocket as SocketifyWebSocket
 
@@ -48,4 +47,5 @@ class WebSocket:
 
     def get_remote_address(self) -> str | None:
         """Get the remote address of the WebSocket connection."""
-        return self._ws.get_remote_address()
+        addr = self._ws.get_remote_address()
+        return str(addr) if addr else None

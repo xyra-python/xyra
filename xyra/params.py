@@ -15,6 +15,8 @@ def parse_path(path: str) -> tuple[str, dict[str, Param]]:
     params = {}
     regex_path = ""
     for segment in path.split("/"):
+        if not segment:  # Skip empty segments
+            continue
         if segment.startswith("{") and segment.endswith("}"):
             param_name = segment[1:-1]
             params[param_name] = Param(param_name)

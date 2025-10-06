@@ -28,7 +28,9 @@ class Request:
     def headers(self) -> dict[str, str]:
         """Get all headers as a dictionary."""
         headers = {}
-        self._req.for_each_header(lambda key, value: headers.update({key: value}))
+        self._req.for_each_header(
+            lambda key, value: headers.update({key.lower(): value})
+        )
         return headers
 
     @property
