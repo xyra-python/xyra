@@ -1,14 +1,6 @@
-<file_path>
-xyra/docs/request-response.md
-</file_path>
+# Request & Response in Xyra
 
-<edit_description>
-Buat file request-response
-</edit_description>
-
-# Request & Response di Xyra
-
-Di Xyra, setiap handler route menerima dua parameter utama: `Request` dan `Response`. Objek-objek ini memberikan akses penuh ke data request HTTP dan kontrol penuh atas response yang dikirim kembali ke client.
+In Xyra, each route handler receives two main parameters: `Request` and `Response`. These objects provide full access to HTTP request data and complete control over the response sent back to the client.
 
 ## Request Object
 

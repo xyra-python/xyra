@@ -1,18 +1,10 @@
-<file_path>
-xyra/docs/examples.md
-</file_path>
+# Complete Examples
 
-<edit_description>
-Buat file examples
-</edit_description>
+This section contains complete application examples that demonstrate various Xyra features in practice. These examples can be used as a starting point for your own projects.
 
-# Contoh Lengkap Xyra
+## Simple REST API
 
-Bagian ini berisi contoh aplikasi lengkap yang menunjukkan berbagai fitur Xyra dalam praktik. Contoh-contoh ini dapat Anda gunakan sebagai starting point untuk proyek Anda sendiri.
-
-## API REST Sederhana
-
-Contoh API untuk manajemen users dengan CRUD operations.
+Example API for user management with CRUD operations.
 
 ```python
 from xyra import App, Request, Response
@@ -20,7 +12,7 @@ from typing import List, Dict, Any
 
 app = App()
 
-# In-memory storage (gunakan database di production)
+# In-memory storage (use database in production)
 users_db = [
     {"id": 1, "name": "Alice", "email": "alice@example.com"},
     {"id": 2, "name": "Bob", "email": "bob@example.com"}
@@ -93,9 +85,9 @@ if __name__ == "__main__":
     app.listen(8000)
 ```
 
-## Blog API dengan Templating
+## Blog API with Templating
 
-Aplikasi blog lengkap dengan templating dan static files.
+Complete blog application with templating and static files.
 
 ```python
 from xyra import App, Request, Response

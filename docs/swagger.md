@@ -1,18 +1,10 @@
-<file_path>
-xyra/docs/swagger.md
-</file_path>
+# API Documentation with Swagger
 
-<edit_description>
-Buat file swagger
-</edit_description>
-
-# Dokumentasi API dengan Swagger
-
-Xyra terintegrasi dengan Swagger (OpenAPI) untuk menghasilkan dokumentasi API secara otomatis. Dokumentasi ini memungkinkan developer dan pengguna API untuk memahami endpoint, parameter, dan response yang tersedia.
+Xyra integrates with Swagger (OpenAPI) to automatically generate API documentation. This documentation allows developers and API users to understand available endpoints, parameters, and responses.
 
 ## Enable Swagger
 
-Untuk mengaktifkan Swagger di aplikasi Xyra, berikan opsi `swagger_options` saat inisialisasi aplikasi:
+To enable Swagger in a Xyra application, provide the `swagger_options` option during app initialization:
 
 ```python
 from xyra import App
@@ -24,16 +16,16 @@ app = App(swagger_options={
 })
 ```
 
-## Akses Dokumentasi
+## Access Documentation
 
-Setelah diaktifkan, dokumentasi Swagger akan tersedia di:
+Once enabled, Swagger documentation will be available at:
 
-- **Swagger UI**: `http://localhost:8000/docs` (atau path custom)
-- **JSON Spec**: `http://localhost:8000/docs/swagger.json` (atau path custom)
+- **Swagger UI**: `http://localhost:8000/docs` (or custom path)
+- **JSON Spec**: `http://localhost:8000/docs/swagger.json` (or custom path)
 
-## Konfigurasi Swagger
+## Swagger Configuration
 
-Anda dapat mengustomisasi berbagai aspek dokumentasi API:
+You can customize various aspects of the API documentation:
 
 ```python
 app = App(swagger_options={
@@ -64,27 +56,27 @@ app = App(swagger_options={
 })
 ```
 
-### Opsi Konfigurasi
+### Configuration Options
 
-- `title`: Judul API
-- `version`: Versi API
-- `description`: Deskripsi API
-- `contact`: Informasi kontak (name, email, url)
-- `license_info`: Informasi lisensi (name, url)
-- `servers`: List server dengan URL dan deskripsi
-- `swagger_ui_path`: Path untuk Swagger UI (default: "/docs")
-- `swagger_json_path`: Path untuk JSON spec (default: "/docs/swagger.json")
+- `title`: API title
+- `version`: API version
+- `description`: API description
+- `contact`: Contact information (name, email, url)
+- `license_info`: License information (name, url)
+- `servers`: List of servers with URL and description
+- `swagger_ui_path`: Path for Swagger UI (default: "/docs")
+- `swagger_json_path`: Path for JSON spec (default: "/docs/swagger.json")
 
-## Dokumentasi Otomatis
+## Automatic Documentation
 
-Xyra secara otomatis menghasilkan dokumentasi dari:
+Xyra automatically generates documentation from:
 
 - Route definitions
-- Parameter types (dari docstrings)
+- Parameter types (from docstrings)
 - Request/response schemas
 - HTTP methods
 
-### Contoh Route dengan Dokumentasi
+### Example Route with Documentation
 
 ```python
 @app.get("/users/{user_id}")
@@ -124,7 +116,7 @@ async def create_user(req: Request, res: Response):
 
 ## Custom Response Schemas
 
-Untuk kontrol lebih baik atas schema response, Anda dapat menggunakan type hints dan docstrings:
+For better control over response schemas, you can use type hints and docstrings:
 
 ```python
 from typing import List, Dict, Any
@@ -150,7 +142,7 @@ def list_users(req: Request, res: Response) -> List[Dict[str, Any]]:
 
 ## Security Schemes
 
-Anda dapat menambahkan informasi autentikasi ke dokumentasi:
+You can add authentication information to the documentation:
 
 ```python
 app = App(swagger_options={
@@ -172,9 +164,9 @@ app = App(swagger_options={
 })
 ```
 
-## Contoh Lengkap
+## Complete Example
 
-Berikut adalah contoh aplikasi lengkap dengan Swagger:
+Here is a complete example application with Swagger:
 
 ```python
 from xyra import App, Request, Response
@@ -287,27 +279,27 @@ if __name__ == "__main__":
     app.listen(8000)
 ```
 
-## Testing API melalui Swagger UI
+## Testing API via Swagger UI
 
-Swagger UI menyediakan interface untuk testing API langsung dari browser:
+Swagger UI provides an interface for testing the API directly from the browser:
 
-1. Buka `http://localhost:8000/docs`
-2. Klik pada endpoint yang ingin ditest
-3. Klik "Try it out"
-4. Isi parameter dan body jika diperlukan
-5. Klik "Execute"
-6. Lihat response di bagian bawah
+1. Open `http://localhost:8000/docs`
+2. Click on the endpoint you want to test
+3. Click "Try it out"
+4. Fill in parameters and body if required
+5. Click "Execute"
+6. View the response at the bottom
 
-## Tips Swagger
+## Swagger Tips
 
-1. **Docstrings yang Jelas**: Tulis docstring yang deskriptif untuk setiap endpoint
-2. **Type Hints**: Gunakan type hints Python untuk schema yang lebih akurat
-3. **Response Codes**: Dokumentasikan berbagai response codes (200, 201, 400, 404, dll)
-4. **Examples**: Berikan contoh request/response di docstring
-5. **Grouping**: Kelompokkan endpoint terkait dengan tags
-6. **Authentication**: Dokumentasikan authentication requirements
-7. **Versioning**: Update versi API saat ada perubahan breaking
+1. **Clear Docstrings**: Write descriptive docstrings for each endpoint
+2. **Type Hints**: Use Python type hints for more accurate schemas
+3. **Response Codes**: Document various response codes (200, 201, 400, 404, etc.)
+4. **Examples**: Provide request/response examples in docstrings
+5. **Grouping**: Group related endpoints with tags
+6. **Authentication**: Document authentication requirements
+7. **Versioning**: Update the API version when there are breaking changes
 
 ---
 
-[Kembali ke Daftar Isi](../README.md)
+[Back to Table of Contents](../README.md)

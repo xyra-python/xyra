@@ -1,11 +1,3 @@
-<file_path>
-xyra/docs/installation.md
-</file_path>
-
-<edit_description>
-Buat file instalasi
-</edit_description>
-
 # Installing Xyra Framework
 
 This guide will help you install Xyra on your system.
@@ -156,7 +148,7 @@ pip install xyra
 ### Using conda
 
 ```bash
-conda create -n xyra_env python=3.9
+conda create -n xyra_env python=3.11
 conda activate xyra_env
 pip install xyra
 ```
@@ -183,7 +175,7 @@ Ensure you have the correct Python version:
 
 ```bash
 python --version
-# Should show Python 3.8 or higher
+# Should show Python 3.11 or higher
 ```
 
 ### Checking pip Version
