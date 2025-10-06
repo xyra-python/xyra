@@ -1,18 +1,10 @@
-<file_path>
-xyra/docs/routing.md
-</file_path>
+# Routing in Xyra
 
-<edit_description>
-Buat file routing
-</edit_description>
+Routing is how Xyra handles HTTP requests and directs them to the appropriate handler. Xyra supports various HTTP methods and flexible routing with parameters and query strings.
 
-# Routing di Xyra
+## HTTP Methods
 
-Routing adalah cara Xyra menangani request HTTP dan mengarahkan mereka ke handler yang sesuai. Xyra mendukung berbagai method HTTP dan routing yang fleksibel dengan parameter dan query string.
-
-## Method HTTP
-
-Xyra mendukung semua method HTTP standar:
+Xyra supports all standard HTTP methods:
 
 ```python
 from xyra import App, Request, Response
@@ -53,9 +45,9 @@ def options_users(req: Request, res: Response):
     res.status(200)
 ```
 
-## Parameter Route
+## Route Parameters
 
-Parameter route memungkinkan Anda menangkap nilai dari URL path.
+Route parameters allow you to capture values from the URL path.
 
 ```python
 @app.get("/users/{user_id}")
@@ -70,11 +62,11 @@ def get_post(req: Request, res: Response):
     res.json({"category": category, "post_id": post_id})
 ```
 
-Parameter diakses melalui `req.params`, yang merupakan dictionary.
+Parameters are accessed through `req.params`, which is a dictionary.
 
 ## Query Parameters
 
-Query parameters digunakan untuk data opsional atau filtering.
+Query parameters are used for optional data or filtering.
 
 ```python
 @app.get("/search")
@@ -89,7 +81,7 @@ def get_users_filtered(req: Request, res: Response):
     per_page = int(req.query_params.get("per_page", ["10"])[0])
     sort_by = req.query_params.get("sort_by", ["name"])[0]
     
-    # Logic untuk filtering, pagination, sorting
+    # Logic for filtering, pagination, sorting
     res.json({
         "page": page,
         "per_page": per_page,
@@ -98,11 +90,11 @@ def get_users_filtered(req: Request, res: Response):
     })
 ```
 
-Query parameters diakses melalui `req.query_params`, yang merupakan dictionary dengan list sebagai nilai (untuk multiple values).
+Query parameters are accessed through `req.query_params`, which is a dictionary with lists as values (for multiple values).
 
-## Route dengan Method Generik
+## Routes with Generic Methods
 
-Anda juga dapat menggunakan method `route()` untuk register route dengan method tertentu:
+You can also use the `route()` method to register a route with a specific method:
 
 ```python
 app.route("GET", "/custom", custom_handler)
@@ -111,7 +103,7 @@ app.route("POST", "/custom", custom_post_handler)
 
 ## Wildcard Routes
 
-Xyra mendukung wildcard dengan `*`:
+Xyra supports wildcards with `*`:
 
 ```python
 @app.get("/files/*")
@@ -121,33 +113,33 @@ def serve_file(req: Request, res: Response):
     res.text(f"Serving file: {path}")
 ```
 
-## Middleware pada Route
+## Middleware on Routes
 
-Middleware dapat diterapkan pada route tertentu (fitur ini mungkin memerlukan implementasi khusus).
+Middleware can be applied to specific routes (this feature may require special implementation).
 
-## Tips Routing
+## Routing Tips
 
-1. **Gunakan parameter yang deskriptif**: `/users/{user_id}` lebih baik daripada `/u/{id}`
+1. **Use descriptive parameters**: `/users/{user_id}` is better than `/u/{id}`
 
-2. **Validasi input**: Selalu validasi parameter dan query string
+2. **Validate input**: Always validate parameters and query strings
 
-3. **Gunakan HTTP method yang tepat**: GET untuk retrieve, POST untuk create, PUT untuk update, DELETE untuk delete
+3. **Use the appropriate HTTP method**: GET for retrieve, POST for create, PUT for update, DELETE for delete
 
-4. **Handle error dengan baik**: Return status code yang sesuai (404 untuk not found, 400 untuk bad request)
+4. **Handle errors properly**: Return appropriate status codes (404 for not found, 400 for bad request)
 
-## Contoh Lengkap
+## Complete Example
 
 ```python
 from xyra import App, Request, Response
 
 app = App()
 
-# Route sederhana
+# Simple route
 @app.get("/")
 def home(req: Request, res: Response):
     res.json({"message": "Welcome to Xyra API"})
 
-# Route dengan parameter
+# Route with parameter
 @app.get("/users/{user_id}")
 def get_user(req: Request, res: Response):
     user_id = req.params.get("user_id")
@@ -156,16 +148,16 @@ def get_user(req: Request, res: Response):
         res.json({"error": "User ID required"})
         return
     
-    # Logic untuk get user
+    # Logic to get user
     res.json({"user_id": user_id, "name": f"User {user_id}"})
 
-# Route dengan query parameters
+# Route with query parameters
 @app.get("/users")
 def list_users(req: Request, res: Response):
     page = int(req.query_params.get("page", ["1"])[0])
     limit = int(req.query_params.get("limit", ["10"])[0])
     
-    # Logic untuk pagination
+    # Logic for pagination
     users = [
         {"id": i, "name": f"User {i}"}
         for i in range((page-1)*limit + 1, page*limit + 1)
@@ -177,18 +169,18 @@ def list_users(req: Request, res: Response):
         "users": users
     })
 
-# Route POST dengan body
+# POST route with body
 @app.post("/users")
 async def create_user(req: Request, res: Response):
     try:
         user_data = await req.json()
-        # Validasi data
+        # Validate data
         if not user_data.get("name"):
             res.status(400)
             res.json({"error": "Name is required"})
             return
         
-        # Logic untuk create user
+        # Logic to create user
         res.status(201)
         res.json({"created": True, "user": user_data})
     except ValueError:
@@ -201,4 +193,4 @@ if __name__ == "__main__":
 
 ---
 
-[Kembali ke Daftar Isi](../README.md)
+[Back to Table of Contents](../README.md)

@@ -1,35 +1,27 @@
-<file_path>
-xyra/docs/static-files.md
-</file_path>
+# Static Files in Xyra
 
-<edit_description>
-Buat file static files
-</edit_description>
-
-# Static Files di Xyra
-
-Xyra memungkinkan Anda untuk serve file statis seperti CSS, JavaScript, gambar, dan file lainnya. File statis disimpan di direktori tertentu dan diakses melalui URL path yang ditentukan.
+Xyra allows you to serve static files such as CSS, JavaScript, images, and other files. Static files are stored in a specific directory and accessed through a defined URL path.
 
 ## Setup Static Files
 
-Gunakan method `static_files()` pada objek App untuk mengatur serving file statis:
+Use the `static_files()` method on the App object to set up serving static files:
 
 ```python
 from xyra import App
 
 app = App()
 
-# Serve file statis dari direktori "static" ke path "/static"
+# Serve static files from the "static" directory to the "/static" path
 app.static_files("/static", "static")
 ```
 
-Parameter:
-- Path pertama: URL path yang akan digunakan untuk mengakses file (contoh: "/static")
-- Path kedua: Direktori di filesystem tempat file statis disimpan
+Parameters:
+- First path: The URL path used to access the files (e.g., "/static")
+- Second path: The directory in the filesystem where static files are stored
 
-## Struktur Direktori
+## Directory Structure
 
-Organisasi direktori yang direkomendasikan:
+Recommended directory organization:
 
 ```
 project/
@@ -46,24 +38,24 @@ project/
     └── index.html
 ```
 
-## Mengakses File Statis
+## Accessing Static Files
 
-Setelah setup, file dapat diakses melalui URL:
+After setup, files can be accessed via URL:
 
 - `http://localhost:8000/static/css/style.css`
 - `http://localhost:8000/static/js/app.js`
 - `http://localhost:8000/static/images/logo.png`
 
-## Menggunakan di Template
+## Using in Templates
 
-Di template Jinja2, Anda dapat menggunakan helper function untuk generate URL:
+In Jinja2 templates, you can use a helper function to generate URLs:
 
 ```python
-# Tambahkan global function untuk static files
+# Add a global function for static files
 app.templates.add_global("static", lambda path: f"/static/{path}")
 ```
 
-Lalu di template:
+Then in the template:
 
 ```html
 <!DOCTYPE html>
@@ -78,7 +70,7 @@ Lalu di template:
 </html>
 ```
 
-## Contoh Lengkap
+## Complete Example
 
 ```python
 from xyra import App, Request, Response
@@ -124,7 +116,7 @@ Template `templates/home.html`:
 </html>
 ```
 
-## File CSS (static/css/style.css)
+## CSS File (static/css/style.css)
 
 ```css
 body {
@@ -144,7 +136,7 @@ img {
 }
 ```
 
-## File JavaScript (static/js/app.js)
+## JavaScript File (static/js/app.js)
 
 ```javascript
 document.addEventListener('DOMContentLoaded', function() {
@@ -160,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 ## Multiple Static Directories
 
-Anda dapat setup multiple direktori statis untuk organisasi yang lebih baik:
+You can set up multiple static directories for better organization:
 
 ```python
 # Public assets
@@ -175,33 +167,33 @@ app.static_files("/uploads", "uploads")
 
 ## Security Considerations
 
-1. **Path Traversal**: Xyra secara otomatis mencegah path traversal attacks
-2. **File Permissions**: Pastikan file memiliki permission yang tepat
-3. **Caching Headers**: Tambahkan cache headers untuk performa
+1. **Path Traversal**: Xyra automatically prevents path traversal attacks
+2. **File Permissions**: Ensure files have appropriate permissions
+3. **Caching Headers**: Add cache headers for performance
 
 ```python
-# Middleware untuk cache headers
+# Middleware for cache headers
 def cache_middleware(req: Request, res: Response):
     if req.url.startswith("/static/"):
         res.set_header("Cache-Control", "public, max-age=31536000")  # 1 year
 ```
 
-## Tips Static Files
+## Static Files Tips
 
-1. **Versioning**: Tambahkan version/hash ke filename untuk cache busting
-2. **CDN**: Untuk production, gunakan CDN untuk static files
-3. **Compression**: Enable gzip compression untuk text files
-4. **Organization**: Kelompokkan file berdasarkan tipe (css, js, images)
-5. **Minification**: Minify CSS dan JS untuk production
+1. **Versioning**: Add version/hash to filename for cache busting
+2. **CDN**: For production, use CDN for static files
+3. **Compression**: Enable gzip compression for text files
+4. **Organization**: Group files by type (css, js, images)
+5. **Minification**: Minify CSS and JS for production
 
 ## Troubleshooting
 
-**File tidak ditemukan**: Pastikan path direktori benar dan file ada di lokasi yang tepat.
+**File not found**: Ensure the directory path is correct and the file exists in the right location.
 
-**CORS issues**: Jika static files diakses dari domain berbeda, tambahkan CORS headers.
+**CORS issues**: If static files are accessed from a different domain, add CORS headers.
 
-**Performance**: Untuk aplikasi besar, gunakan web server seperti Nginx untuk serve static files.
+**Performance**: For large applications, use a web server like Nginx to serve static files.
 
 ---
 
-[Kembali ke Daftar Isi](../README.md)
+[Back to Table of Contents](../README.md)

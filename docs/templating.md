@@ -1,14 +1,21 @@
+# Templating in Xyra
+
+Xyra uses Jinja2 for templating. Templates allow you to generate dynamic HTML pages with data from your routes.
+
+## Setup Templates
+
+By default, Xyra looks for templates in the `templates/` directory. You can change it with the `templates_directory` parameter.
+
+```python
 from xyra import App
 
-# Inisialisasi dengan direktori template
+# Initialize with templates directory
 app = App(templates_directory="templates")
 ```
 
-Secara default, Xyra akan mencari template di direktori `templates/`. Anda dapat mengubahnya dengan parameter `templates_directory`.
-
 ## Render Template
 
-Untuk merender template, gunakan method `render()` pada objek Response:
+To render a template, use the `render()` method on the Response object:
 
 ```python
 @app.get("/page")
@@ -16,11 +23,11 @@ def render_page(req: Request, res: Response):
     res.render("page.html", title="My Page", users=["Alice", "Bob"])
 ```
 
-Parameter pertama adalah nama file template, diikuti oleh context variables yang akan tersedia di template.
+The first parameter is the template file name, followed by context variables that will be available in the template.
 
-## Template HTML
+## HTML Template
 
-Template menggunakan sintaks Jinja2. Berikut adalah contoh template HTML:
+Templates use Jinja2 syntax. Here is an example HTML template:
 
 ```html
 <!-- templates/page.html -->
@@ -65,11 +72,11 @@ Template menggunakan sintaks Jinja2. Berikut adalah contoh template HTML:
 </html>
 ```
 
-## Sintaks Jinja2
+## Jinja2 Syntax
 
 ### Variables
 
-Gunakan `{{ variable }}` untuk menampilkan nilai variable:
+Use `{{ variable }}` to display variable values:
 
 ```html
 <h1>Hello, {{ name }}!</h1>
@@ -78,19 +85,19 @@ Gunakan `{{ variable }}` untuk menampilkan nilai variable:
 
 ### Filters
 
-Filter mengubah nilai variable. Gunakan pipe `|` untuk menerapkan filter:
+Filters modify variable values. Use the pipe `|` to apply a filter:
 
 ```html
-<p>{{ name|upper }}</p>  <!-- NAMA BESAR -->
+<p>{{ name|upper }}</p>  <!-- ALL CAPS -->
 <p>{{ price|currency }}</p>  <!-- $1,234.56 -->
-<p>{{ text|truncate(50) }}</p>  <!-- Potong teks menjadi 50 karakter -->
+<p>{{ text|truncate(50) }}</p>  <!-- Truncate text to 50 characters -->
 ```
 
-Filter built-in Jinja2:
-- `upper`, `lower`: Ubah case
-- `truncate`: Potong teks
-- `length`: Panjang string/list
-- `default`: Nilai default jika kosong
+Built-in Jinja2 filters:
+- `upper`, `lower`: Change case
+- `truncate`: Truncate text
+- `length`: Length of string/list
+- `default`: Default value if empty
 
 ### Control Structures
 
@@ -129,18 +136,18 @@ Filter built-in Jinja2:
 {{ render_user(current_user) }}
 ```
 
-## Custom Filters dan Globals
+## Custom Filters and Globals
 
-Xyra memungkinkan Anda menambahkan custom filters dan global functions ke template.
+Xyra allows you to add custom filters and global functions to templates.
 
 ### Custom Filters
 
 ```python
-# Tambah filter custom
+# Add custom filter
 app.templates.add_filter("currency", lambda value, symbol="$": f"{symbol}{value:,.2f}")
 app.templates.add_filter("uppercase", lambda text: text.upper())
 
-# Penggunaan di template
+# Usage in template
 {{ 1234.56 | currency }}  <!-- $1,234.56 -->
 {{ 1234.56 | currency("€") }}  <!-- €1,234.56 -->
 {{ "hello" | uppercase }}  <!-- HELLO -->
@@ -149,24 +156,24 @@ app.templates.add_filter("uppercase", lambda text: text.upper())
 ### Global Functions
 
 ```python
-# Tambah global function
+# Add global function
 app.templates.add_global("current_year", 2024)
 app.templates.add_global("url_for", lambda route: f"/{route}")
 
-# Penggunaan di template
+# Usage in template
 <p>&copy; {{ current_year }} My App</p>
 <a href="{{ url_for('about') }}">About</a>
 ```
 
 ## Static Files
 
-Untuk file statis (CSS, JS, gambar), gunakan helper `static()`:
+For static files (CSS, JS, images), use the `static()` helper:
 
 ```python
 app.templates.add_global("static", lambda path: f"/static/{path}")
 ```
 
-Lalu di template:
+Then in the template:
 
 ```html
 <link rel="stylesheet" href="{{ static('css/style.css') }}">
@@ -174,9 +181,9 @@ Lalu di template:
 <img src="{{ static('images/logo.png') }}" alt="Logo">
 ```
 
-## Render dari String
+## Render from String
 
-Selain dari file, Anda juga dapat merender template dari string:
+In addition to files, you can also render templates from strings:
 
 ```python
 from xyra import App
@@ -190,7 +197,7 @@ def dynamic_template(req: Request, res: Response):
     <p>Message: {{ message }}</p>
     """
     
-    # Render dari string
+    # Render from string
     html = app.templates.render_string(template_string, 
                                       title="Dynamic Page", 
                                       message="Hello from string template!")
@@ -198,16 +205,16 @@ def dynamic_template(req: Request, res: Response):
     res.html(html)
 ```
 
-## Contoh Lengkap
+## Complete Example
 
-Berikut adalah contoh aplikasi lengkap dengan templating:
+Here is a complete application example with templating:
 
 ```python
 from xyra import App, Request, Response
 
 app = App(templates_directory="templates")
 
-# Setup custom filters dan globals
+# Setup custom filters and globals
 app.templates.add_filter("currency", lambda value: f"Rp{value:,.0f}")
 app.templates.add_global("current_year", 2024)
 app.templates.add_global("static", lambda path: f"/static/{path}")
@@ -230,7 +237,7 @@ def home(req: Request, res: Response):
 def product_detail(req: Request, res: Response):
     product_id = req.params.get("product_id")
     
-    # Simulasi get product from database
+    # Simulate get product from database
     product = {
         "id": product_id,
         "name": f"Product {product_id}",
@@ -302,14 +309,14 @@ Template `templates/home.html`:
 </html>
 ```
 
-## Tips Templating
+## Templating Tips
 
-1. **Gunakan inheritance**: Manfaatkan template inheritance Jinja2 untuk layout yang konsisten
-2. **Validasi context**: Pastikan semua variable yang digunakan di template tersedia di context
-3. **Escape output**: Jinja2 secara otomatis escape HTML, tapi hati-hati dengan `|safe` filter
-4. **Optimasi performa**: Gunakan caching untuk template yang sering digunakan
-5. **Organisasi file**: Pisahkan template ke dalam subfolder berdasarkan fitur
+1. **Use inheritance**: Leverage Jinja2 template inheritance for consistent layouts
+2. **Validate context**: Ensure all variables used in the template are available in the context
+3. **Escape output**: Jinja2 automatically escapes HTML, but be careful with the `|safe` filter
+4. **Performance optimization**: Use caching for frequently used templates
+5. **File organization**: Separate templates into subfolders based on features
 
 ---
 
-[Kembali ke Daftar Isi](../README.md)
+[Back to Table of Contents](../README.md)

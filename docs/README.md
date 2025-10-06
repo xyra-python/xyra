@@ -1,11 +1,3 @@
-<file_path>
-xyra/docs/README.md
-</file_path>
-
-<edit_description>
-Buat README.md utama dengan pendahuluan dan navigasi
-</edit_description>
-
 # Xyra Framework Documentation
 
 Xyra is a lightweight and fast Python web framework built on top of socketify for high performance. The framework provides modern features such as flexible routing, templating, WebSocket support, and automatic API documentation.

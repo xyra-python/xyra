@@ -1,14 +1,6 @@
-<file_path>
-xyra/docs/middleware.md
-</file_path>
+# Middleware in Xyra
 
-<edit_description>
-Buat file middleware
-</edit_description>
-
-# Middleware di Xyra
-
-Middleware adalah fungsi yang dijalankan sebelum atau sesudah handler route utama. Middleware memungkinkan Anda untuk menambahkan logika umum seperti autentikasi, logging, CORS handling, atau validasi input ke semua atau beberapa route tertentu.
+Middleware are functions that are executed before or after the main route handler. Middleware allows you to add common logic such as authentication, logging, CORS handling, or input validation to all or specific routes.
 
 ## Cara Kerja Middleware
 

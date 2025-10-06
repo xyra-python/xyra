@@ -1,18 +1,10 @@
-<file_path>
-xyra/docs/api-reference.md
-</file_path>
+# Xyra API Reference
 
-<edit_description>
-Buat file api reference
-</edit_description>
-
-# API Reference Xyra
-
-Dokumentasi lengkap API untuk framework Xyra, termasuk semua class, method, dan properti yang tersedia.
+Complete API documentation for the Xyra framework, including all available classes, methods, and properties.
 
 ## App Class
 
-Class utama untuk membuat aplikasi Xyra.
+The main class for creating Xyra applications.
 
 ### Constructor
 
@@ -21,15 +13,15 @@ App(options=None, templates_directory="templates", swagger_options=None)
 ```
 
 **Parameters:**
-- `options` (dict, optional): Opsi untuk socketify
-- `templates_directory` (str): Direktori untuk template files (default: "templates")
-- `swagger_options` (dict, optional): Konfigurasi untuk Swagger documentation
+- `options` (dict, optional): Options for socketify
+- `templates_directory` (str): Directory for template files (default: "templates")
+- `swagger_options` (dict, optional): Configuration for Swagger documentation
 
 ### Methods
 
 #### route(method, path, handler=None)
 
-Register route dengan method HTTP tertentu.
+Register route with specific HTTP method.
 
 ```python
 app.route("GET", "/users", handler_function)
@@ -45,7 +37,7 @@ app.route("POST", "/users", handler_function)
 
 #### get(path, handler=None)
 
-Register route GET.
+Register GET route.
 
 ```python
 app.get("/users", get_users_handler)
@@ -53,7 +45,7 @@ app.get("/users", get_users_handler)
 
 #### post(path, handler=None)
 
-Register route POST.
+Register POST route.
 
 ```python
 app.post("/users", create_user_handler)
@@ -61,7 +53,7 @@ app.post("/users", create_user_handler)
 
 #### put(path, handler=None)
 
-Register route PUT.
+Register PUT route.
 
 ```python
 app.put("/users/{id}", update_user_handler)
@@ -69,7 +61,7 @@ app.put("/users/{id}", update_user_handler)
 
 #### delete(path, handler=None)
 
-Register route DELETE.
+Register DELETE route.
 
 ```python
 app.delete("/users/{id}", delete_user_handler)
@@ -77,7 +69,7 @@ app.delete("/users/{id}", delete_user_handler)
 
 #### patch(path, handler=None)
 
-Register route PATCH.
+Register PATCH route.
 
 ```python
 app.patch("/users/{id}", patch_user_handler)
@@ -85,7 +77,7 @@ app.patch("/users/{id}", patch_user_handler)
 
 #### head(path, handler=None)
 
-Register route HEAD.
+Register HEAD route.
 
 ```python
 app.head("/users", head_users_handler)
@@ -93,7 +85,7 @@ app.head("/users", head_users_handler)
 
 #### options(path, handler=None)
 
-Register route OPTIONS.
+Register OPTIONS route.
 
 ```python
 app.options("/users", options_users_handler)
@@ -101,7 +93,7 @@ app.options("/users", options_users_handler)
 
 #### use(middleware)
 
-Tambahkan middleware ke aplikasi.
+Add middleware to the application.
 
 ```python
 def my_middleware(req, res):
@@ -123,8 +115,8 @@ app.static_files("/static", "static")
 ```
 
 **Parameters:**
-- `path` (str): URL path untuk static files
-- `directory` (str): Direktori filesystem untuk static files
+- `path` (str): URL path for static files
+- `directory` (str): Filesystem directory for static files
 
 #### websocket(path, handler)
 
@@ -140,7 +132,7 @@ app.websocket("/ws", websocket_handler)
 
 #### listen(port=8000, host="0.0.0.0")
 
-Jalankan server.
+Run the server.
 
 ```python
 app.listen(8000)  # localhost:8000
@@ -148,14 +140,14 @@ app.listen(3000, "127.0.0.1")  # localhost:3000
 ```
 
 **Parameters:**
-- `port` (int): Port untuk server (default: 8000)
+- `port` (int): Port for server (default: 8000)
 - `host` (str): Host address (default: "0.0.0.0")
 
 ### Properties
 
 #### router
 
-Akses ke router instance.
+Access to router instance.
 
 ```python
 routes = app.router.routes
@@ -163,7 +155,7 @@ routes = app.router.routes
 
 #### middlewares
 
-List middleware yang terdaftar.
+List of registered middlewares.
 
 ```python
 middlewares = app.middlewares
@@ -171,7 +163,7 @@ middlewares = app.middlewares
 
 #### ws_routes
 
-List WebSocket routes yang terdaftar.
+List of registered WebSocket routes.
 
 ```python
 ws_routes = app.ws_routes
@@ -187,7 +179,7 @@ app.templates.add_filter("custom", custom_filter)
 
 ## Request Class
 
-Class untuk menangani HTTP request.
+Class for handling HTTP requests.
 
 ### Constructor
 
@@ -203,7 +195,7 @@ Request(req, params=None)
 
 #### method
 
-HTTP method dari request.
+HTTP method of the request.
 
 ```python
 method = req.method  # "GET", "POST", etc.
@@ -213,7 +205,7 @@ method = req.method  # "GET", "POST", etc.
 
 #### url
 
-URL lengkap dari request.
+Full URL of the request.
 
 ```python
 url = req.url  # "http://localhost:8000/users?page=1"
@@ -223,7 +215,7 @@ url = req.url  # "http://localhost:8000/users?page=1"
 
 #### headers
 
-Dictionary semua headers.
+Dictionary of all headers.
 
 ```python
 headers = req.headers
@@ -244,7 +236,7 @@ query = req.query  # "?page=1&limit=10"
 
 #### query_params
 
-Parsed query parameters sebagai dictionary dengan list values.
+Parsed query parameters as dictionary with list values.
 
 ```python
 params = req.query_params
@@ -287,7 +279,7 @@ length = req.content_length
 
 #### get_header(name, default=None)
 
-Ambil nilai header tertentu.
+Get specific header value.
 
 ```python
 auth = req.get_header("Authorization")
@@ -295,27 +287,27 @@ content_type = req.get_header("Content-Type", "application/json")
 ```
 
 **Parameters:**
-- `name` (str): Nama header
-- `default` (str, optional): Nilai default jika header tidak ada
+- `name` (str): Header name
+- `default` (str, optional): Default value if header doesn't exist
 
 **Returns:** Optional[str]
 
 #### get_parameter(index)
 
-Ambil parameter route berdasarkan index.
+Get route parameter by index.
 
 ```python
 param = req.get_parameter(0)
 ```
 
 **Parameters:**
-- `index` (int): Index parameter
+- `index` (int): Parameter index
 
 **Returns:** Optional[str]
 
 #### text()
 
-Ambil body request sebagai text.
+Get request body as text.
 
 ```python
 async def handler(req, res):
@@ -326,7 +318,7 @@ async def handler(req, res):
 
 #### json()
 
-Parse body request sebagai JSON.
+Parse request body as JSON.
 
 ```python
 async def handler(req, res):
@@ -335,11 +327,11 @@ async def handler(req, res):
 
 **Returns:** Any
 
-**Raises:** ValueError jika JSON invalid
+**Raises:** ValueError if JSON is invalid
 
 #### form()
 
-Parse body request sebagai form data.
+Parse request body as form data.
 
 ```python
 async def handler(req, res):
@@ -350,7 +342,7 @@ async def handler(req, res):
 
 #### is_json()
 
-Cek apakah content-type adalah JSON.
+Check if content-type is JSON.
 
 ```python
 if req.is_json():
@@ -361,7 +353,7 @@ if req.is_json():
 
 #### is_form()
 
-Cek apakah content-type adalah form data.
+Check if content-type is form data.
 
 ```python
 if req.is_form():
@@ -372,24 +364,24 @@ if req.is_form():
 
 ## Response Class
 
-Class untuk membuat HTTP response.
+Class for creating HTTP responses.
 
 ### Methods
 
 #### json(data)
 
-Kirim response JSON.
+Send JSON response.
 
 ```python
 res.json({"status": "success", "data": []})
 ```
 
 **Parameters:**
-- `data` (Any): Data yang akan di-serialize ke JSON
+- `data` (Any): Data to be serialized to JSON
 
 #### html(content)
 
-Kirim response HTML.
+Send HTML response.
 
 ```python
 res.html("<h1>Hello World</h1>")
@@ -400,7 +392,7 @@ res.html("<h1>Hello World</h1>")
 
 #### text(content)
 
-Kirim response plain text.
+Send plain text response.
 
 ```python
 res.text("Hello World")
@@ -436,7 +428,7 @@ res.set_header("X-Custom", "value")
 
 #### redirect(url)
 
-Redirect ke URL lain.
+Redirect to another URL.
 
 ```python
 res.redirect("/login")
@@ -469,17 +461,17 @@ res.render("index.html", title="Home", users=users)
 
 **Parameters:**
 - `template` (str): Template filename
-- `**context`: Context variables untuk template
+- `**context`: Context variables for template
 
 ## WebSocket Class
 
-Class untuk menangani WebSocket connections.
+Class for handling WebSocket connections.
 
 ### Methods
 
 #### send(message, opcode=OpCode.TEXT)
 
-Kirim message ke client.
+Send message to client.
 
 ```python
 ws.send("Hello World")
@@ -492,7 +484,7 @@ ws.send(b"Binary data", OpCode.BINARY)
 
 #### send_text(message)
 
-Kirim text message.
+Send text message.
 
 ```python
 ws.send_text("Hello World")
@@ -503,7 +495,7 @@ ws.send_text("Hello World")
 
 #### send_binary(message)
 
-Kirim binary message.
+Send binary message.
 
 ```python
 ws.send_binary(b"Binary data")
@@ -514,7 +506,7 @@ ws.send_binary(b"Binary data")
 
 #### publish(topic, message, opcode=OpCode.TEXT, compress=False)
 
-Publish message ke topic (broadcast).
+Publish message to topic (broadcast).
 
 ```python
 ws.publish("room1", "Hello everyone!")
@@ -528,7 +520,7 @@ ws.publish("room1", "Hello everyone!")
 
 #### subscribe(topic)
 
-Subscribe ke topic.
+Subscribe to topic.
 
 ```python
 ws.subscribe("notifications")
@@ -540,7 +532,7 @@ ws.subscribe("room1")
 
 #### unsubscribe(topic)
 
-Unsubscribe dari topic.
+Unsubscribe from topic.
 
 ```python
 ws.unsubscribe("room1")
@@ -551,7 +543,7 @@ ws.unsubscribe("room1")
 
 #### close(code=1000, message=None)
 
-Tutup WebSocket connection.
+Close WebSocket connection.
 
 ```python
 ws.close()  # Normal closure
@@ -564,7 +556,7 @@ ws.close(1001, "Going away")  # With code and message
 
 #### ping(message=b"")
 
-Kirim ping frame.
+Send ping frame.
 
 ```python
 ws.ping(b"ping data")
@@ -575,7 +567,7 @@ ws.ping(b"ping data")
 
 #### pong(message=b"")
 
-Kirim pong frame.
+Send pong frame.
 
 ```python
 ws.pong(b"pong data")
@@ -588,7 +580,7 @@ ws.pong(b"pong data")
 
 #### closed
 
-Cek apakah connection sudah ditutup.
+Check if connection is closed.
 
 ```python
 if ws.closed:
@@ -599,7 +591,7 @@ if ws.closed:
 
 ## Templating Class
 
-Class untuk menangani template rendering dengan Jinja2.
+Class for handling template rendering with Jinja2.
 
 ### Constructor
 
@@ -609,7 +601,7 @@ Templating(directory="templates", auto_reload=True)
 
 **Parameters:**
 - `directory` (str): Template directory
-- `auto_reload` (bool): Auto reload templates saat development
+- `auto_reload` (bool): Auto reload templates during development
 
 ### Methods
 
@@ -629,7 +621,7 @@ html = app.templates.render("index.html", title="Home", users=users)
 
 #### render_string(template_string, **context)
 
-Render template dari string.
+Render template from string.
 
 ```python
 template = "<h1>{{ title }}</h1>"
@@ -644,7 +636,7 @@ html = app.templates.render_string(template, title="Hello")
 
 #### add_global(name, value)
 
-Tambah global variable ke semua templates.
+Add global variable to all templates.
 
 ```python
 app.templates.add_global("current_year", 2024)
@@ -657,7 +649,7 @@ app.templates.add_global("url_for", lambda route: f"/{route}")
 
 #### add_filter(name, func)
 
-Tambah custom filter.
+Add custom filter.
 
 ```python
 def currency_filter(value):
@@ -672,7 +664,7 @@ app.templates.add_filter("currency", currency_filter)
 
 #### list_templates()
 
-List semua template yang tersedia.
+List all available templates.
 
 ```python
 templates = app.templates.list_templates()
@@ -682,7 +674,7 @@ templates = app.templates.list_templates()
 
 #### template_exists(template_name)
 
-Cek apakah template ada.
+Check if template exists.
 
 ```python
 if app.templates.template_exists("index.html"):
@@ -697,7 +689,7 @@ if app.templates.template_exists("index.html"):
 
 #### get_template_source(template_name)
 
-Ambil source code template (untuk debugging).
+Get template source code (for debugging).
 
 ```python
 source, filename, uptodate = app.templates.get_template_source("index.html")
@@ -710,4 +702,4 @@ source, filename, uptodate = app.templates.get_template_source("index.html")
 
 ---
 
-[Kembali ke Daftar Isi](../README.md)
+[Back to Table of Contents](../README.md)

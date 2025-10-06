@@ -1,11 +1,3 @@
-<file_path>
-xyra/docs/getting-started.md
-</file_path>
-
-<edit_description>
-Buat file memulai
-</edit_description>
-
 # Getting Started with Xyra
 
 Welcome to Xyra! This section will help you create your first web application with the Xyra framework.
@@ -14,7 +6,7 @@ Welcome to Xyra! This section will help you create your first web application wi
 
 Before you begin, make sure you have:
 
-- Python 3.8 or higher
+- Python 3.11 or higher
 - pip package manager
 - Basic knowledge of Python
 

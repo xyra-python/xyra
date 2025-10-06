@@ -1,20 +1,12 @@
-<file_path>
-xyra/docs/websocket.md
-</file_path>
+# WebSocket in Xyra
 
-<edit_description>
-Buat file websocket
-</edit_description>
-
-# WebSocket di Xyra
-
-Xyra mendukung WebSocket untuk komunikasi real-time antara server dan client. WebSocket memungkinkan koneksi dua arah yang persisten, ideal untuk aplikasi chat, notifikasi real-time, game, atau dashboard live.
+Xyra supports WebSocket for real-time communication between server and client. WebSocket enables persistent bidirectional connections, ideal for chat applications, real-time notifications, games, or live dashboards.
 
 ## Setup WebSocket
 
-Untuk menggunakan WebSocket di Xyra, Anda perlu mendaftarkan route WebSocket dan menentukan handler.
+To use WebSocket in Xyra, you need to register a WebSocket route and specify a handler.
 
-### Handler Sederhana
+### Simple Handler
 
 ```python
 from xyra import App
@@ -26,9 +18,9 @@ def handle_websocket(websocket):
     websocket.send("Connected!")
 ```
 
-### Handler dengan Events Terpisah
+### Handler with Separate Events
 
-Untuk kontrol lebih baik, Anda dapat menentukan handler terpisah untuk setiap event:
+For better control, you can specify separate handlers for each event:
 
 ```python
 def on_open(ws):
@@ -51,9 +43,9 @@ app.websocket("/chat", {
 
 ## WebSocket Methods
 
-Objek WebSocket menyediakan berbagai method untuk mengirim dan menerima data.
+The WebSocket object provides various methods for sending and receiving data.
 
-### Mengirim Data
+### Sending Data
 
 ```python
 def websocket_handler(websocket):
@@ -64,25 +56,25 @@ def websocket_handler(websocket):
     # Send binary data
     websocket.send_binary(b"Binary data")
     
-    # Send dengan opcode tertentu
+    # Send with specific opcode
     from socketify import OpCode
     websocket.send("Data", OpCode.TEXT)
 ```
 
-### Publish ke Topic
+### Publish to Topic
 
-WebSocket mendukung pub/sub pattern untuk broadcasting ke multiple clients:
+WebSocket supports a pub/sub pattern for broadcasting to multiple clients:
 
 ```python
 def websocket_handler(websocket):
-    # Subscribe ke topic
+    # Subscribe to topic
     websocket.subscribe("room1")
     websocket.subscribe("notifications")
     
-    # Unsubscribe dari topic
+    # Unsubscribe from topic
     websocket.unsubscribe("room1")
     
-    # Publish message ke topic
+    # Publish message to topic
     websocket.publish("room1", "Hello everyone in room1!")
     websocket.publish("notifications", "System update available", compress=True)
 ```
@@ -91,13 +83,13 @@ def websocket_handler(websocket):
 
 ```python
 def websocket_handler(websocket):
-    # Close dengan status normal
+    # Close with normal status
     websocket.close()
     
-    # Close dengan code dan message
+    # Close with code and message
     websocket.close(1000, "Normal closure")
     
-    # Close dengan code error
+    # Close with error code
     websocket.close(1001, "Going away")
 ```
 
@@ -109,13 +101,13 @@ def websocket_handler(websocket):
         print("Connection is closed")
         return
     
-    # Connection masih aktif
+    # Connection is still active
     websocket.send("Connection is active")
 ```
 
-## Contoh Lengkap
+## Complete Example
 
-### Chat Room Sederhana
+### Simple Chat Room
 
 ```python
 from xyra import App
@@ -133,9 +125,9 @@ def on_open(ws):
 def on_message(ws, message, opcode):
     print(f"Received: {message}")
     
-    # Broadcast message ke semua clients
+    # Broadcast message to all clients
     for client in connected_clients:
-        if client != ws:  # Jangan kirim ke sender sendiri
+        if client != ws:  # Don't send to sender
             client.send(f"User: {message}")
 
 def on_close(ws, code, message):
@@ -206,7 +198,7 @@ if __name__ == "__main__":
 
 ### Client JavaScript
 
-Untuk terhubung dari browser, gunakan JavaScript:
+To connect from the browser, use JavaScript:
 
 ```html
 <!DOCTYPE html>
@@ -259,7 +251,7 @@ Untuk terhubung dari browser, gunakan JavaScript:
 
 ## Error Handling
 
-Selalu handle error pada WebSocket connections:
+Always handle errors in WebSocket connections:
 
 ```python
 def on_open(ws):
@@ -286,21 +278,21 @@ def on_message(ws, message, opcode):
 
 ## Security Considerations
 
-1. **Validasi Input**: Selalu validasi dan sanitize input dari WebSocket
-2. **Rate Limiting**: Implementasi rate limiting untuk mencegah abuse
-3. **Authentication**: Verifikasi identitas client sebelum menerima connections
-4. **Origin Checking**: Cek origin header untuk mencegah cross-site WebSocket hijacking
-5. **Message Size Limits**: Batasi ukuran message untuk mencegah DoS attacks
+1. **Input Validation**: Always validate and sanitize input from WebSocket
+2. **Rate Limiting**: Implement rate limiting to prevent abuse
+3. **Authentication**: Verify client identity before accepting connections
+4. **Origin Checking**: Check the origin header to prevent cross-site WebSocket hijacking
+5. **Message Size Limits**: Limit message size to prevent DoS attacks
 
-## Tips WebSocket
+## WebSocket Tips
 
-1. **Connection Management**: Track connected clients untuk broadcasting
-2. **Heartbeat**: Implementasi ping/pong untuk detect broken connections
-3. **Reconnection**: Handle reconnection logic di client side
-4. **Binary Data**: Gunakan binary messages untuk data yang efisien
-5. **Compression**: Enable compression untuk messages besar
-6. **Topics**: Gunakan pub/sub pattern untuk scalable broadcasting
+1. **Connection Management**: Track connected clients for broadcasting
+2. **Heartbeat**: Implement ping/pong to detect broken connections
+3. **Reconnection**: Handle reconnection logic on the client side
+4. **Binary Data**: Use binary messages for efficient data
+5. **Compression**: Enable compression for large messages
+6. **Topics**: Use pub/sub pattern for scalable broadcasting
 
 ---
 
-[Kembali ke Daftar Isi](../README.md)
+[Back to Table of Contents](../README.md)
