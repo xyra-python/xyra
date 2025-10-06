@@ -21,6 +21,8 @@ def mock_socketify_request():
 @pytest.fixture
 def mock_socketify_response():
     res = Mock()
+    res.get_data = AsyncMock(return_value=b'{"key": "value"}')
+    res.get_json = AsyncMock(return_value={"key": "value"})
     return res
 
 
@@ -86,7 +88,8 @@ async def test_request_json(mock_socketify_request, mock_socketify_response):
 async def test_request_json_empty():
     req = Mock()
     res = Mock()
-    req.text = AsyncMock(return_value="")
+    res.get_data = AsyncMock(return_value=b"")
+    res.get_json = AsyncMock(return_value={})
     request = Request(req, res)
     data = await request.json()
     assert data == {}
@@ -96,7 +99,7 @@ async def test_request_json_empty():
 async def test_request_json_invalid():
     req = Mock()
     res = Mock()
-    req.text = AsyncMock(return_value="invalid json")
+    res.get_json = AsyncMock(side_effect=ValueError("Invalid JSON"))
     request = Request(req, res)
     with pytest.raises(ValueError, match="Invalid JSON"):
         await request.json()
@@ -106,7 +109,7 @@ async def test_request_json_invalid():
 async def test_request_form():
     req = Mock()
     res = Mock()
-    req.text = AsyncMock(return_value="name=john&age=30")
+    res.get_data = AsyncMock(return_value=b"name=john&age=30")
     request = Request(req, res)
     form = await request.form()
     assert form == {"name": "john", "age": "30"}

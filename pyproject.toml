@@ -36,7 +36,6 @@ dependencies = [
     "pytest-twisted>=1.14.3",
     "twisted>=25.5.0",
     "ruff>=0.13.3",
-    "aiosqlite>=0.21.0",
 ]
 
 [project.optional-dependencies]
