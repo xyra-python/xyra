@@ -1,15 +1,24 @@
-version: "1"
+version: v1
 
 labels:
-  - label: "documentation"
-    files:
-      - "docs/**"
-  - label: "tests"
-    files:
-      - "tests/**"
-  - label: "ci"
-    files:
-      - ".github/**"
-  - label: "core"
-    files:
-      - "xyra/**"
+    -   label: '📒 documentation'
+        matcher:
+            title: '\b(docs|doc:|\[doc\]|README|typos|comment|documentation)\b'
+    -   label: '☢️ bug'
+        matcher:
+            title: '\b(fix|race|bug|missing|correct)\b'
+    -   label: '🧹 updates'
+        matcher:
+            title: '\b(improve|update|refactor|deprecated|remove|unused|test)\b'
+    -   label: '🤖 dependencies'
+        matcher:
+            title: '\b(bumb|dependencies)\b'
+    -   label: '✏️ feature'
+        matcher:
+            title: '\b(feature|feat|create|implement|add)\b'
+    -   label: '📝 proposal'
+        matcher:
+            title: '\b(proposal|idea|request|suggest)\b'
+    -   label: '🤔 question'
+        matcher:
+            title: '\b(question|how)\b'

@@ -1,16 +1,24 @@
-name: Labeler
+name: Auto labeler
 
 on:
+  issues:
+    types: [opened, edited, milestoned]
   pull_request_target:
+    types: [opened]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  statuses: write
+  checks: write
 
 jobs:
-  label:
+  labeler:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-
     steps:
-    - uses: actions/labeler@v5
-      with:
-        repo-token: ${{ secrets.LABEL }}
+      - name: Check Labels
+        id: labeler
+        uses: fuxingloh/multi-labeler@v4
+        with:
+          github-token: ${{secrets.LABEL}}
