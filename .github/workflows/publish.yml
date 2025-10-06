@@ -16,7 +16,15 @@ jobs:
         python-version: "3.11"
     - name: Install uv
       uses: astral-sh/setup-uv@v3
+      with:
+        enable-cache: true
+        cache-dependency-glob: "uv.lock"
+    - name: Check version
+      run: |
+        uv python list --project
+        grep "version" pyproject.toml
     - name: Build package
       run: uv build
     - name: Publish to PyPI
       run: uv publish --token ${{ secrets.PYPI_API_TOKEN }}
+      continue-on-error: false
