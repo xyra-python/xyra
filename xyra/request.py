@@ -1,13 +1,23 @@
-import json
 from typing import Any
 from urllib.parse import parse_qs
 
-from socketify import Request as SocketifyRequest
+from socketify import (
+    Request as SocketifyRequest,
+)
+from socketify import (
+    Response as SocketifyResponse,
+)
 
 
 class Request:
-    def __init__(self, req: SocketifyRequest, params: dict[str, str] | None = None):
+    def __init__(
+        self,
+        req: SocketifyRequest,
+        res: "SocketifyResponse",
+        params: dict[str, str] | None = None,
+    ):
         self._req = req
+        self._res = res
         self.params = params or {}
 
     @property
@@ -59,17 +69,17 @@ class Request:
 
     async def text(self) -> str:
         """Get the request body as text."""
-        return await self._req.text()  # type: ignore
+        body = await self._res.get_data()
+        if isinstance(body, bytes):
+            return body.decode("utf-8")
+        elif isinstance(body, str):
+            return body
+        else:
+            return str(body)
 
-    async def json(self) -> Any:
+    async def json(self) -> Any:  # type: ignore
         """Parse the request body as JSON."""
-        try:
-            text_content = await self.text()
-            if not text_content:
-                return {}
-            return json.loads(text_content)
-        except json.JSONDecodeError:
-            raise ValueError("Invalid JSON in request body") from None
+        return await self._res.get_json()
 
     async def form(self) -> dict[str, str]:
         """Parse form data from the request body."""

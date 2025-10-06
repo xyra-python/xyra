@@ -1,6 +1,7 @@
+import asyncio
 import os
 from collections.abc import Callable
-from typing import Any, Union
+from typing import Any, Union, overload
 
 import socketify
 
@@ -88,6 +89,12 @@ class App:
             self._router.add_route(method.upper(), path, handler)
             return self
 
+    @overload
+    def get(self, path: str) -> Callable[[Callable], Callable]: ...
+
+    @overload
+    def get(self, path: str, handler: Callable) -> "App": ...
+
     def get(self, path: str, handler: Callable | None = None) -> Union[Callable, "App"]:
         """Register a GET route."""
         return self.route("GET", path, handler)
@@ -152,41 +159,64 @@ class App:
         return ws_close_handler
 
     def _create_final_handler(
-        self, route_handler: Callable, middlewares: list[Callable]
+        self,
+        route_handler: Callable,
+        param_names: list[str],
+        middlewares: list[Callable],
     ):
-        def final_handler(res, req):
-            request = Request(req)
-            response = Response(res, self.templates)
-            route_handler(request, response)
+        if asyncio.iscoroutinefunction(route_handler):
 
-        return final_handler
+            async def async_final_handler(res, req):
+                params = {}
+                for i, param_name in enumerate(param_names):
+                    param_value = req.get_parameter(i)
+                    if param_value is not None:
+                        params[param_name] = param_value
+                request = Request(req, res, params)
+                response = Response(res, self.templates)
+                await route_handler(request, response)
+
+            return async_final_handler
+        else:
+
+            def sync_final_handler(res, req):
+                params = {}
+                for i, param_name in enumerate(param_names):
+                    param_value = req.get_parameter(i)
+                    if param_value is not None:
+                        params[param_name] = param_value
+                request = Request(req, res, params)
+                response = Response(res, self.templates)
+                route_handler(request, response)
+
+            return sync_final_handler
 
     def _register_routes(self):
         """Register all routes with the underlying socketify app."""
         try:
             for route in self._router.routes:
                 method = route["method"].lower()
-                path = route["path"]
+                parsed_path = route["parsed_path"]
 
                 final_handler = self._create_final_handler(
-                    route["handler"], self._middlewares
+                    route["handler"], route["param_names"], self._middlewares
                 )
 
                 # Use the app methods to register routes
                 if method == "get":
-                    self._app.get(path, final_handler)
+                    self._app.get(parsed_path, final_handler)
                 elif method == "post":
-                    self._app.post(path, final_handler)
+                    self._app.post(parsed_path, final_handler)
                 elif method == "put":
-                    self._app.put(path, final_handler)
+                    self._app.put(parsed_path, final_handler)
                 elif method == "delete":
-                    self._app.delete(path, final_handler)
+                    self._app.delete(parsed_path, final_handler)
                 elif method == "patch":
-                    self._app.patch(path, final_handler)
+                    self._app.patch(parsed_path, final_handler)
                 elif method == "head":
-                    self._app.head(path, final_handler)
+                    self._app.head(parsed_path, final_handler)
                 elif method == "options":
-                    self._app.options(path, final_handler)
+                    self._app.options(parsed_path, final_handler)
 
             # Add catch-all handler for 404 Not Found
             def not_found_handler(res, req):

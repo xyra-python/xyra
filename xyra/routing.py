@@ -1,3 +1,6 @@
+from .params import parse_path
+
+
 class Router:
     """
     HTTP route manager for Xyra applications.
@@ -23,7 +26,16 @@ class Router:
             path: URL path pattern.
             handler: Function to handle requests for this route.
         """
-        self.routes.append({"method": method, "path": path, "handler": handler})
+        parsed_path, param_names = parse_path(path)
+        self.routes.append(
+            {
+                "method": method,
+                "path": path,
+                "parsed_path": parsed_path,
+                "param_names": param_names,
+                "handler": handler,
+            }
+        )
 
     def get(self, path: str):
         """
