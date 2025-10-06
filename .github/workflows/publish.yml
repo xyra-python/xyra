@@ -23,6 +23,8 @@ jobs:
       run: |
         uv python list --project
         grep "version" pyproject.toml
+    - name: Clean dist
+      run: rm -rf dist
     - name: Build package
       run: uv build
     - name: Publish to PyPI
