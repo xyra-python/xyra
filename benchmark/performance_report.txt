@@ -1,0 +1,110 @@
+Xyra Framework Performance Report
+==================================================
+
+Benchmark Results:
+--------------------
+Simple Hello World:
+  RPS: 4951.2
+  Avg Latency: 200.8ms
+  P95 Latency: 266.2ms
+
+JSON Response:
+  RPS: 4595.4
+  Avg Latency: 234.7ms
+  P95 Latency: 294.3ms
+
+JSON POST:
+  RPS: 2595.4
+  Avg Latency: 386.9ms
+  P95 Latency: 584.1ms
+
+Headers Access:
+  RPS: 4501.9
+  Avg Latency: 225.5ms
+  P95 Latency: 287.1ms
+
+Query Parameters:
+  RPS: 4438.7
+  Avg Latency: 210.9ms
+  P95 Latency: 281.3ms
+
+Route Parameters:
+  RPS: 4952.5
+  Avg Latency: 204.4ms
+  P95 Latency: 270.1ms
+
+Simple Hello World:
+  RPS: 4646.9
+  Avg Latency: 161.0ms
+  P95 Latency: 215.9ms
+
+JSON Response:
+  RPS: 5149.6
+  Avg Latency: 146.4ms
+  P95 Latency: 193.6ms
+
+JSON POST:
+  RPS: 3749.9
+  Avg Latency: 199.5ms
+  P95 Latency: 241.8ms
+
+Headers Access:
+  RPS: 4518.2
+  Avg Latency: 169.2ms
+  P95 Latency: 217.5ms
+
+Query Parameters:
+  RPS: 4831.1
+  Avg Latency: 154.5ms
+  P95 Latency: 209.5ms
+
+Route Parameters:
+  RPS: 4297.3
+  Avg Latency: 174.8ms
+  P95 Latency: 205.3ms
+
+Simple Hello World:
+  RPS: 4575.6
+  Avg Latency: 111.0ms
+  P95 Latency: 149.0ms
+
+JSON Response:
+  RPS: 4563.1
+  Avg Latency: 106.3ms
+  P95 Latency: 147.5ms
+
+JSON POST:
+  RPS: 4021.9
+  Avg Latency: 128.6ms
+  P95 Latency: 159.9ms
+
+Headers Access:
+  RPS: 4010.1
+  Avg Latency: 136.4ms
+  P95 Latency: 164.4ms
+
+Query Parameters:
+  RPS: 4949.3
+  Avg Latency: 98.2ms
+  P95 Latency: 136.1ms
+
+Route Parameters:
+  RPS: 5071.9
+  Avg Latency: 100.4ms
+  P95 Latency: 136.9ms
+
+Performance Analysis:
+--------------------
+✅ Framework Status: Optimized
+✅ Lazy Loading: Implemented
+✅ Caching: Enabled
+✅ Parameter Extraction: Optimized
+✅ Middleware: Efficient execution
+✅ Templating: Cached rendering
+
+Recommendations:
+---------------
+• Target RPS: 4,000+ for production workloads
+• Target P95 Latency: <300ms
+• Monitor memory usage under load
+• Consider async template rendering for high throughput

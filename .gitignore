@@ -150,3 +150,7 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Benchmark artifacts
+benchmark/benchmark/*
+benchmark/benchmark/

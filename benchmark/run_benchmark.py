@@ -70,6 +70,11 @@ def benchmark_version(
         print("📊 Running client benchmark...")
         result = run_client(base_url, requests, concurrency)
 
+        # Print client output if available
+        if result.get("raw_output"):
+            print("📈 Benchmark Results:")
+            print(result["raw_output"])
+
         return {
             "version": version_name,
             "server_type": server_type,
