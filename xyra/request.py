@@ -19,6 +19,11 @@ class Request:
         self._req = req
         self._res = res
         self.params = params or {}
+        # Lazy loading caches
+        self._headers_cache: dict[str, str] | None = None
+        self._query_params_cache: dict[str, list] | None = None
+        self._url_cache: str | None = None
+        self._query_cache: str | None = None
 
     @property
     def method(self) -> str:
@@ -29,35 +34,45 @@ class Request:
 
     @property
     def url(self) -> str:
-        """Get the URL of the request."""
-        url = self._req.get_url()
-        assert url is not None
-        return url
+        """Get the URL of the request (cached)."""
+        if self._url_cache is None:
+            url = self._req.get_url()
+            assert url is not None
+            self._url_cache = url
+        return self._url_cache
 
     @property
     def headers(self) -> dict[str, str]:
-        """Get all headers as a dictionary."""
-        headers = {}
-        self._req.for_each_header(
-            lambda key, value: headers.update({key.lower(): value})
-        )
-        return headers
+        """Get all headers as a dictionary (cached)."""
+        if self._headers_cache is None:
+            headers = {}
+            self._req.for_each_header(
+                lambda key, value: headers.update({key.lower(): value})
+            )
+            self._headers_cache = headers
+        return self._headers_cache
 
     @property
     def query(self) -> str:
-        """Get the raw query string."""
-        url = self._req.get_url()
-        if url and "?" in url:
-            return url.split("?", 1)[1]
-        return ""
+        """Get the raw query string (cached)."""
+        if self._query_cache is None:
+            url = self.url
+            if "?" in url:
+                self._query_cache = url.split("?", 1)[1]
+            else:
+                self._query_cache = ""
+        return self._query_cache
 
     @property
     def query_params(self) -> dict[str, list]:
-        """Parse and return query parameters as a dictionary."""
-        query_string = self.query
-        if not query_string:
-            return {}
-        return parse_qs(query_string)
+        """Parse and return query parameters as a dictionary (cached)."""
+        if self._query_params_cache is None:
+            query_string = self.query
+            if not query_string:
+                self._query_params_cache = {}
+            else:
+                self._query_params_cache = parse_qs(query_string)
+        return self._query_params_cache
 
     def get_parameter(self, index: int) -> str | None:
         """Get a URL parameter by index."""

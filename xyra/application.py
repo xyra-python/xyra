@@ -167,26 +167,54 @@ class App:
         if asyncio.iscoroutinefunction(route_handler):
 
             async def async_final_handler(res, req):
-                params = {}
-                for i, param_name in enumerate(param_names):
-                    param_value = req.get_parameter(i)
-                    if param_value is not None:
-                        params[param_name] = param_value
+                # Optimized parameter extraction
+                params = {
+                    param_name: req.get_parameter(i)
+                    for i, param_name in enumerate(param_names)
+                    if req.get_parameter(i) is not None
+                }
                 request = Request(req, res, params)
                 response = Response(res, self.templates)
+
+                # Execute middlewares
+                for middleware in middlewares:
+                    if asyncio.iscoroutinefunction(middleware):
+                        await middleware(request, response)
+                    else:
+                        middleware(request, response)
+
+                    # If response has been ended by middleware, stop processing
+                    if response._ended:
+                        return
+
                 await route_handler(request, response)
 
             return async_final_handler
         else:
 
             def sync_final_handler(res, req):
-                params = {}
-                for i, param_name in enumerate(param_names):
-                    param_value = req.get_parameter(i)
-                    if param_value is not None:
-                        params[param_name] = param_value
+                # Optimized parameter extraction
+                params = {
+                    param_name: req.get_parameter(i)
+                    for i, param_name in enumerate(param_names)
+                    if req.get_parameter(i) is not None
+                }
                 request = Request(req, res, params)
                 response = Response(res, self.templates)
+
+                # Execute middlewares
+                for middleware in middlewares:
+                    if asyncio.iscoroutinefunction(middleware):
+                        # For sync handlers, we can't await async middlewares
+                        # This is a limitation - async middlewares should be used with async routes
+                        continue
+                    else:
+                        middleware(request, response)
+
+                    # If response has been ended by middleware, stop processing
+                    if response._ended:
+                        return
+
                 route_handler(request, response)
 
             return sync_final_handler
