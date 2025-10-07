@@ -241,27 +241,37 @@ def main():
             return
 
         # Read metrics from stdin or generate sample
-        print("Enter metrics as JSON (or press Enter for sample data):")
-        try:
-            import sys
+        import os
 
-            input_line = sys.stdin.readline().strip()
-            if input_line:
-                metrics = json.loads(input_line)
-            else:
-                # Sample metrics
-                metrics = {
-                    "requests_per_second": 4500.0,
-                    "avg_response_time_ms": 220.0,
-                    "p95_response_time_ms": 280.0,
-                }
-        except (json.JSONDecodeError, KeyboardInterrupt):
-            print("Using sample metrics...")
+        if os.environ.get("CI") == "true":
+            print("CI environment detected, using sample metrics...")
             metrics = {
                 "requests_per_second": 4500.0,
                 "avg_response_time_ms": 220.0,
                 "p95_response_time_ms": 280.0,
             }
+        else:
+            print("Enter metrics as JSON (or press Enter for sample data):")
+            try:
+                import sys
+
+                input_line = sys.stdin.readline().strip()
+                if input_line:
+                    metrics = json.loads(input_line)
+                else:
+                    # Sample metrics
+                    metrics = {
+                        "requests_per_second": 4500.0,
+                        "avg_response_time_ms": 220.0,
+                        "p95_response_time_ms": 280.0,
+                    }
+            except (json.JSONDecodeError, KeyboardInterrupt):
+                print("Using sample metrics...")
+                metrics = {
+                    "requests_per_second": 4500.0,
+                    "avg_response_time_ms": 220.0,
+                    "p95_response_time_ms": 280.0,
+                }
 
         baseline.set_baseline(
             args.test_name, metrics, args.python_version, args.environment

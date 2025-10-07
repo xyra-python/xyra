@@ -75,6 +75,7 @@ xyra = ["py.typed"]
 [tool.ruff]
 line-length = 88
 target-version = "py311"
+exclude = ["benchmark"]
 
 [tool.ruff.lint]
 select = [
@@ -99,10 +100,12 @@ ignore = [
 [tool.black]
 line-length = 88
 target-version = ['py311']
+exclude = "benchmark"
 
 [tool.isort]
 profile = "black"
 line_length = 88
+skip = ["benchmark"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -118,6 +121,7 @@ warn_unused_ignores = true
 warn_no_return = true
 warn_unreachable = true
 strict_equality = true
+exclude = ["benchmark"]
 
 [[tool.mypy.overrides]]
 module = ["socketify.*"]

@@ -125,7 +125,23 @@ def create_app_with_middleware() -> App:
 
 def create_app_with_templates() -> App:
     """Create app with templating for testing template performance."""
-    app = App(templates_directory="benchmark/templates")
+    import tempfile
+    import os
+
+    # Create temporary directory for templates to avoid cluttering benchmark folder
+    temp_dir = tempfile.mkdtemp(prefix="xyra_templates_")
+    templates_dir = os.path.join(temp_dir, "templates")
+    os.makedirs(templates_dir, exist_ok=True)
+
+    # Copy test template to temp directory
+    import shutil
+
+    if os.path.exists("benchmark/templates/test.html"):
+        shutil.copy(
+            "benchmark/templates/test.html", os.path.join(templates_dir, "test.html")
+        )
+
+    app = App(templates_directory=templates_dir)
 
     @app.get("/template")
     def template_test(req: Request, res: Response):

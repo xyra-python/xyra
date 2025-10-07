@@ -9,14 +9,19 @@ from datetime import datetime
 from typing import Any
 
 try:
+    import matplotlib
+
+    matplotlib.use("Agg")  # Use non-interactive backend
     import matplotlib.pyplot as plt
     import seaborn as sns
 
     HAS_MATPLOTLIB = True
-except ImportError:
+    print("✅ Matplotlib available for chart generation")
+except ImportError as e:
     HAS_MATPLOTLIB = False
     plt = None
     sns = None
+    print(f"❌ Matplotlib not available: {e}")
 
 
 class PerformanceReportGenerator:
@@ -47,15 +52,22 @@ class PerformanceReportGenerator:
         # Extract data from benchmark results
         if isinstance(data, list):
             for result in data:
-                if isinstance(result, dict) and "result" in result:
-                    # This is from run_benchmark.py format
-                    continue
-                elif isinstance(result, dict):
-                    # Direct result format
-                    for key, value in result.items():
-                        if isinstance(value, dict) and "requests_per_second" in value:
-                            endpoints.append(key.replace("_", " ").title())
-                            rps_values.append(value["requests_per_second"])
+                if isinstance(result, dict):
+                    if "endpoint" in result and "requests_per_second" in result:
+                        # Direct result format from parse_benchmark_output
+                        endpoints.append(result["endpoint"])
+                        rps_values.append(result["requests_per_second"])
+                    elif "result" in result:
+                        # This is from run_benchmark.py format
+                        continue
+                    else:
+                        for key, value in result.items():
+                            if (
+                                isinstance(value, dict)
+                                and "requests_per_second" in value
+                            ):
+                                endpoints.append(key.replace("_", " ").title())
+                                rps_values.append(value["requests_per_second"])
 
         if endpoints and rps_values:
             bars = ax.bar(
@@ -90,6 +102,10 @@ class PerformanceReportGenerator:
         self, data: dict[str, Any], output_file: str = "latency_comparison.png"
     ):
         """Create latency comparison chart."""
+        if not HAS_MATPLOTLIB:
+            print("❌ Chart generation disabled - matplotlib not available")
+            return
+
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 8))
 
         endpoints = []
@@ -100,11 +116,22 @@ class PerformanceReportGenerator:
         if isinstance(data, list):
             for result in data:
                 if isinstance(result, dict):
-                    for key, value in result.items():
-                        if isinstance(value, dict) and "avg_response_time_ms" in value:
-                            endpoints.append(key.replace("_", " ").title())
-                            avg_latencies.append(value["avg_response_time_ms"])
-                            p95_latencies.append(value.get("p95_response_time_ms", 0))
+                    if "endpoint" in result and "avg_response_time_ms" in result:
+                        # Direct result format from parse_benchmark_output
+                        endpoints.append(result["endpoint"])
+                        avg_latencies.append(result["avg_response_time_ms"])
+                        p95_latencies.append(result.get("p95_response_time_ms", 0))
+                    else:
+                        for key, value in result.items():
+                            if (
+                                isinstance(value, dict)
+                                and "avg_response_time_ms" in value
+                            ):
+                                endpoints.append(key.replace("_", " ").title())
+                                avg_latencies.append(value["avg_response_time_ms"])
+                                p95_latencies.append(
+                                    value.get("p95_response_time_ms", 0)
+                                )
 
         if endpoints and avg_latencies:
             x = range(len(endpoints))
@@ -137,6 +164,10 @@ class PerformanceReportGenerator:
         self, baseline_file: str, output_file: str = "performance_trend.png"
     ):
         """Create performance trend chart from baseline history."""
+        if not HAS_MATPLOTLIB:
+            print("❌ Chart generation disabled - matplotlib not available")
+            return
+
         baseline_data = self.load_benchmark_data(baseline_file)
 
         if not baseline_data or "history" not in baseline_data:
@@ -242,11 +273,12 @@ Performance Summary:
         benchmark_data = self.load_benchmark_data(benchmark_file)
 
         if benchmark_data:
-            # Create comparison charts
-            self.create_rps_comparison_chart(benchmark_data, "rps_comparison.png")
-            self.create_latency_comparison_chart(
-                benchmark_data, "latency_comparison.png"
-            )
+            # Extract results list from data
+            results = benchmark_data.get("results", [])
+            if results:
+                # Create comparison charts
+                self.create_rps_comparison_chart(results, "rps_comparison.png")
+                self.create_latency_comparison_chart(results, "latency_comparison.png")
 
         # Create trend chart if baseline exists
         if os.path.exists(baseline_file):
@@ -289,10 +321,12 @@ def main():
         generator.generate_all_charts(args.benchmark_file, args.baseline_file)
     elif args.chart_type == "rps":
         data = generator.load_benchmark_data(args.benchmark_file)
-        generator.create_rps_comparison_chart(data)
+        results = data.get("results", []) if isinstance(data, dict) else data
+        generator.create_rps_comparison_chart(results)
     elif args.chart_type == "latency":
         data = generator.load_benchmark_data(args.benchmark_file)
-        generator.create_latency_comparison_chart(data)
+        results = data.get("results", []) if isinstance(data, dict) else data
+        generator.create_latency_comparison_chart(results)
     elif args.chart_type == "trend":
         generator.create_performance_trend_chart(args.baseline_file)
 

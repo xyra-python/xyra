@@ -1,0 +1,131 @@
+{
+  "timestamp": "2025-10-07T22:00:00.031340",
+  "results": [
+    {
+      "endpoint": "Simple Hello World",
+      "requests_per_second": 4730.4,
+      "avg_response_time_ms": 215.3,
+      "p95_response_time_ms": 271.1,
+      "timestamp": "2025-10-07T21:59:48.797993"
+    },
+    {
+      "endpoint": "JSON Response",
+      "requests_per_second": 3931.3,
+      "avg_response_time_ms": 269.0,
+      "p95_response_time_ms": 350.5,
+      "timestamp": "2025-10-07T21:59:48.798029"
+    },
+    {
+      "endpoint": "JSON POST",
+      "requests_per_second": 2576.7,
+      "avg_response_time_ms": 389.0,
+      "p95_response_time_ms": 568.4,
+      "timestamp": "2025-10-07T21:59:48.798041"
+    },
+    {
+      "endpoint": "Headers Access",
+      "requests_per_second": 4050.9,
+      "avg_response_time_ms": 258.4,
+      "p95_response_time_ms": 326.2,
+      "timestamp": "2025-10-07T21:59:48.798062"
+    },
+    {
+      "endpoint": "Query Parameters",
+      "requests_per_second": 4262.3,
+      "avg_response_time_ms": 215.0,
+      "p95_response_time_ms": 294.8,
+      "timestamp": "2025-10-07T21:59:48.798072"
+    },
+    {
+      "endpoint": "Route Parameters",
+      "requests_per_second": 4474.0,
+      "avg_response_time_ms": 234.7,
+      "p95_response_time_ms": 303.4,
+      "timestamp": "2025-10-07T21:59:48.798081"
+    },
+    {
+      "endpoint": "Simple Hello World",
+      "requests_per_second": 4761.1,
+      "avg_response_time_ms": 153.3,
+      "p95_response_time_ms": 205.1,
+      "timestamp": "2025-10-07T21:59:54.825528"
+    },
+    {
+      "endpoint": "JSON Response",
+      "requests_per_second": 4913.0,
+      "avg_response_time_ms": 156.9,
+      "p95_response_time_ms": 210.5,
+      "timestamp": "2025-10-07T21:59:54.825562"
+    },
+    {
+      "endpoint": "JSON POST",
+      "requests_per_second": 3414.6,
+      "avg_response_time_ms": 222.5,
+      "p95_response_time_ms": 269.2,
+      "timestamp": "2025-10-07T21:59:54.825574"
+    },
+    {
+      "endpoint": "Headers Access",
+      "requests_per_second": 4179.0,
+      "avg_response_time_ms": 188.5,
+      "p95_response_time_ms": 231.7,
+      "timestamp": "2025-10-07T21:59:54.825584"
+    },
+    {
+      "endpoint": "Query Parameters",
+      "requests_per_second": 4591.7,
+      "avg_response_time_ms": 162.0,
+      "p95_response_time_ms": 208.9,
+      "timestamp": "2025-10-07T21:59:54.825593"
+    },
+    {
+      "endpoint": "Route Parameters",
+      "requests_per_second": 3581.1,
+      "avg_response_time_ms": 213.5,
+      "p95_response_time_ms": 243.9,
+      "timestamp": "2025-10-07T21:59:54.825603"
+    },
+    {
+      "endpoint": "Simple Hello World",
+      "requests_per_second": 4913.2,
+      "avg_response_time_ms": 100.3,
+      "p95_response_time_ms": 133.3,
+      "timestamp": "2025-10-07T22:00:00.031052"
+    },
+    {
+      "endpoint": "JSON Response",
+      "requests_per_second": 4706.3,
+      "avg_response_time_ms": 108.5,
+      "p95_response_time_ms": 149.2,
+      "timestamp": "2025-10-07T22:00:00.031077"
+    },
+    {
+      "endpoint": "JSON POST",
+      "requests_per_second": 3999.6,
+      "avg_response_time_ms": 132.1,
+      "p95_response_time_ms": 161.3,
+      "timestamp": "2025-10-07T22:00:00.031084"
+    },
+    {
+      "endpoint": "Headers Access",
+      "requests_per_second": 3580.6,
+      "avg_response_time_ms": 146.4,
+      "p95_response_time_ms": 174.3,
+      "timestamp": "2025-10-07T22:00:00.031090"
+    },
+    {
+      "endpoint": "Query Parameters",
+      "requests_per_second": 4180.2,
+      "avg_response_time_ms": 118.8,
+      "p95_response_time_ms": 160.8,
+      "timestamp": "2025-10-07T22:00:00.031096"
+    },
+    {
+      "endpoint": "Route Parameters",
+      "requests_per_second": 4418.6,
+      "avg_response_time_ms": 114.6,
+      "p95_response_time_ms": 161.4,
+      "timestamp": "2025-10-07T22:00:00.031103"
+    }
+  ]
+}

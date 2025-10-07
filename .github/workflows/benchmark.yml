@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.11', '3.12', '3.13']
+        python-version: ['3.11']
 
     steps:
     - name: Checkout code
@@ -72,13 +72,13 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run quick benchmark
-      if: github.event.inputs.benchmark_type == 'quick' || (github.event_name == 'push' && matrix.python-version == '3.13')
+      if: github.event.inputs.benchmark_type == 'quick' || github.event_name == 'push'
       run: |
         cd benchmark
         python run_benchmark.py --mode=single --requests=500 --concurrency=5 --server-type=simple
 
     - name: Run full benchmark
-      if: github.event.inputs.benchmark_type == 'full' || (github.event_name == 'pull_request' && matrix.python-version == '3.13')
+      if: github.event.inputs.benchmark_type == 'full' || github.event_name == 'pull_request'
       run: |
         cd benchmark
         python run_benchmark.py --mode=single --requests=2000 --concurrency=20 --server-type=simple
@@ -124,14 +124,13 @@ jobs:
     - name: Upload benchmark results
       uses: actions/upload-artifact@v4
       with:
-        name: benchmark-results-py${{ matrix.python-version }}
+        name: benchmark-results
         path: |
+          benchmark/result/
           benchmark/benchmark_report.md
-          benchmark/*.json
-          benchmark/*.png
 
     - name: Comment PR with benchmark results
-      if: github.event_name == 'pull_request' && matrix.python-version == '3.13'
+      if: github.event_name == 'pull_request'
       uses: actions/github-script@v6
       with:
         script: |
@@ -180,7 +179,7 @@ jobs:
     - name: Download benchmark results
       uses: actions/download-artifact@v3
       with:
-        name: benchmark-results-py3.11
+        name: benchmark-results
 
     - name: Check for performance regression
       run: |

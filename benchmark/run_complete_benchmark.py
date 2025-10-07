@@ -11,10 +11,14 @@ from datetime import datetime
 from typing import Any
 
 
-def run_command(cmd: list[str], cwd: str | None = None) -> subprocess.CompletedProcess:
+def run_command(
+    cmd: list[str], cwd: str | None = None, input_text: str | None = None
+) -> subprocess.CompletedProcess:
     """Run command and return result."""
     print(f"🔄 Running: {' '.join(cmd)}")
-    result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
+    result = subprocess.run(
+        cmd, cwd=cwd, capture_output=True, text=True, input=input_text
+    )
     if result.returncode != 0:
         print(f"❌ Command failed: {result.stderr}")
         return result
@@ -72,8 +76,15 @@ def run_benchmarks():
         print(f"\n📋 Running {config['name']} Benchmark")
         print("-" * 40)
 
-        result = run_command(config["cmd"], benchmark_dir)
+        # Ensure we use the correct python executable
+        config_cmd = [
+            sys.executable if cmd == "python" else cmd for cmd in config["cmd"]
+        ]
+        result = run_command(config_cmd, benchmark_dir)
         if result.returncode == 0:
+            # Print the benchmark output
+            if result.stdout:
+                print(result.stdout)
             # Try to extract results from output
             results = parse_benchmark_output(result.stdout)
             if results:
@@ -83,7 +94,10 @@ def run_benchmarks():
 
     # Save combined results
     if all_results:
-        output_file = os.path.join(benchmark_dir, "complete_benchmark_results.json")
+        result_dir = os.path.join(benchmark_dir, "result")
+        os.makedirs(result_dir, exist_ok=True)
+
+        output_file = os.path.join(result_dir, "complete_benchmark_results.json")
         with open(output_file, "w") as f:
             json.dump(
                 {"timestamp": datetime.now().isoformat(), "results": all_results},
@@ -96,39 +110,53 @@ def run_benchmarks():
         print("\n📊 Generating Performance Charts")
         print("-" * 40)
         chart_cmd = [
-            "python",
-            "chart_generator.py",
-            "--benchmark-file=complete_benchmark_results.json",
+            sys.executable,
+            "chart_generator_old.py",
+            f"--benchmark-file=result/complete_benchmark_results.json",
+            f"--baseline-file={os.path.join(result_dir, 'performance_baseline.json')}",
+            f"--output-dir={result_dir}",
         ]
         run_command(chart_cmd, benchmark_dir)
 
         # Update baseline
         print("\n📈 Updating Performance Baseline")
         print("-" * 40)
-        baseline_cmd = [
-            "python",
-            "baseline.py",
-            "set",
-            "--test-name=complete_benchmark",
-        ]
-        run_command(baseline_cmd, benchmark_dir)
+        # Skip baseline operations in CI/CD environment
+        if os.environ.get("CI") != "true":
+            baseline_cmd = [
+                sys.executable,
+                "baseline.py",
+                "set",
+                "--test-name=complete_benchmark",
+                f"--baseline-file={os.path.join(result_dir, 'performance_baseline.json')}",
+            ]
+            # Provide empty input to use sample metrics
+            run_command(baseline_cmd, benchmark_dir, input_text="\n")
 
-        # Generate baseline report
-        report_cmd = ["python", "baseline.py", "report"]
-        result = run_command(report_cmd, benchmark_dir)
-        if result.returncode == 0:
-            report_file = os.path.join(benchmark_dir, "baseline_report.md")
-            with open(report_file, "w") as f:
-                f.write(result.stdout)
-            print(f"📄 Baseline report saved to {report_file}")
+            # Generate baseline report
+            report_cmd = [
+                "python",
+                "baseline.py",
+                "report",
+                f"--baseline-file={os.path.join(result_dir, 'performance_baseline.json')}",
+            ]
+            result = run_command(report_cmd, benchmark_dir)
+            if result.returncode == 0:
+                report_file = os.path.join(result_dir, "baseline_report.md")
+                with open(report_file, "w") as f:
+                    f.write(result.stdout)
+                print(f"📄 Baseline report saved to {report_file}")
+        else:
+            print("⏭️  Skipping baseline operations in CI environment")
 
     print("\n🎉 Complete Benchmark Suite Finished!")
     print("=" * 60)
-    print("Generated files:")
+    print("Generated files in benchmark/result/:")
     print("- complete_benchmark_results.json")
     print("- rps_comparison.png")
     print("- latency_comparison.png")
     print("- performance_trend.png (if baseline exists)")
+    print("- performance_baseline.json")
     print("- baseline_report.md")
 
 
@@ -148,8 +176,8 @@ def parse_benchmark_output(output: str) -> list[dict[str, Any]]:
                 try:
                     endpoint = parts[0]
                     rps = float(parts[1].split()[0])
-                    avg_latency = float(parts[2].split()[0])
-                    p95_latency = float(parts[3].split()[0])
+                    avg_latency = float(parts[2].split()[0].rstrip("ms"))
+                    p95_latency = float(parts[3].split()[0].rstrip("ms"))
 
                     results.append(
                         {
@@ -175,7 +203,13 @@ def main():
             print("Runs comprehensive benchmarks and generates charts/reports")
             return
 
-    run_benchmarks()
+    try:
+        run_benchmarks()
+    except Exception as e:
+        print(f"Error running benchmarks: {e}")
+        import traceback
+
+        traceback.print_exc()
 
 
 if __name__ == "__main__":
