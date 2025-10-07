@@ -225,9 +225,9 @@ Template `templates/home.html`:
 </html>
 ```
 
-## Chat Application dengan WebSocket
+## Real-time Chat Application with WebSocket
 
-Aplikasi chat real-time menggunakan WebSocket.
+A real-time chat application using WebSocket.
 
 ```python
 from xyra import App
@@ -561,12 +561,12 @@ Template `templates/index.html`:
 <body>
     <div class="container">
         <h1>{{ title }}</h1>
-        
+
         <form id="todoForm">
             <input type="text" id="todoInput" placeholder="Add new todo..." required>
             <button type="submit">Add</button>
         </form>
-        
+
         <ul id="todoList"></ul>
     </div>
 
@@ -575,7 +575,7 @@ Template `templates/index.html`:
 </html>
 ```
 
-File JavaScript `static/js/app.js`:
+JavaScript file `static/js/app.js`:
 
 ```javascript
 document.addEventListener('DOMContentLoaded', function() {
@@ -600,7 +600,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function loadTodos() {
         const response = await fetch('/api/todos');
         const todos = await response.json();
-        
+
         todoList.innerHTML = '';
         todos.forEach(todo => {
             const li = document.createElement('li');
@@ -643,4 +643,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
 ---
 
-[Kembali ke Daftar Isi](../README.md)
+[Back to Table of Contents](../README.md)

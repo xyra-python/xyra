@@ -4,7 +4,7 @@ This guide will help you install Xyra on your system.
 
 ## System Requirements
 
-- **Python**: 3.8 or higher
+- **Python**: 3.11 or higher
 - **Operating System**: Linux, macOS, or Windows
 - **Package Manager**: pip (comes with Python)
 

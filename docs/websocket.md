@@ -196,7 +196,7 @@ if __name__ == "__main__":
     app.listen(8000)
 ```
 
-### Client JavaScript
+### JavaScript Client
 
 To connect from the browser, use JavaScript:
 

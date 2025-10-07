@@ -30,6 +30,10 @@ class Templating:
             enable_async=False,  # We'll handle async in the framework layer
         )
 
+        # Simple render cache for performance
+        self._render_cache: dict[str, str] = {}
+        self._cache_enabled = True
+
         # Add custom filters and globals
         self._setup_environment()
 
@@ -82,9 +86,22 @@ class Templating:
             TemplateNotFound: If the template file doesn't exist
             Exception: If there's an error rendering the template
         """
+        # Simple caching for performance (disabled in development with auto_reload)
+        if self._cache_enabled and not self.auto_reload:
+            cache_key = f"{template_name}:{hash(frozenset(context.items()))}"
+            if cache_key in self._render_cache:
+                return self._render_cache[cache_key]
+
         try:
             template = self.env.get_template(template_name)
-            return template.render(**context)
+            result = template.render(**context)
+
+            # Cache the result
+            if self._cache_enabled and not self.auto_reload:
+                cache_key = f"{template_name}:{hash(frozenset(context.items()))}"
+                self._render_cache[cache_key] = result
+
+            return result
         except TemplateNotFound:
             raise TemplateNotFound(
                 f"Template '{template_name}' not found in directory '{self.directory}'"

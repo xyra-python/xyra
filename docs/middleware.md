@@ -1,61 +1,61 @@
 # Middleware in Xyra
 
-Middleware are functions that are executed before or after the main route handler. Middleware allows you to add common logic such as authentication, logging, CORS handling, or input validation to all or specific routes.
+Middleware are functions that are executed before the main route handler. Middleware allows you to add common logic such as authentication, logging, CORS handling, or input validation to routes.
 
-## Cara Kerja Middleware
+## How Middleware Works
 
-Middleware di Xyra adalah fungsi yang menerima parameter `req` (Request), `res` (Response), dan opsional `next` untuk melanjutkan ke middleware/route berikutnya.
+Middleware in Xyra are functions that receive `req` (Request) and `res` (Response) parameters. They are executed in the order they are registered before the route handler.
 
 ```python
 def my_middleware(req: Request, res: Response):
-    # Logic middleware
+    # Middleware logic
     print(f"Request to: {req.url}")
-    # Lanjutkan ke handler berikutnya
-    # (implementasi internal akan handle ini)
+    # Continue to next middleware/route handler
+    # (handled internally by the framework)
 ```
 
-## Menambahkan Middleware
+## Adding Middleware
 
-Gunakan method `use()` pada objek App untuk menambahkan middleware:
+Use the `use()` method on the App object to add middleware:
 
 ```python
 from xyra import App, Request, Response
 
 app = App()
 
-# Middleware logging
+# Logging middleware
 def logging_middleware(req: Request, res: Response):
     print(f"{req.method} {req.url} - {time.time()}")
 
-# Middleware CORS
+# CORS middleware
 def cors_middleware(req: Request, res: Response):
     res.set_header("Access-Control-Allow-Origin", "*")
     res.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
     res.set_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
-# Tambahkan middleware
+# Add middleware
 app.use(logging_middleware)
 app.use(cors_middleware)
 ```
 
-## Urutan Eksekusi
+## Execution Order
 
-Middleware dijalankan dalam urutan mereka ditambahkan:
+Middleware are executed in the order they are added:
 
 ```python
-app.use(middleware1)  # Dijalankan pertama
-app.use(middleware2)  # Dijalankan kedua
-app.use(middleware3)  # Dijalankan ketiga
+app.use(middleware1)  # Executed first
+app.use(middleware2)  # Executed second
+app.use(middleware3)  # Executed third
 
 @app.get("/test")
 def handler(req, res):
-    # Dijalankan terakhir
+    # Executed last
     res.json({"message": "OK"})
 ```
 
-## Middleware dengan Error Handling
+## Middleware with Error Handling
 
-Middleware dapat menghentikan request dengan mengirim response:
+Middleware can stop request processing by sending a response:
 
 ```python
 def auth_middleware(req: Request, res: Response):
@@ -63,15 +63,15 @@ def auth_middleware(req: Request, res: Response):
     if not token:
         res.status(401)
         res.json({"error": "Unauthorized"})
-        return  # Hentikan eksekusi
-    
-    # Verifikasi token...
+        return  # Stop execution
+
+    # Verify token...
     if not is_valid_token(token):
         res.status(403)
         res.json({"error": "Invalid token"})
         return
-    
-    # Lanjutkan ke handler berikutnya
+
+    # Continue to next handler
 ```
 
 ## Middleware untuk Validasi
@@ -223,19 +223,19 @@ if __name__ == "__main__":
     app.listen(8000)
 ```
 
-## Tips Penggunaan Middleware
+## Middleware Usage Tips
 
-1. **Urutan Penting**: Middleware dijalankan dalam urutan registrasi
-2. **Error Handling**: Middleware dapat menghentikan request dengan mengirim response
-3. **Performance**: Middleware yang berat sebaiknya dioptimalkan
-4. **Testing**: Test middleware secara terpisah dari route handlers
-5. **Modularity**: Buat middleware yang fokus pada satu tanggung jawab
-6. **Configuration**: Gunakan parameter untuk membuat middleware yang dapat dikonfigurasi
+1. **Order Matters**: Middleware are executed in registration order
+2. **Error Handling**: Middleware can stop request processing by sending a response
+3. **Performance**: Optimize heavy middleware operations
+4. **Testing**: Test middleware separately from route handlers
+5. **Modularity**: Create middleware focused on single responsibilities
+6. **Configuration**: Use parameters to make configurable middleware
 
 ## Built-in Middleware
 
-Xyra mungkin menyediakan beberapa middleware built-in di masa depan, tapi saat ini Anda perlu membuat middleware custom sesuai kebutuhan.
+Xyra may provide some built-in middleware in the future, but currently you need to create custom middleware as needed.
 
 ---
 
-[Kembali ke Daftar Isi](../README.md)
+[Back to Table of Contents](../README.md)
