@@ -20,6 +20,7 @@ Xyra is a lightweight and fast Python web framework built on top of socketify fo
 - [Getting Started](getting-started.md)
 - [Routing](routing.md)
 - [Request & Response](request-response.md)
+- [Logger](logger.md)
 - [Templating](templating.md)
 - [WebSocket](websocket.md)
 - [Swagger Documentation](swagger.md)

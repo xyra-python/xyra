@@ -1,10 +1,12 @@
 import asyncio
 import os
+import time
 from collections.abc import Callable
 from typing import Any, Union, overload
 
 import socketify
 
+from .logger import get_logger, setup_logging
 from .request import Request
 from .response import Response
 from .routing import Router
@@ -50,6 +52,8 @@ class App:
         self._middlewares: list[Callable] = []
         self.templates = Templating(templates_directory)
         self.swagger_options = swagger_options
+        self._swagger_cache: dict[str, Any] | None = None
+        self.log_requests = True  # Will be set in run_server
 
     def route(
         self, method: str, path: str, handler: Callable | None = None
@@ -167,6 +171,7 @@ class App:
         if asyncio.iscoroutinefunction(route_handler):
 
             async def async_final_handler(res, req):
+                start_time = time.time()
                 # Optimized parameter extraction
                 params = {
                     param_name: req.get_parameter(i)
@@ -189,10 +194,19 @@ class App:
 
                 await route_handler(request, response)
 
+                # Log request if enabled
+                if self.log_requests:
+                    duration = int((time.time() - start_time) * 1000)
+                    req_logger = get_logger("xyra")
+                    req_logger.info(
+                        f"{request.method} {request.url} {response.status_code} {duration}ms"
+                    )
+
             return async_final_handler
         else:
 
             def sync_final_handler(res, req):
+                start_time = time.time()
                 # Optimized parameter extraction
                 params = {
                     param_name: req.get_parameter(i)
@@ -216,6 +230,14 @@ class App:
                         return
 
                 route_handler(request, response)
+
+                # Log request if enabled
+                if self.log_requests:
+                    duration = int((time.time() - start_time) * 1000)
+                    req_logger = get_logger("xyra")
+                    req_logger.info(
+                        f"{request.method} {request.url} {response.status_code} {duration}ms"
+                    )
 
             return sync_final_handler
 
@@ -322,8 +344,9 @@ class App:
         def get_swagger_json(req: Request, res: Response):
             assert self.swagger_options is not None
             try:
-                swagger_spec = generate_swagger(self, **self.swagger_options)
-                res.json(swagger_spec)
+                if self._swagger_cache is None:
+                    self._swagger_cache = generate_swagger(self, **self.swagger_options)
+                res.json(self._swagger_cache)
             except Exception as e:
                 res.status(500).json(
                     {"error": "Failed to generate Swagger spec", "message": str(e)}
@@ -376,7 +399,11 @@ class App:
         self.get(swagger_ui_path, get_swagger_ui)
 
     def run_server(
-        self, port: int = 8000, host: str = "localhost", reload: bool = False
+        self,
+        port: int = 8000,
+        host: str = "localhost",
+        reload: bool = False,
+        log_enabled: bool = True,
     ):
         """Start the server."""
         if reload and os.environ.get("XYRA_RELOAD_CHILD") != "1":
@@ -438,27 +465,31 @@ class App:
         self._register_routes()
         self._register_ws_routes()
 
-        # ASCII Art for Xyra
-        ascii_art = r"""
-██╗  ██╗██╗   ██╗██████╗  █████╗
-╚██╗██╔╝╚██╗ ██╔╝██╔══██╗██╔══██╗
- ╚███╔╝  ╚████╔╝ ██████╔╝███████║
- ██╔██╗   ╚██╔╝  ██╔══██╗██╔══██║
-██╔╝ ██╗   ██║   ██║  ██║██║  ██║
-╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝
-        """
-        print(ascii_art)
-        print(f"🚀 Xyra server running on http://{host}:{port}")
+        # Always setup logging for startup messages
+        setup_logging()
+        logger = get_logger("xyra")
+        self.log_requests = log_enabled
+
+        logger.info(f"Started server process [{os.getpid()}]")
+        logger.info("Waiting for application startup.")
+        logger.info("Application startup complete.")
+        logger.info(f"Xyra server running on http://{host}:{port}")
         if self.swagger_options:
             swagger_ui_path = self.swagger_options.get("swagger_ui_path", "/docs")
-            print(f"📚 API docs available at http://{host}:{port}{swagger_ui_path}")
+            logger.info(f"API docs available at http://{host}:{port}{swagger_ui_path}")
 
-        self._app.listen(port, lambda config: print(f"listening on port {port}"))
+        self._app.listen(port, lambda config: logger.info(f"Listening on port {port}"))
         self._app.run()
 
-    def listen(self, port: int = 8000, host: str = "localhost", reload: bool = False):
+    def listen(
+        self,
+        port: int = 8000,
+        host: str = "localhost",
+        reload: bool = False,
+        logger: bool = True,
+    ):
         """Alias for run_server method."""
-        return self.run_server(port, host, reload)
+        return self.run_server(port, host, reload, logger)
 
     @property
     def router(self):
