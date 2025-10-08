@@ -1,6 +1,11 @@
+import sys
 from typing import Any
 
-import orjson
+if sys.implementation.name == "pypy":
+    import ujson as json_lib
+else:
+    import orjson as json_lib
+
 from socketify import Response as SocketifyResponse
 
 
@@ -85,7 +90,9 @@ class Response:
     def json(self, data: Any) -> None:
         """Send JSON response."""
         self.header("Content-Type", "application/json")
-        json_data = orjson.dumps(data).decode("utf-8")
+        json_data = json_lib.dumps(data)
+        if isinstance(json_data, bytes):
+            json_data = json_data.decode("utf-8")
         self.send(json_data)
 
     def html(self, html: str) -> None:
