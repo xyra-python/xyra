@@ -4,7 +4,6 @@ Trusted Host Middleware for Xyra Framework
 This middleware validates that the request's Host header is in a list of allowed hosts.
 """
 
-from collections.abc import Callable
 
 from ..request import Request
 from ..response import Response
@@ -22,7 +21,7 @@ class TrustedHostMiddleware:
         """
         self.allowed_hosts = allowed_hosts
 
-    def __call__(self, req: Request, res: Response, next_handler: Callable):
+    def __call__(self, req: Request, res: Response):
         """Validate the request's Host header."""
         host = req.headers.get("Host", "").split(":")[0]  # Remove port
 
@@ -30,10 +29,10 @@ class TrustedHostMiddleware:
             # Return 400 Bad Request for untrusted host
             res.status(400)
             res.json({"error": "Bad Request", "message": "Untrusted host"})
+            res._ended = True
             return
 
-        # Continue to next handler
-        next_handler()
+        # Continue to next middleware
 
 
 def trusted_host_middleware(allowed_hosts: list[str]) -> TrustedHostMiddleware:
