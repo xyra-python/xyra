@@ -12,7 +12,7 @@
         "avg_response_time_ms": 220.0,
         "p95_response_time_ms": 280.0
       },
-      "timestamp": "2025-10-08T16:09:55.513384",
+      "timestamp": "2025-10-08T16:22:19.083789",
       "python_version": "python_3.13",
       "environment": "ci"
     }

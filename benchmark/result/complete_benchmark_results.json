@@ -1,131 +1,131 @@
 {
-  "timestamp": "2025-10-08T16:09:53.115106",
+  "timestamp": "2025-10-08T16:22:16.784458",
   "results": [
     {
       "endpoint": "Simple Hello World",
-      "requests_per_second": 3400.8,
-      "avg_response_time_ms": 301.9,
-      "p95_response_time_ms": 390.4,
-      "timestamp": "2025-10-08T16:09:40.523662"
+      "requests_per_second": 3528.6,
+      "avg_response_time_ms": 283.4,
+      "p95_response_time_ms": 375.3,
+      "timestamp": "2025-10-08T16:22:03.857655"
     },
     {
       "endpoint": "JSON Response",
-      "requests_per_second": 3070.5,
-      "avg_response_time_ms": 355.4,
-      "p95_response_time_ms": 453.9,
-      "timestamp": "2025-10-08T16:09:40.523726"
+      "requests_per_second": 3335.4,
+      "avg_response_time_ms": 317.6,
+      "p95_response_time_ms": 399.3,
+      "timestamp": "2025-10-08T16:22:03.857692"
     },
     {
       "endpoint": "JSON POST",
-      "requests_per_second": 2680.9,
-      "avg_response_time_ms": 363.7,
-      "p95_response_time_ms": 493.6,
-      "timestamp": "2025-10-08T16:09:40.523740"
+      "requests_per_second": 2652.4,
+      "avg_response_time_ms": 385.7,
+      "p95_response_time_ms": 500.4,
+      "timestamp": "2025-10-08T16:22:03.857739"
     },
     {
       "endpoint": "Headers Access",
-      "requests_per_second": 3005.2,
-      "avg_response_time_ms": 331.0,
-      "p95_response_time_ms": 445.4,
-      "timestamp": "2025-10-08T16:09:40.523751"
+      "requests_per_second": 3385.5,
+      "avg_response_time_ms": 295.3,
+      "p95_response_time_ms": 386.6,
+      "timestamp": "2025-10-08T16:22:03.857751"
     },
     {
       "endpoint": "Query Parameters",
-      "requests_per_second": 3008.8,
-      "avg_response_time_ms": 324.2,
-      "p95_response_time_ms": 434.1,
-      "timestamp": "2025-10-08T16:09:40.523761"
+      "requests_per_second": 3333.6,
+      "avg_response_time_ms": 279.1,
+      "p95_response_time_ms": 376.7,
+      "timestamp": "2025-10-08T16:22:03.857761"
     },
     {
       "endpoint": "Route Parameters",
-      "requests_per_second": 3429.0,
-      "avg_response_time_ms": 280.4,
-      "p95_response_time_ms": 386.9,
-      "timestamp": "2025-10-08T16:09:40.523770"
+      "requests_per_second": 3503.9,
+      "avg_response_time_ms": 285.3,
+      "p95_response_time_ms": 377.1,
+      "timestamp": "2025-10-08T16:22:03.857770"
     },
     {
       "endpoint": "Simple Hello World",
-      "requests_per_second": 3555.2,
-      "avg_response_time_ms": 205.0,
-      "p95_response_time_ms": 273.2,
-      "timestamp": "2025-10-08T16:09:47.270370"
+      "requests_per_second": 3474.0,
+      "avg_response_time_ms": 213.9,
+      "p95_response_time_ms": 288.1,
+      "timestamp": "2025-10-08T16:22:10.757190"
     },
     {
       "endpoint": "JSON Response",
-      "requests_per_second": 3679.3,
-      "avg_response_time_ms": 204.9,
-      "p95_response_time_ms": 278.8,
-      "timestamp": "2025-10-08T16:09:47.270409"
+      "requests_per_second": 3205.9,
+      "avg_response_time_ms": 225.0,
+      "p95_response_time_ms": 331.4,
+      "timestamp": "2025-10-08T16:22:10.757228"
     },
     {
       "endpoint": "JSON POST",
-      "requests_per_second": 2672.6,
-      "avg_response_time_ms": 280.2,
-      "p95_response_time_ms": 318.3,
-      "timestamp": "2025-10-08T16:09:47.270424"
+      "requests_per_second": 2781.3,
+      "avg_response_time_ms": 265.0,
+      "p95_response_time_ms": 314.6,
+      "timestamp": "2025-10-08T16:22:10.757239"
     },
     {
       "endpoint": "Headers Access",
-      "requests_per_second": 3350.5,
-      "avg_response_time_ms": 224.1,
-      "p95_response_time_ms": 296.7,
-      "timestamp": "2025-10-08T16:09:47.270437"
+      "requests_per_second": 3347.3,
+      "avg_response_time_ms": 222.3,
+      "p95_response_time_ms": 294.4,
+      "timestamp": "2025-10-08T16:22:10.757248"
     },
     {
       "endpoint": "Query Parameters",
-      "requests_per_second": 3428.3,
-      "avg_response_time_ms": 212.3,
-      "p95_response_time_ms": 275.4,
-      "timestamp": "2025-10-08T16:09:47.270449"
+      "requests_per_second": 3531.9,
+      "avg_response_time_ms": 210.2,
+      "p95_response_time_ms": 285.9,
+      "timestamp": "2025-10-08T16:22:10.757257"
     },
     {
       "endpoint": "Route Parameters",
-      "requests_per_second": 3357.9,
-      "avg_response_time_ms": 225.6,
-      "p95_response_time_ms": 269.8,
-      "timestamp": "2025-10-08T16:09:47.270463"
+      "requests_per_second": 3017.3,
+      "avg_response_time_ms": 239.7,
+      "p95_response_time_ms": 305.9,
+      "timestamp": "2025-10-08T16:22:10.757266"
     },
     {
       "endpoint": "Simple Hello World",
-      "requests_per_second": 3205.5,
+      "requests_per_second": 3171.2,
+      "avg_response_time_ms": 158.6,
+      "p95_response_time_ms": 217.7,
+      "timestamp": "2025-10-08T16:22:16.783992"
+    },
+    {
+      "endpoint": "JSON Response",
+      "requests_per_second": 3416.4,
+      "avg_response_time_ms": 144.4,
+      "p95_response_time_ms": 202.7,
+      "timestamp": "2025-10-08T16:22:16.784025"
+    },
+    {
+      "endpoint": "JSON POST",
+      "requests_per_second": 2619.4,
+      "avg_response_time_ms": 190.8,
+      "p95_response_time_ms": 236.4,
+      "timestamp": "2025-10-08T16:22:16.784036"
+    },
+    {
+      "endpoint": "Headers Access",
+      "requests_per_second": 2684.1,
+      "avg_response_time_ms": 195.8,
+      "p95_response_time_ms": 233.3,
+      "timestamp": "2025-10-08T16:22:16.784045"
+    },
+    {
+      "endpoint": "Query Parameters",
+      "requests_per_second": 3311.8,
       "avg_response_time_ms": 150.1,
-      "p95_response_time_ms": 214.6,
-      "timestamp": "2025-10-08T16:09:53.114461"
-    },
-    {
-      "endpoint": "JSON Response",
-      "requests_per_second": 3486.1,
-      "avg_response_time_ms": 143.4,
-      "p95_response_time_ms": 197.3,
-      "timestamp": "2025-10-08T16:09:53.114502"
-    },
-    {
-      "endpoint": "JSON POST",
-      "requests_per_second": 2994.8,
-      "avg_response_time_ms": 170.5,
-      "p95_response_time_ms": 212.8,
-      "timestamp": "2025-10-08T16:09:53.114517"
-    },
-    {
-      "endpoint": "Headers Access",
-      "requests_per_second": 2762.1,
-      "avg_response_time_ms": 186.5,
-      "p95_response_time_ms": 233.4,
-      "timestamp": "2025-10-08T16:09:53.114530"
-    },
-    {
-      "endpoint": "Query Parameters",
-      "requests_per_second": 3608.1,
-      "avg_response_time_ms": 137.8,
-      "p95_response_time_ms": 189.7,
-      "timestamp": "2025-10-08T16:09:53.114542"
+      "p95_response_time_ms": 199.8,
+      "timestamp": "2025-10-08T16:22:16.784053"
     },
     {
       "endpoint": "Route Parameters",
-      "requests_per_second": 3576.5,
-      "avg_response_time_ms": 143.2,
-      "p95_response_time_ms": 195.3,
-      "timestamp": "2025-10-08T16:09:53.114556"
+      "requests_per_second": 3078.2,
+      "avg_response_time_ms": 163.5,
+      "p95_response_time_ms": 232.3,
+      "timestamp": "2025-10-08T16:22:16.784062"
     }
   ]
 }
