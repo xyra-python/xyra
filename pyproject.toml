@@ -1,6 +1,6 @@
 [project]
 name = "xyra"
-version = "0.1.5"
+version = "0.1.6"
 description = "A fast and simple web framework for Python"
 readme = "README.md"
 license = {text = "MIT"}
@@ -28,7 +28,8 @@ dependencies = [
     "jinja2",
     "multidict",
     "watchfiles",
-    "orjson>=3.11.3",
+    "orjson>=3.11.3; python_implementation != 'PyPy'",
+    "ujson; python_implementation == 'PyPy'",
 ]
 
 [project.optional-dependencies]
