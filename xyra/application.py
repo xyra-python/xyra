@@ -403,7 +403,7 @@ class App:
         port: int = 8000,
         host: str = "localhost",
         reload: bool = False,
-        log_enabled: bool = True,
+        log_enabled: bool = False,
     ):
         """Start the server."""
         if reload and os.environ.get("XYRA_RELOAD_CHILD") != "1":
@@ -486,9 +486,9 @@ class App:
         port: int = 8000,
         host: str = "localhost",
         reload: bool = False,
-        logger: bool = True,
+        logger: bool = False,
     ):
-        """Alias for run_server method."""
+        """Alias for run_server method with default logger disabled."""
         return self.run_server(port, host, reload, logger)
 
     @property
