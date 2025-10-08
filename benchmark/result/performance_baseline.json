@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "framework": "Xyra",
+    "version": "1.0.0",
+    "created": "2025-10-08T16:09:55.513318",
+    "description": "Performance baseline for Xyra framework"
+  },
+  "baselines": {
+    "complete_benchmark_python_3.13_ci": {
+      "metrics": {
+        "requests_per_second": 4500.0,
+        "avg_response_time_ms": 220.0,
+        "p95_response_time_ms": 280.0
+      },
+      "timestamp": "2025-10-08T16:22:19.083789",
+      "python_version": "python_3.13",
+      "environment": "ci"
+    }
+  },
+  "history": []
+}

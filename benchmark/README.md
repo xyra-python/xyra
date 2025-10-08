@@ -190,6 +190,14 @@ python chart_generator.py --chart-type=trend
 - `latency_comparison.png` - Response time analysis
 - `performance_trend.png` - Historical performance trends
 
+### Performance Charts
+
+#### RPS Comparison
+![RPS Comparison](result/rps_comparison.png)
+
+#### Latency Analysis
+![Latency Comparison](result/latency_comparison.png)
+
 ## Complete Benchmark Suite
 
 The `run_complete_benchmark.py` script provides a comprehensive benchmarking solution:

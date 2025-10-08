@@ -27,24 +27,25 @@ INFO - xyra - GET http://localhost:8000/api/users/1 404 12ms
 
 ## Controlling Logging
 
-### Enable Full Logging (Default)
+### Enable Full Logging
+
+To enable startup and request logging:
 
 ```python
 from xyra import App
 
 app = App()
 
-# Logger enabled by default
-app.listen(8000)
-# or explicitly
 app.listen(8000, logger=True)
 ```
 
-### Disable Request Logging
+### Disable Request Logging (Default)
 
-To show only startup messages and hide request logs:
+By default, only startup messages are shown and request logs are hidden:
 
 ```python
+app.listen(8000)
+# or explicitly
 app.listen(8000, logger=False)
 ```
 

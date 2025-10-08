@@ -7,6 +7,21 @@ import json
 import os
 from typing import Any
 
+try:
+    import matplotlib
+
+    matplotlib.use("Agg")  # Use non-interactive backend
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+
+    HAS_MATPLOTLIB = True
+    print("✅ Matplotlib available for chart generation")
+except ImportError as e:
+    HAS_MATPLOTLIB = False
+    plt = None
+    sns = None
+    print(f"❌ Matplotlib not available: {e}")
+
 
 class PerformanceReportGenerator:
     """Generate performance reports from benchmark data."""
@@ -110,12 +125,144 @@ class PerformanceReportGenerator:
         report_lines.append("• Consider async template rendering for high throughput")
         report_lines.append("")
 
+        # Add chart references
+        report_lines.append("")
+        report_lines.append("## Performance Charts")
+        report_lines.append("")
+        report_lines.append("### RPS Comparison")
+        report_lines.append("![RPS Comparison](rps_comparison.png)")
+        report_lines.append("")
+        report_lines.append("### Latency Analysis")
+        report_lines.append("![Latency Comparison](latency_comparison.png)")
+        report_lines.append("")
+
         # Write report
         with open(output_file, "w") as f:
             f.write("\n".join(report_lines))
 
         print(f"✅ Performance report generated: {output_file}")
         return "\n".join(report_lines)
+
+    def create_rps_comparison_chart(
+        self, data: dict[str, Any], output_file: str = "rps_comparison.png"
+    ):
+        """Create RPS comparison chart."""
+        if not HAS_MATPLOTLIB:
+            print("❌ Chart generation disabled - matplotlib not available")
+            return
+
+        fig, ax = plt.subplots(figsize=(12, 8))
+
+        endpoints = []
+        rps_values = []
+
+        # Extract data from benchmark results
+        results = data.get("results", []) if isinstance(data, dict) else data
+        if isinstance(results, list):
+            for result in results:
+                if isinstance(result, dict):
+                    if "endpoint" in result and "requests_per_second" in result:
+                        endpoints.append(result["endpoint"])
+                        rps_values.append(result["requests_per_second"])
+                    else:
+                        for key, value in result.items():
+                            if (
+                                isinstance(value, dict)
+                                and "requests_per_second" in value
+                            ):
+                                endpoints.append(key.replace("_", " ").title())
+                                rps_values.append(value["requests_per_second"])
+
+        if endpoints and rps_values:
+            bars = ax.bar(
+                endpoints, rps_values, color=sns.color_palette("husl", len(endpoints))
+            )
+            ax.set_title(
+                "Requests Per Second (RPS) by Endpoint", fontsize=16, fontweight="bold"
+            )
+            ax.set_xlabel("Endpoint", fontsize=12)
+            ax.set_ylabel("Requests Per Second", fontsize=12)
+            ax.tick_params(axis="x", rotation=45)
+
+            # Add value labels on bars
+            for bar, value in zip(bars, rps_values, strict=False):
+                ax.text(
+                    bar.get_x() + bar.get_width() / 2,
+                    bar.get_height() + 50,
+                    f"{value:.0f}",
+                    ha="center",
+                    va="bottom",
+                    fontsize=10,
+                )
+
+            plt.tight_layout()
+            plt.savefig(output_file, dpi=300, bbox_inches="tight")
+            plt.close()
+            print(f"✅ RPS comparison chart saved to {output_file}")
+        else:
+            print("❌ No RPS data found for chart generation")
+
+    def create_latency_comparison_chart(
+        self, data: dict[str, Any], output_file: str = "latency_comparison.png"
+    ):
+        """Create latency comparison chart."""
+        if not HAS_MATPLOTLIB:
+            print("❌ Chart generation disabled - matplotlib not available")
+            return
+
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 8))
+
+        endpoints = []
+        avg_latencies = []
+        p95_latencies = []
+
+        # Extract latency data
+        results = data.get("results", []) if isinstance(data, dict) else data
+        if isinstance(results, list):
+            for result in results:
+                if isinstance(result, dict):
+                    if "endpoint" in result and "avg_response_time_ms" in result:
+                        endpoints.append(result["endpoint"])
+                        avg_latencies.append(result["avg_response_time_ms"])
+                        p95_latencies.append(result.get("p95_response_time_ms", 0))
+                    else:
+                        for key, value in result.items():
+                            if (
+                                isinstance(value, dict)
+                                and "avg_response_time_ms" in value
+                            ):
+                                endpoints.append(key.replace("_", " ").title())
+                                avg_latencies.append(value["avg_response_time_ms"])
+                                p95_latencies.append(
+                                    value.get("p95_response_time_ms", 0)
+                                )
+
+        if endpoints and avg_latencies:
+            x = range(len(endpoints))
+
+            # Average latency
+            ax1.bar(x, avg_latencies, color="skyblue", alpha=0.7, label="Average")
+            ax1.set_title("Average Response Time", fontsize=14, fontweight="bold")
+            ax1.set_xlabel("Endpoint")
+            ax1.set_ylabel("Response Time (ms)")
+            ax1.set_xticks(x)
+            ax1.set_xticklabels(endpoints, rotation=45)
+
+            # P95 latency
+            if any(p95_latencies):
+                ax2.bar(x, p95_latencies, color="salmon", alpha=0.7, label="P95")
+                ax2.set_title("P95 Response Time", fontsize=14, fontweight="bold")
+                ax2.set_xlabel("Endpoint")
+                ax2.set_ylabel("Response Time (ms)")
+                ax2.set_xticks(x)
+                ax2.set_xticklabels(endpoints, rotation=45)
+
+            plt.tight_layout()
+            plt.savefig(output_file, dpi=300, bbox_inches="tight")
+            plt.close()
+            print(f"✅ Latency comparison chart saved to {output_file}")
+        else:
+            print("❌ No latency data found for chart generation")
 
     def generate_comparison_report(
         self,
@@ -171,6 +318,11 @@ class PerformanceReportGenerator:
         benchmark_data = self.load_benchmark_data(benchmark_file)
         if benchmark_data:
             self.generate_text_report(benchmark_data, "performance_report.txt")
+            # Generate charts
+            self.create_rps_comparison_chart(benchmark_data, "rps_comparison.png")
+            self.create_latency_comparison_chart(
+                benchmark_data, "latency_comparison.png"
+            )
 
         # Generate comparison if baseline exists
         if os.path.exists(baseline_file):

@@ -41,7 +41,7 @@ def home(req: Request, res: Response):
     res.json({"message": "Hello, Xyra!"})
 
 if __name__ == "__main__":
-    app.listen(8000)
+    app.listen(8000, logger=True)  # Enable logging
 ```
 
 Visit `http://localhost:8000` to see the result.
