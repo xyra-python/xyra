@@ -1,4 +1,3 @@
-import json
 from unittest.mock import Mock
 
 import pytest
@@ -70,7 +69,9 @@ def test_response_json(mock_socketify_response):
     response = Response(mock_socketify_response)
     data = {"key": "value"}
     response.json(data)
-    expected_json = json.dumps(data, ensure_ascii=False)
+    import orjson
+
+    expected_json = orjson.dumps(data).decode("utf-8")
     mock_socketify_response.end.assert_called_once_with(expected_json)
     assert response.headers["Content-Type"] == "application/json"
 

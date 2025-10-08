@@ -27,7 +27,7 @@ class Templating:
         self.env = Environment(
             loader=FileSystemLoader(directory),
             auto_reload=auto_reload,
-            enable_async=False,  # We'll handle async in the framework layer
+            enable_async=True,  # Enable async template rendering
         )
 
         # Simple render cache for performance
@@ -95,6 +95,46 @@ class Templating:
         try:
             template = self.env.get_template(template_name)
             result = template.render(**context)
+
+            # Cache the result
+            if self._cache_enabled and not self.auto_reload:
+                cache_key = f"{template_name}:{hash(frozenset(context.items()))}"
+                self._render_cache[cache_key] = result
+
+            return result
+        except TemplateNotFound:
+            raise TemplateNotFound(
+                f"Template '{template_name}' not found in directory '{self.directory}'"
+            ) from None
+        except Exception as e:
+            raise Exception(
+                f"Error rendering template '{template_name}': {str(e)}"
+            ) from e
+
+    async def render_async(self, template_name: str, **context) -> str:
+        """
+        Render a template asynchronously with the given context.
+
+        Args:
+            template_name: Name of the template file
+            **context: Variables to pass to the template
+
+        Returns:
+            Rendered HTML string
+
+        Raises:
+            TemplateNotFound: If the template file doesn't exist
+            Exception: If there's an error rendering the template
+        """
+        # Simple caching for performance (disabled in development with auto_reload)
+        if self._cache_enabled and not self.auto_reload:
+            cache_key = f"{template_name}:{hash(frozenset(context.items()))}"
+            if cache_key in self._render_cache:
+                return self._render_cache[cache_key]
+
+        try:
+            template = self.env.get_template(template_name)
+            result = await template.render_async(**context)
 
             # Cache the result
             if self._cache_enabled and not self.auto_reload:

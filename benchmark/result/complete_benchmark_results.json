@@ -1,131 +1,26 @@
 {
-  "timestamp": "2025-10-08T16:22:16.784458",
+  "timestamp": "2025-10-08T20:21:57.660287",
   "results": [
     {
       "endpoint": "Simple Hello World",
-      "requests_per_second": 3528.6,
-      "avg_response_time_ms": 283.4,
-      "p95_response_time_ms": 375.3,
-      "timestamp": "2025-10-08T16:22:03.857655"
-    },
-    {
-      "endpoint": "JSON Response",
-      "requests_per_second": 3335.4,
-      "avg_response_time_ms": 317.6,
-      "p95_response_time_ms": 399.3,
-      "timestamp": "2025-10-08T16:22:03.857692"
-    },
-    {
-      "endpoint": "JSON POST",
-      "requests_per_second": 2652.4,
-      "avg_response_time_ms": 385.7,
-      "p95_response_time_ms": 500.4,
-      "timestamp": "2025-10-08T16:22:03.857739"
-    },
-    {
-      "endpoint": "Headers Access",
-      "requests_per_second": 3385.5,
-      "avg_response_time_ms": 295.3,
-      "p95_response_time_ms": 386.6,
-      "timestamp": "2025-10-08T16:22:03.857751"
-    },
-    {
-      "endpoint": "Query Parameters",
-      "requests_per_second": 3333.6,
-      "avg_response_time_ms": 279.1,
-      "p95_response_time_ms": 376.7,
-      "timestamp": "2025-10-08T16:22:03.857761"
-    },
-    {
-      "endpoint": "Route Parameters",
-      "requests_per_second": 3503.9,
-      "avg_response_time_ms": 285.3,
-      "p95_response_time_ms": 377.1,
-      "timestamp": "2025-10-08T16:22:03.857770"
+      "requests_per_second": 4705.0,
+      "avg_response_time_ms": 219.4,
+      "p95_response_time_ms": 291.2,
+      "timestamp": "2025-10-08T20:21:36.977421"
     },
     {
       "endpoint": "Simple Hello World",
-      "requests_per_second": 3474.0,
-      "avg_response_time_ms": 213.9,
-      "p95_response_time_ms": 288.1,
-      "timestamp": "2025-10-08T16:22:10.757190"
-    },
-    {
-      "endpoint": "JSON Response",
-      "requests_per_second": 3205.9,
-      "avg_response_time_ms": 225.0,
-      "p95_response_time_ms": 331.4,
-      "timestamp": "2025-10-08T16:22:10.757228"
-    },
-    {
-      "endpoint": "JSON POST",
-      "requests_per_second": 2781.3,
-      "avg_response_time_ms": 265.0,
-      "p95_response_time_ms": 314.6,
-      "timestamp": "2025-10-08T16:22:10.757239"
-    },
-    {
-      "endpoint": "Headers Access",
-      "requests_per_second": 3347.3,
-      "avg_response_time_ms": 222.3,
-      "p95_response_time_ms": 294.4,
-      "timestamp": "2025-10-08T16:22:10.757248"
-    },
-    {
-      "endpoint": "Query Parameters",
-      "requests_per_second": 3531.9,
-      "avg_response_time_ms": 210.2,
-      "p95_response_time_ms": 285.9,
-      "timestamp": "2025-10-08T16:22:10.757257"
-    },
-    {
-      "endpoint": "Route Parameters",
-      "requests_per_second": 3017.3,
-      "avg_response_time_ms": 239.7,
-      "p95_response_time_ms": 305.9,
-      "timestamp": "2025-10-08T16:22:10.757266"
+      "requests_per_second": 4562.9,
+      "avg_response_time_ms": 166.3,
+      "p95_response_time_ms": 228.6,
+      "timestamp": "2025-10-08T20:21:48.432960"
     },
     {
       "endpoint": "Simple Hello World",
-      "requests_per_second": 3171.2,
-      "avg_response_time_ms": 158.6,
-      "p95_response_time_ms": 217.7,
-      "timestamp": "2025-10-08T16:22:16.783992"
-    },
-    {
-      "endpoint": "JSON Response",
-      "requests_per_second": 3416.4,
-      "avg_response_time_ms": 144.4,
-      "p95_response_time_ms": 202.7,
-      "timestamp": "2025-10-08T16:22:16.784025"
-    },
-    {
-      "endpoint": "JSON POST",
-      "requests_per_second": 2619.4,
-      "avg_response_time_ms": 190.8,
-      "p95_response_time_ms": 236.4,
-      "timestamp": "2025-10-08T16:22:16.784036"
-    },
-    {
-      "endpoint": "Headers Access",
-      "requests_per_second": 2684.1,
-      "avg_response_time_ms": 195.8,
-      "p95_response_time_ms": 233.3,
-      "timestamp": "2025-10-08T16:22:16.784045"
-    },
-    {
-      "endpoint": "Query Parameters",
-      "requests_per_second": 3311.8,
-      "avg_response_time_ms": 150.1,
-      "p95_response_time_ms": 199.8,
-      "timestamp": "2025-10-08T16:22:16.784053"
-    },
-    {
-      "endpoint": "Route Parameters",
-      "requests_per_second": 3078.2,
-      "avg_response_time_ms": 163.5,
-      "p95_response_time_ms": 232.3,
-      "timestamp": "2025-10-08T16:22:16.784062"
+      "requests_per_second": 4682.8,
+      "avg_response_time_ms": 114.5,
+      "p95_response_time_ms": 148.5,
+      "timestamp": "2025-10-08T20:21:57.659847"
     }
   ]
 }
