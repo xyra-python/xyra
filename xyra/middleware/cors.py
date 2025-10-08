@@ -1,4 +1,3 @@
-
 from ..request import Request
 from ..response import Response
 
@@ -51,7 +50,7 @@ class CorsMiddleware:
             return True
         return origin in self.allowed_origins
 
-    async def __call__(self, request: Request, response: Response, next_handler):
+    def __call__(self, request: Request, response: Response):
         """Handle CORS for the request."""
         origin = request.get_header("origin")
 
@@ -74,10 +73,10 @@ class CorsMiddleware:
         if request.method == "OPTIONS":
             response.status(204)
             response.send("")
+            response._ended = True
             return
 
-        # Continue to next middleware/handler
-        await next_handler()
+        # For other requests, headers are set, continue to next middleware
 
 
 def cors(

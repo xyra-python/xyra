@@ -85,31 +85,61 @@ def json_validation_middleware(req: Request, res: Response):
             return
 ```
 
-## Middleware untuk Rate Limiting
+## Rate Limiting Middleware
+
+Xyra provides a built-in rate limiter middleware to limit requests per client:
 
 ```python
-import time
-from collections import defaultdict
+from xyra import App
+from xyra.middleware import rate_limiter
 
-# Simple in-memory rate limiting (untuk demo)
-request_counts = defaultdict(list)
+app = App()
 
-def rate_limit_middleware(req: Request, res: Response):
-    client_ip = req.get_header("X-Forwarded-For") or "unknown"
-    now = time.time()
-    
-    # Clean old requests
-    request_counts[client_ip] = [t for t in request_counts[client_ip] if now - t < 60]
-    
-    # Check rate limit (10 requests per minute)
-    if len(request_counts[client_ip]) >= 10:
-        res.status(429)
-        res.json({"error": "Too many requests"})
-        return
-    
-    # Add current request
-    request_counts[client_ip].append(now)
+# Add rate limiter: 100 requests per minute per IP
+app.use(rate_limiter(requests=100, window=60))
+
+@app.get("/")
+def home(req, res):
+    res.json({"message": "Hello World"})
 ```
+
+### Rate Limiter Options
+
+```python
+# 10 requests per second
+app.use(rate_limiter(requests=10, window=1))
+
+# 1000 requests per hour
+app.use(rate_limiter(requests=1000, window=3600))
+
+# Custom key function (by user ID instead of IP)
+def get_user_key(req):
+    return req.get_header("X-User-ID") or "anonymous"
+
+app.use(rate_limiter(requests=50, window=60, key_func=get_user_key))
+```
+
+### Rate Limit Headers
+
+The middleware adds standard rate limit headers:
+
+- `X-RateLimit-Limit`: Maximum requests allowed
+- `X-RateLimit-Remaining`: Remaining requests in current window
+- `X-RateLimit-Reset`: Time when the limit resets (Unix timestamp)
+
+### Rate Limit Response
+
+When limit is exceeded, returns HTTP 429 with:
+
+```json
+{
+  "error": "Too Many Requests",
+  "message": "Rate limit exceeded. Please try again later.",
+  "retry_after": 60
+}
+```
+
+Plus `Retry-After` header with seconds until reset.
 
 ## Middleware untuk Static Files
 
@@ -140,37 +170,31 @@ Berikut adalah contoh aplikasi dengan berbagai middleware:
 
 ```python
 from xyra import App, Request, Response
-import time
-from collections import defaultdict
+from xyra.middleware import rate_limiter
 
 app = App()
 
-# Middleware 1: Logging
-def logging_middleware(req: Request, res: Response):
-    start_time = time.time()
-    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {req.method} {req.url}")
-    
-    # Note: In real implementation, you'd modify response after handler
-    # This is simplified for demonstration
+# Rate limiting: 100 requests per minute
+app.use(rate_limiter(requests=100, window=60))
 
-# Middleware 2: CORS
+# CORS middleware
 def cors_middleware(req: Request, res: Response):
     res.set_header("Access-Control-Allow-Origin", "*")
     res.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
     res.set_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
-# Middleware 3: Authentication
+# Authentication middleware
 def auth_middleware(req: Request, res: Response):
     # Skip auth for login and register
     if req.url in ["/login", "/register"] or req.method == "OPTIONS":
         return
-    
+
     token = req.get_header("Authorization")
     if not token or not token.startswith("Bearer "):
         res.status(401)
         res.json({"error": "Authorization header required"})
         return
-    
+
     # Verify token (simplified)
     token_value = token[7:]  # Remove "Bearer "
     if token_value != "valid-token":
@@ -178,7 +202,7 @@ def auth_middleware(req: Request, res: Response):
         res.json({"error": "Invalid token"})
         return
 
-# Middleware 4: JSON Content-Type validation
+# JSON Content-Type validation
 def json_middleware(req: Request, res: Response):
     if req.method in ["POST", "PUT", "PATCH"]:
         content_type = req.get_header("Content-Type")
@@ -188,7 +212,6 @@ def json_middleware(req: Request, res: Response):
             return
 
 # Register middleware
-app.use(logging_middleware)
 app.use(cors_middleware)
 app.use(auth_middleware)
 app.use(json_middleware)
@@ -234,7 +257,52 @@ if __name__ == "__main__":
 
 ## Built-in Middleware
 
-Xyra may provide some built-in middleware in the future, but currently you need to create custom middleware as needed.
+Xyra provides several built-in middleware for common use cases:
+
+### CORS Middleware
+
+```python
+from xyra.middleware import cors
+
+app.use(cors(
+    allowed_origins=["http://localhost:3000", "https://myapp.com"],
+    allowed_methods=["GET", "POST", "PUT", "DELETE"],
+    allowed_headers=["Content-Type", "Authorization"],
+    allow_credentials=True
+))
+```
+
+### Gzip Compression
+
+```python
+from xyra.middleware import gzip_middleware
+
+app.use(gzip_middleware(minimum_size=1024, compress_level=6))
+```
+
+### HTTPS Redirect
+
+```python
+from xyra.middleware import https_redirect_middleware
+
+app.use(https_redirect_middleware(redirect_status_code=301))
+```
+
+### Trusted Host
+
+```python
+from xyra.middleware import trusted_host_middleware
+
+app.use(trusted_host_middleware(allowed_hosts=["myapp.com", "api.myapp.com"]))
+```
+
+### Rate Limiter
+
+```python
+from xyra.middleware import rate_limiter
+
+app.use(rate_limiter(requests=100, window=60))
+```
 
 ---
 
