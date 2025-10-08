@@ -1,6 +1,6 @@
-import json
 from typing import Any
 
+import orjson
 from socketify import Response as SocketifyResponse
 
 
@@ -85,7 +85,7 @@ class Response:
     def json(self, data: Any) -> None:
         """Send JSON response."""
         self.header("Content-Type", "application/json")
-        json_data = json.dumps(data, ensure_ascii=False)
+        json_data = orjson.dumps(data).decode("utf-8")
         self.send(json_data)
 
     def html(self, html: str) -> None:

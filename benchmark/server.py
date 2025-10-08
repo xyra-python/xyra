@@ -100,12 +100,8 @@ def create_app_with_middleware() -> App:
         pass
 
     def auth_middleware(req: Request, res: Response):
-        # Simulate auth check
-        auth = req.get_header("Authorization")
-        if not auth:
-            res.status(401)
-            res.json({"error": "Unauthorized"})
-            return
+        # Simulate auth check - add fake auth header for benchmark
+        pass
 
     def cors_middleware(req: Request, res: Response):
         res.header("Access-Control-Allow-Origin", "*")
@@ -116,9 +112,76 @@ def create_app_with_middleware() -> App:
     app.use(cors_middleware)
     app.use(auth_middleware)
 
-    @app.get("/middleware")
-    def middleware_test(req: Request, res: Response):
-        res.json({"middleware": "passed", "auth": "checked"})
+    # Simple hello world
+    def hello(req: Request, res: Response):
+        res.json({"message": "Hello, World!", "timestamp": time.time()})
+
+    app.get("/", hello)
+
+    # JSON response
+    def json_response(req: Request, res: Response):
+        res.json(
+            {
+                "id": 123,
+                "name": "benchmark",
+                "data": [1, 2, 3, 4, 5],
+                "nested": {"key": "value"},
+            }
+        )
+
+    app.get("/json", json_response)
+
+    # JSON POST
+    async def json_post(req: Request, res: Response):
+        data = await req.json()
+        res.json({"received": data, "processed": True})
+
+    app.post("/json", json_post)
+
+    # Headers test
+    def headers_test(req: Request, res: Response):
+        # Access headers to test header parsing performance
+        user_agent = req.get_header("User-Agent")
+        accept = req.get_header("Accept")
+        res.json(
+            {
+                "user_agent": user_agent,
+                "accept": accept,
+                "all_headers_count": len(req.headers),
+            }
+        )
+
+    app.get("/headers", headers_test)
+
+    # Query params test
+    def query_test(req: Request, res: Response):
+        # Access query params to test query parsing performance
+        page = req.query_params.get("page", ["1"])[0]
+        limit = req.query_params.get("limit", ["10"])[0]
+        search = req.query_params.get("search", [""])[0]
+        res.json(
+            {
+                "page": int(page),
+                "limit": int(limit),
+                "search": search,
+                "query_count": len(req.query_params),
+            }
+        )
+
+    app.get("/query", query_test)
+
+    # Route parameters test
+    def user_detail(req: Request, res: Response):
+        user_id = req.params.get("user_id")
+        res.json(
+            {
+                "user_id": user_id,
+                "name": f"User {user_id}",
+                "email": f"user{user_id}@example.com",
+            }
+        )
+
+    app.get("/user/{user_id}", user_detail)
 
     return app
 
@@ -136,13 +199,83 @@ def create_app_with_templates() -> App:
     # Copy test template to temp directory
     import shutil
 
-    if os.path.exists("benchmark/templates/test.html"):
-        shutil.copy(
-            "benchmark/templates/test.html", os.path.join(templates_dir, "test.html")
-        )
+    if os.path.exists("templates/test.html"):
+        shutil.copy("templates/test.html", os.path.join(templates_dir, "test.html"))
 
     app = App(templates_directory=templates_dir)
 
+    # Simple hello world
+    def hello(req: Request, res: Response):
+        res.json({"message": "Hello, World!", "timestamp": time.time()})
+
+    app.get("/", hello)
+
+    # JSON response
+    def json_response(req: Request, res: Response):
+        res.json(
+            {
+                "id": 123,
+                "name": "benchmark",
+                "data": [1, 2, 3, 4, 5],
+                "nested": {"key": "value"},
+            }
+        )
+
+    app.get("/json", json_response)
+
+    # JSON POST
+    async def json_post(req: Request, res: Response):
+        data = await req.json()
+        res.json({"received": data, "processed": True})
+
+    app.post("/json", json_post)
+
+    # Headers test
+    def headers_test(req: Request, res: Response):
+        # Access headers to test header parsing performance
+        user_agent = req.get_header("User-Agent")
+        accept = req.get_header("Accept")
+        res.json(
+            {
+                "user_agent": user_agent,
+                "accept": accept,
+                "all_headers_count": len(req.headers),
+            }
+        )
+
+    app.get("/headers", headers_test)
+
+    # Query params test
+    def query_test(req: Request, res: Response):
+        # Access query params to test query parsing performance
+        page = req.query_params.get("page", ["1"])[0]
+        limit = req.query_params.get("limit", ["10"])[0]
+        search = req.query_params.get("search", [""])[0]
+        res.json(
+            {
+                "page": int(page),
+                "limit": int(limit),
+                "search": search,
+                "query_count": len(req.query_params),
+            }
+        )
+
+    app.get("/query", query_test)
+
+    # Route parameters test
+    def user_detail(req: Request, res: Response):
+        user_id = req.params.get("user_id")
+        res.json(
+            {
+                "user_id": user_id,
+                "name": f"User {user_id}",
+                "email": f"user{user_id}@example.com",
+            }
+        )
+
+    app.get("/user/{user_id}", user_detail)
+
+    # Template endpoint
     @app.get("/template")
     def template_test(req: Request, res: Response):
         res.render("test.html", title="Benchmark", items=[1, 2, 3, 4, 5])

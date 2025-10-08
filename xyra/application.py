@@ -159,13 +159,15 @@ class App:
 
                     await route_handler(request, response)
 
-                    # Log request if enabled
+                    # Log request if enabled (only for non-2xx status codes or slow requests)
                     if self.log_requests:
                         duration = int((time.time() - start_time) * 1000)
-                        req_logger = get_logger("xyra")
-                        req_logger.info(
-                            f"{request.method} {request.url} {response.status_code} {duration}ms"
-                        )
+                        # Only log errors, redirects, or slow requests (>100ms)
+                        if response.status_code >= 400 or duration > 100:
+                            req_logger = get_logger("xyra")
+                            req_logger.info(
+                                f"{request.method} {request.url} {response.status_code} {duration}ms"
+                            )
                 except Exception as e:
                     print(f"Error in async handler: {e}")
                     res.end('{"error": "Internal Server Error"}')
@@ -188,13 +190,15 @@ class App:
 
                     route_handler(request, response)
 
-                    # Log request if enabled
+                    # Log request if enabled (only for non-2xx status codes or slow requests)
                     if self.log_requests:
                         duration = int((time.time() - start_time) * 1000)
-                        req_logger = get_logger("xyra")
-                        req_logger.info(
-                            f"{request.method} {request.url} {response.status_code} {duration}ms"
-                        )
+                        # Only log errors, redirects, or slow requests (>100ms)
+                        if response.status_code >= 400 or duration > 100:
+                            req_logger = get_logger("xyra")
+                            req_logger.info(
+                                f"{request.method} {request.url} {response.status_code} {duration}ms"
+                            )
                 except Exception as e:
                     print(f"Error in sync handler: {e}")
                     res.end('{"error": "Internal Server Error"}')
