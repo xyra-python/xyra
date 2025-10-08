@@ -1187,28 +1187,25 @@ name = "xyra"
 version = "0.1.4"
 source = { virtual = "." }
 dependencies = [
-    { name = "anyio" },
     { name = "jinja2" },
     { name = "multidict" },
+    { name = "socketify" },
+    { name = "watchfiles" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "anyio" },
+    { name = "black" },
+    { name = "isort" },
+    { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-tornasync" },
     { name = "pytest-trio" },
     { name = "pytest-twisted" },
     { name = "ruff" },
-    { name = "socketify" },
     { name = "twisted" },
-    { name = "watchfiles" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "black" },
-    { name = "isort" },
-    { name = "mypy" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "ruff" },
 ]
 docs = [
     { name = "mkdocs" },
@@ -1217,7 +1214,7 @@ docs = [
 
 [package.metadata]
 requires-dist = [
-    { name = "anyio", specifier = ">=4.11.0" },
+    { name = "anyio", marker = "extra == 'dev'", specifier = ">=4.11.0" },
     { name = "black", marker = "extra == 'dev'" },
     { name = "isort", marker = "extra == 'dev'" },
     { name = "jinja2" },
@@ -1225,17 +1222,14 @@ requires-dist = [
     { name = "mkdocs-material", marker = "extra == 'docs'" },
     { name = "multidict" },
     { name = "mypy", marker = "extra == 'dev'" },
-    { name = "pytest", specifier = ">=8.4.2" },
-    { name = "pytest", marker = "extra == 'dev'" },
-    { name = "pytest-asyncio", specifier = ">=1.2.0" },
-    { name = "pytest-asyncio", marker = "extra == 'dev'" },
-    { name = "pytest-tornasync", specifier = ">=0.6.0.post2" },
-    { name = "pytest-trio", specifier = ">=0.8.0" },
-    { name = "pytest-twisted", specifier = ">=1.14.3" },
-    { name = "ruff", specifier = ">=0.13.3" },
-    { name = "ruff", marker = "extra == 'dev'" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.4.2" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=1.2.0" },
+    { name = "pytest-tornasync", marker = "extra == 'dev'", specifier = ">=0.6.0.post2" },
+    { name = "pytest-trio", marker = "extra == 'dev'", specifier = ">=0.8.0" },
+    { name = "pytest-twisted", marker = "extra == 'dev'", specifier = ">=1.14.3" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.13.3" },
     { name = "socketify" },
-    { name = "twisted", specifier = ">=25.5.0" },
+    { name = "twisted", marker = "extra == 'dev'", specifier = ">=25.5.0" },
     { name = "watchfiles" },
 ]
 provides-extras = ["dev", "docs"]

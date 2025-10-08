@@ -1,5 +1,5 @@
 from typing import Any
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, parse_qsl
 
 from socketify import (
     Request as SocketifyRequest,
@@ -102,13 +102,19 @@ class Request:
         if not text_content:
             return {}
 
-        # Simple form parsing - in production you might want to use a proper form parser
-        form_data = {}
-        for pair in text_content.split("&"):
-            if "=" in pair:
-                key, value = pair.split("=", 1)
-                form_data[key] = value
-        return form_data
+        # Optimized form parsing using urllib.parse.parse_qsl for proper URL decoding
+        try:
+            parsed_pairs = parse_qsl(text_content, keep_blank_values=True)
+            form_data = dict(parsed_pairs)
+            return form_data
+        except Exception:
+            # Fallback to simple parsing if parse_qsl fails
+            form_data = {}
+            for pair in text_content.split("&"):
+                if "=" in pair:
+                    key, value = pair.split("=", 1)
+                    form_data[key] = value
+            return form_data
 
     @property
     def content_type(self) -> str | None:
