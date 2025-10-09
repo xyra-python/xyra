@@ -98,6 +98,43 @@ def test_response_redirect(mock_socketify_response):
     mock_socketify_response.end.assert_called_once_with("")
 
 
+def test_response_custom_serialization():
+    """Test custom response serialization like FastAPI."""
+    res = Mock()
+    res.write_status = Mock()
+    res.write_header = Mock()
+    res.end = Mock()
+    response = Response(res)
+
+    # Test Pydantic-like model serialization
+    class User:
+        def __init__(self, name, age):
+            self.name = name
+            self.age = age
+
+        def dict(self):
+            return {"name": self.name, "age": self.age}
+
+    user = User("John", 25)
+    response.json(user.dict())
+    import orjson
+
+    expected = orjson.dumps(user.dict()).decode("utf-8")
+    res.end.assert_called_with(expected)
+
+
+def test_response_error_handling():
+    """Test response error handling."""
+    res = Mock()
+    res.end = Mock()
+    response = Response(res)
+
+    # Test sending error response
+    response.status(500).text("Internal Server Error")
+    assert response.status_code == 500
+    res.end.assert_called_with("Internal Server Error")
+
+
 def test_response_set_cookie(mock_socketify_response):
     response = Response(mock_socketify_response)
     result = response.set_cookie("session", "abc123", max_age=3600, secure=True)
@@ -150,3 +187,25 @@ def test_response_render_no_templating(mock_socketify_response):
     response = Response(mock_socketify_response)
     with pytest.raises(RuntimeError, match="Templating is not configured"):
         response.render("index.html")
+
+
+def test_response_api_stability():
+    """Test that Response class has expected public methods to prevent accidental renaming."""
+    expected_methods = [
+        "status",
+        "header",
+        "send",
+        "json",
+        "html",
+        "text",
+        "redirect",
+        "set_cookie",
+        "clear_cookie",
+        "cors",
+        "cache",
+        "no_cache",
+        "render",
+    ]
+    for method in expected_methods:
+        assert hasattr(Response, method), f"Response is missing method: {method}"
+        assert callable(getattr(Response, method)), f"Response.{method} is not callable"

@@ -179,7 +179,7 @@ app.templates.add_filter("custom", custom_filter)
 
 ## Request Class
 
-Class for handling HTTP requests.
+Class for handling HTTP requests. Supports both synchronous and asynchronous operations.
 
 ### Constructor
 
@@ -190,6 +190,25 @@ Request(req, params=None)
 **Parameters:**
 - `req`: Internal request object
 - `params` (dict, optional): Route parameters
+
+### Handler Types
+
+Xyra supports both synchronous and asynchronous route handlers:
+
+```python
+# Synchronous handler
+@app.get("/sync")
+def sync_handler(req, res):
+    res.json({"type": "sync"})
+
+# Asynchronous handler
+@app.get("/async")
+async def async_handler(req, res):
+    data = await req.json()
+    res.json({"type": "async", "data": data})
+```
+
+Use async handlers for operations requiring `await` (like `req.json()`, `req.text()`, background tasks). Use sync handlers for simple operations.
 
 ### Properties
 
@@ -318,12 +337,29 @@ async def handler(req, res):
 
 #### json()
 
-Parse request body as JSON.
+Parse request body as JSON (asynchronous).
 
 ```python
 async def handler(req, res):
     data = await req.json()
 ```
+
+**Returns:** Any
+
+**Raises:** ValueError if JSON is invalid
+
+#### parse_json(json_string)
+
+Parse a JSON string synchronously.
+
+```python
+def handler(req, res):
+    json_str = req.query_params.get("data", ["{}"])[0]
+    data = req.parse_json(json_str)
+```
+
+**Parameters:**
+- `json_string` (str): JSON string to parse
 
 **Returns:** Any
 
@@ -699,6 +735,67 @@ source, filename, uptodate = app.templates.get_template_source("index.html")
 - `template_name` (str): Template name
 
 **Returns:** tuple
+
+## Background Tasks
+
+Xyra supports running background tasks asynchronously.
+
+### create_background_task(func, *args, **kwargs)
+
+Create and run a background task.
+
+```python
+from xyra.background import create_background_task
+
+async def send_email(email):
+    # Simulate sending email
+    await asyncio.sleep(1)
+    print(f"Email sent to {email}")
+
+@app.post("/send-email")
+async def send_email_endpoint(req, res):
+    data = await req.json()
+    email = data["email"]
+
+    # Run in background
+    task = create_background_task(send_email, email)
+
+    res.json({"message": "Email will be sent in background"})
+```
+
+**Parameters:**
+- `func` (callable): Async function to run
+- `*args`, `**kwargs`: Arguments for the function
+
+**Returns:** Task object
+
+## Concurrency
+
+Xyra provides utilities for concurrent operations.
+
+### to_thread(func)
+
+Run a blocking function in a thread pool.
+
+```python
+from xyra.concurrency import to_thread
+
+@to_thread
+def blocking_operation(x, y):
+    # Simulate blocking I/O
+    time.sleep(1)
+    return x + y
+
+@app.get("/compute")
+async def compute(req, res):
+    result = await blocking_operation(5, 3)
+    res.json({"result": result})
+```
+
+**Parameters:**
+- `func` (callable): Function to run in thread
+
+**Returns:** Decorated async function
 
 ---
 

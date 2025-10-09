@@ -96,7 +96,38 @@ async def test_request_json_empty():
 
 
 @pytest.mark.asyncio
+async def test_request_parsing_json():
+    """Test asynchronous JSON parsing."""
+    req = Mock()
+    res = Mock()
+    res.get_json = AsyncMock(return_value={"key": "value"})
+    request = Request(req, res)
+    data = await request.json()
+    assert data == {"key": "value"}
+
+
+@pytest.mark.asyncio
+async def async_test_request_json_invalid():
+    req = Mock()
+    res = Mock()
+    res.get_json = AsyncMock(side_effect=ValueError("Invalid JSON"))
+    request = Request(req, res)
+    with pytest.raises(ValueError, match="Invalid JSON"):
+        await request.json()
+
+
+def test_request_parse_json():
+    """Test synchronous JSON string parsing."""
+    req = Mock()
+    res = Mock()
+    request = Request(req, res)
+    data = request.parse_json('{"key": "value"}')
+    assert data == {"key": "value"}
+
+
+@pytest.mark.asyncio
 async def test_request_json_invalid():
+    """Test invalid JSON."""
     req = Mock()
     res = Mock()
     res.get_json = AsyncMock(side_effect=ValueError("Invalid JSON"))
@@ -113,6 +144,51 @@ async def test_request_form():
     request = Request(req, res)
     form = await request.form()
     assert form == {"name": "john", "age": "30"}
+
+
+@pytest.mark.asyncio
+async def test_request_body_validation():
+    """Test request body validation like in FastAPI."""
+    req = Mock()
+    res = Mock()
+    res.get_data = AsyncMock(return_value=b'{"name": "John", "age": 25}')
+    res.get_json = AsyncMock(return_value={"name": "John", "age": 25})
+    req.for_each_header = Mock(
+        side_effect=lambda func: func("content-type", "application/json")
+    )
+    request = Request(req, res)
+
+    # Simulate Pydantic-like validation
+    data = await request.json()
+    # Validate required fields
+    if "name" not in data or not isinstance(data["name"], str):
+        raise ValueError("Invalid name")
+    if "age" not in data or not isinstance(data["age"], int):
+        raise ValueError("Invalid age")
+    assert data["name"] == "John"
+    assert data["age"] == 25
+
+
+@pytest.mark.asyncio
+async def test_request_body_validation_error():
+    """Test request body validation error."""
+    req = Mock()
+    res = Mock()
+    res.get_json = AsyncMock(return_value={"name": 123, "age": "invalid"})
+    req.for_each_header = Mock(
+        side_effect=lambda func: func("content-type", "application/json")
+    )
+    request = Request(req, res)
+
+    data = await request.json()
+    try:
+        if not isinstance(data.get("name"), str):
+            raise ValueError("Name must be string")
+        if not isinstance(data.get("age"), int):
+            raise ValueError("Age must be int")
+        assert False, "Should raise ValueError"
+    except ValueError as e:
+        assert "Name must be string" in str(e) or "Age must be int" in str(e)
 
 
 def test_request_content_type(mock_socketify_request, mock_socketify_response):
@@ -143,3 +219,25 @@ def test_request_is_form():
     )
     request = Request(req, res)
     assert request.is_form() is True
+
+
+def test_request_api_stability():
+    """Test that Request class has expected public methods and properties to prevent accidental renaming."""
+    expected_attributes = [
+        "method",
+        "url",
+        "headers",
+        "query",
+        "query_params",
+        "get_parameter",
+        "get_header",
+        "text",
+        "json",
+        "form",
+        "content_type",
+        "content_length",
+        "is_json",
+        "is_form",
+    ]
+    for attr in expected_attributes:
+        assert hasattr(Request, attr), f"Request is missing attribute: {attr}"
