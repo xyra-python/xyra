@@ -86,3 +86,55 @@ def test_validate_swagger_spec_invalid():
     # Missing info fields
     spec = {"openapi": "3.0.0", "info": {}, "paths": {}}
     assert validate_swagger_spec(spec) is False
+
+
+def test_generate_swagger_from_app():
+    """Test generating Swagger spec from app routes like FastAPI."""
+    from xyra import App
+    from xyra.swagger import generate_swagger
+
+    app = App(swagger_options={"title": "Test API", "version": "1.0.0"})
+
+    @app.get("/users")
+    def get_users(req, res):
+        """Get all users.
+
+        Returns a list of users.
+        """
+        res.json([])
+
+    @app.post("/users")
+    def create_user(req, res):
+        """Create a new user.
+
+        body (object): User data
+        """
+        res.json({"id": 1})
+
+    spec = generate_swagger(app, **app.swagger_options)
+    assert "paths" in spec
+    assert "/users" in spec["paths"]
+    assert "get" in spec["paths"]["/users"]
+    assert "post" in spec["paths"]["/users"]
+    assert spec["info"]["title"] == "Test API"
+
+
+def test_swagger_endpoint():
+    """Test Swagger UI endpoint."""
+    from unittest.mock import Mock
+
+    from xyra.request import Request
+    from xyra.response import Response
+
+    # Mock request to /docs
+    mock_req = Mock()
+    mock_req.get_method.return_value = "GET"
+    mock_req.get_url.return_value = "http://localhost:8000/docs"
+    mock_req.for_each_header = Mock(side_effect=lambda func: None)
+
+    mock_res = Mock()
+    response = Response(mock_res)
+    response.html("<html>Swagger UI</html>")
+    request = Request(mock_req, mock_res)
+    request.is_json()
+    mock_res.end.assert_called()

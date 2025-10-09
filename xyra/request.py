@@ -96,6 +96,15 @@ class Request:
         """Parse the request body as JSON."""
         return await self._res.get_json()
 
+    def parse_json(self, json_string: str) -> Any:
+        """Parse a JSON string synchronously."""
+        import orjson
+
+        try:
+            return orjson.loads(json_string)
+        except Exception as e:
+            return ValueError(f"Invalid JSON: {e}")
+
     async def form(self) -> dict[str, str]:
         """Parse form data from the request body."""
         text_content = await self.text()

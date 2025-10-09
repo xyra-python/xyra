@@ -234,6 +234,16 @@ class App:
             elif method == "options":
                 self._app.options(parsed_path, final_handler)
 
+        # Add catch-all handler for unmatched routes (404)
+        def not_found_handler(res, req):
+            response = Response(res, self.templates)
+            response.status(404).json({"error": "Not Found"})
+
+        # Try different patterns for catch-all
+        # self._app.any("*", not_found_handler)  # This might not work
+        # Use a more specific pattern that catches all paths
+        self._app.any("/*", not_found_handler)
+
     def enable_swagger(self, host: str = "localhost", port: int = 8000):
         """
         Enable Swagger UI documentation for the API.
