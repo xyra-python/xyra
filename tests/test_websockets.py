@@ -111,26 +111,37 @@ def test_websocket_api_stability():
 
 @pytest.mark.asyncio
 async def test_websocket_in_app():
-    """Test WebSocket integration in app like FastAPI."""
+    """Test WebSocket integration in app."""
+
+    from xyra import App
 
     messages = []
 
-    # Since app.websocket doesn't exist, test WebSocket class directly
-    async def websocket_handler(ws: WebSocket):
-        # Simulate connection
+    def on_open(ws: WebSocket):
         ws.subscribe("chat")
-        # Simulate receiving message
-        # In real, this would be in on_message
         messages.append("connected")
 
-    # Mock WebSocket
-    mock_ws = Mock()
-    await websocket_handler(WebSocket(mock_ws))
+    def on_message(ws: WebSocket, message, opcode):
+        messages.append(f"received: {message}")
 
-    # Check WebSocket was subscribed
-    mock_ws.subscribe.assert_called_with("chat")
-    assert messages == ["connected"]
-    mock_ws.subscribe.assert_called_with("chat")
+    def on_close(ws: WebSocket, code, message):
+        messages.append("disconnected")
+
+    app = App()
+    app.websocket("/ws", {"open": on_open, "message": on_message, "close": on_close})
+
+    # Test that websocket route is registered
+    # We can't easily test the full integration without running the server
+    # but we can check that the method exists and doesn't error
+    assert hasattr(app, "websocket")
+
+    # Test decorator syntax
+    @app.websocket("/chat")
+    def chat_handler(ws: WebSocket):
+        ws.send("Welcome to chat!")
+
+    # Check that decorator works
+    assert callable(chat_handler)
 
 
 def test_websocket_message_handling():

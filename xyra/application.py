@@ -13,6 +13,7 @@ from .response import Response
 from .routing import Router
 from .swagger import generate_swagger
 from .templating import Templating
+from .websockets import WebSocket
 
 
 class App:
@@ -131,6 +132,96 @@ class App:
         """Add a middleware to the application."""
         self._middlewares.append(middleware)
         return self
+
+    @overload
+    def websocket(self, path: str) -> Callable[[Callable], "App"]: ...
+
+    @overload
+    def websocket(self, path: str, handlers: dict[str, Callable]) -> "App": ...
+
+    def websocket(
+        self, path: str, handlers: dict[str, Callable] | None = None
+    ) -> Union[Callable, "App"]:
+        """
+        Register a WebSocket route.
+
+        This method can be used as a decorator or as a direct method call.
+
+        Args:
+            path: WebSocket path pattern.
+            handlers: Dictionary with event handlers ('open', 'message', 'close', etc.).
+
+        Returns:
+            If handlers is None, returns a decorator function.
+            Otherwise, returns self for method chaining.
+
+        Examples:
+            # As decorator
+            @app.websocket("/ws")
+            def handle_websocket(ws):
+                ws.send("Connected!")
+
+            # As method call
+            app.websocket("/chat", {
+                "open": on_open,
+                "message": on_message,
+                "close": on_close
+            })
+        """
+        if handlers is None:
+            # Used as decorator
+            def decorator(func):
+                self._register_websocket(path, {"open": func})
+                return func
+
+            return decorator
+        else:
+            # Used as method call
+            self._register_websocket(path, handlers)
+            return self
+
+    def _register_websocket(self, path: str, handlers: dict[str, Callable]):
+        """Register WebSocket route with socketify."""
+        # Map Xyra event handlers to socketify callbacks
+        ws_config = {}
+
+        # Copy compression and other config if provided
+        for key in [
+            "compression",
+            "max_payload_length",
+            "idle_timeout",
+            "max_backpressure",
+            "max_lifetime",
+        ]:
+            if key in handlers:
+                ws_config[key] = handlers[key]
+
+        # Map event handlers
+        if "open" in handlers:
+            ws_config["open"] = lambda ws: handlers["open"](WebSocket(ws))
+
+        if "message" in handlers:
+            ws_config["message"] = lambda ws, message, opcode: handlers["message"](
+                WebSocket(ws), message, opcode
+            )
+
+        if "close" in handlers:
+            ws_config["close"] = lambda ws, code, message: handlers["close"](
+                WebSocket(ws), code, message
+            )
+
+        if "drain" in handlers:
+            ws_config["drain"] = lambda ws: handlers["drain"](WebSocket(ws))
+
+        if "subscription" in handlers:
+            ws_config["subscription"] = (
+                lambda ws, topic, subscriptions, subscriptions_before: handlers[
+                    "subscription"
+                ](WebSocket(ws), topic, subscriptions, subscriptions_before)
+            )
+
+        # Register with socketify
+        self._app.ws(path, ws_config)
 
     def static_files(self, path: str, directory: str):
         """Serve static files from a directory."""
