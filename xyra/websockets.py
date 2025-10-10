@@ -49,3 +49,7 @@ class WebSocket:
         """Get the remote address of the WebSocket connection."""
         addr = self._ws.get_remote_address()
         return str(addr) if addr else None
+
+    def get_buffered_amount(self) -> int:
+        """Get the amount of buffered data."""
+        return self._ws.get_buffered_amount()
