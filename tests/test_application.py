@@ -5,12 +5,12 @@ from xyra.request import Request
 from xyra.response import Response
 
 
-def test_app_creation():
+def test_app_creation() -> None:
     app = App()
     assert app is not None
 
 
-def test_app_route():
+def test_app_route() -> None:
     app = App()
 
     @app.get("/")
@@ -20,13 +20,13 @@ def test_app_route():
     assert len(app.router.routes) == 1
 
 
-def test_app_run():
+def test_app_run() -> None:
     app = App()
     # Mock run to avoid actual server start
     assert hasattr(app, "run_server")
 
 
-def test_404_handler_registration():
+def test_404_handler_registration() -> None:
     """Test that 404 handler is registered for unmatched routes."""
     app = App()
 
@@ -43,7 +43,7 @@ def test_404_handler_registration():
     assert call_args[0][0] == "/*"  # The pattern should be "/*"
 
 
-def test_app_api_stability():
+def test_app_api_stability() -> None:
     """Test that App class has expected public methods and properties to prevent accidental renaming."""
     expected_methods = [
         "route",
@@ -64,13 +64,13 @@ def test_app_api_stability():
 
     for method in expected_methods:
         assert hasattr(App, method), f"App is missing method: {method}"
-        assert callable(getattr(App, method)), f"App.{method} is not callable"
+        assert callable(getattr(App, method)), f"App.{method} is not callable"  # type: ignore
 
     for prop in expected_properties:
         assert hasattr(App, prop), f"App is missing property: {prop}"
 
 
-def test_dependency_injection_simulation():
+def test_dependency_injection_simulation() -> None:
     """Test simulated dependency injection like in FastAPI."""
     from unittest.mock import Mock
 
@@ -108,6 +108,6 @@ def test_dependency_injection_simulation():
     get_user(request, response, db=get_db(), user=get_current_user())
 
     # Check response
-    assert response.status_code == 200
+    assert response.status_code == 200  # type: ignore
     # Assuming json method sets some internal data
     mock_res.end.assert_called()  # Or whatever response.json does

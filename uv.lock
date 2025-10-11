@@ -1375,8 +1375,8 @@ wheels = [
 
 [[package]]
 name = "xyra"
-version = "0.1.7"
-source = { virtual = "." }
+version = "0.1.8"
+source = { editable = "." }
 dependencies = [
     { name = "jinja2" },
     { name = "multidict" },

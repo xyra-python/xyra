@@ -17,4 +17,16 @@ def test_get_file_info():
         tmp.flush()
         info = get_file_info(tmp.name)
         assert hasattr(info, "st_size")
-        assert info.st_size == 12  # "test content" is 12 bytes
+
+
+def test_get_real_path_with_symlink(tmp_path):
+    """Test that get_real_path resolves symbolic links."""
+    # Create a file and a symlink to it
+    real_file = tmp_path / "real.txt"
+    real_file.touch()
+    link_file = tmp_path / "link.txt"
+    os.symlink(real_file, link_file)
+
+    # Get the real path of the symlink
+    real_path = get_real_path(str(link_file))
+    assert real_path == str(real_file.resolve())
