@@ -1,7 +1,7 @@
 [project]
 name = "xyra"
-version = "0.1.7"
-description = "A fast and simple web framework for Python"
+version = "0.1.8"
+description = "High Performance Frameworks, Easy to learn and Ready for Production"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.11"
@@ -51,6 +51,10 @@ docs = [
     "mkdocs",
     "mkdocs-material",
 ]
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project.urls]
 Homepage = "https://github.com/xyra-python/xyra"

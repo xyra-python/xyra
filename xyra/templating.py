@@ -1,4 +1,3 @@
-import os
 from collections.abc import Callable
 from typing import Any
 
@@ -18,10 +17,6 @@ class Templating:
         """
         self.directory = directory
         self.auto_reload = auto_reload
-
-        # Check if templates directory exists
-        if not os.path.exists(directory):
-            os.makedirs(directory, exist_ok=True)
 
         # Initialize Jinja2 environment
         self.env = Environment(
