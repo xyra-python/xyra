@@ -56,7 +56,8 @@ class Request:
                     res.json({"method": "POST"})
         """
         method = self._req.get_method()
-        assert method is not None
+        if method is None:
+            raise ValueError("Request method is None")
         return method
 
     @property
@@ -74,7 +75,8 @@ class Request:
         """
         if self._url_cache is None:
             url = self._req.get_url()
-            assert url is not None
+            if url is None:
+                raise ValueError("Request URL is None")
             self._url_cache = url
         return self._url_cache
 

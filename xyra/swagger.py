@@ -308,7 +308,7 @@ def extract_query_parameters(handler_func) -> list[dict[str, Any]]:
 
     except Exception:
         # If signature inspection fails, just return empty list
-        pass
+        pass  # nosec B110
 
     return parameters
 

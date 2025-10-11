@@ -27,3 +27,5 @@ jobs:
       run: uv run pytest
     - name: Run ruff check
       run: uv run ruff check --fix .
+    - name: Run Bandit Check
+      run: uv run bandit -r ./xyra
