@@ -28,6 +28,7 @@ class Templating:
             loader=FileSystemLoader(directory),
             auto_reload=auto_reload,
             enable_async=True,  # Enable async template rendering
+            autoescape=True,  # Enable autoescape for XSS protection
         )
 
         # Simple render cache for performance
@@ -190,5 +191,6 @@ class Templating:
 
     def get_template_source(self, template_name: str) -> tuple:
         """Get the source code of a template (for debugging)."""
-        assert self.env.loader is not None
+        if self.env.loader is None:
+            raise ValueError("Template loader is not set")
         return self.env.loader.get_source(self.env, template_name)

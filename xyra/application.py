@@ -366,7 +366,8 @@ class App:
             ]
 
         def get_swagger_json(req: Request, res: Response):
-            assert self.swagger_options is not None
+            if self.swagger_options is None:
+                raise ValueError("Swagger options are not configured")
             try:
                 if self._swagger_cache is None:
                     self._swagger_cache = generate_swagger(self, **self.swagger_options)
@@ -432,7 +433,7 @@ class App:
         """Start the server."""
         if reload and os.environ.get("XYRA_RELOAD_CHILD") != "1":
             try:
-                import subprocess
+                import subprocess  # nosec B404
                 import sys
                 import time
 
@@ -453,7 +454,7 @@ class App:
                     current_proc.wait()
                 env = os.environ.copy()
                 env["XYRA_RELOAD_CHILD"] = "1"
-                current_proc = subprocess.Popen([sys.executable] + sys.argv, env=env)
+                current_proc = subprocess.Popen([sys.executable] + sys.argv, env=env)  # nosec B603
 
             # Watch for file changes in current directory
             def watch_and_restart():
