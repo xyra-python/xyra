@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # WebSocket in Xyra
 
 Xyra supports WebSocket for real-time communication between server and client. WebSocket enables persistent bidirectional connections, ideal for chat applications, real-time notifications, games, or live dashboards.

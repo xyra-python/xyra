@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Middleware in Xyra
 
 Middleware are functions that are executed before the main route handler. Middleware allows you to add common logic such as authentication, logging, CORS handling, or input validation to routes.
@@ -28,14 +32,11 @@ def logging_middleware(req: Request, res: Response):
     print(f"{req.method} {req.url} - {time.time()}")
 
 # CORS middleware
-def cors_middleware(req: Request, res: Response):
-    res.set_header("Access-Control-Allow-Origin", "*")
-    res.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-    res.set_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+from xyra.middleware import cors
 
 # Add middleware
 app.use(logging_middleware)
-app.use(cors_middleware)
+app.use(cors())
 ```
 
 ## Execution Order
@@ -164,9 +165,9 @@ def static_files_middleware(req: Request, res: Response):
         res.json({"error": "File not found"})
 ```
 
-## Contoh Lengkap
+## Full example
 
-Berikut adalah contoh aplikasi dengan berbagai middleware:
+This example middleware in xyra framework:
 
 ```python
 from xyra import App, Request, Response
@@ -178,10 +179,7 @@ app = App()
 app.use(rate_limiter(requests=100, window=60))
 
 # CORS middleware
-def cors_middleware(req: Request, res: Response):
-    res.set_header("Access-Control-Allow-Origin", "*")
-    res.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-    res.set_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+from xyra.middleware import cors
 
 # Authentication middleware
 def auth_middleware(req: Request, res: Response):
@@ -212,7 +210,7 @@ def json_middleware(req: Request, res: Response):
             return
 
 # Register middleware
-app.use(cors_middleware)
+app.use(cors())
 app.use(auth_middleware)
 app.use(json_middleware)
 
@@ -261,6 +259,15 @@ Xyra provides several built-in middleware for common use cases:
 
 ### CORS Middleware
 
+Handles Cross-Origin Resource Sharing (CORS) by setting appropriate headers on responses.
+
+**Parameters:**
+- `allowed_origins`: List of allowed origins or `"*"` (default: `["*"]`)
+- `allowed_methods`: List of allowed HTTP methods (default: `["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"]`)
+- `allowed_headers`: List of allowed headers (default: `["Content-Type", "Authorization", "X-Requested-With"]`)
+- `allow_credentials`: Whether to allow credentials (default: `False`)
+- `max_age`: Max age for preflight cache in seconds (default: `3600`)
+
 ```python
 from xyra.middleware import cors
 
@@ -268,11 +275,18 @@ app.use(cors(
     allowed_origins=["http://localhost:3000", "https://myapp.com"],
     allowed_methods=["GET", "POST", "PUT", "DELETE"],
     allowed_headers=["Content-Type", "Authorization"],
-    allow_credentials=True
+    allow_credentials=True,
+    max_age=3600
 ))
 ```
 
 ### Gzip Compression
+
+Compresses response data using gzip compression when the client supports it and the response size meets the minimum threshold.
+
+**Parameters:**
+- `minimum_size`: Minimum response size to compress in bytes (default: `1024`)
+- `compress_level`: Gzip compression level (1-9, default: `6`)
 
 ```python
 from xyra.middleware import gzip_middleware
@@ -282,6 +296,11 @@ app.use(gzip_middleware(minimum_size=1024, compress_level=6))
 
 ### HTTPS Redirect
 
+Redirects HTTP requests to HTTPS to enforce secure connections.
+
+**Parameters:**
+- `redirect_status_code`: HTTP status code for the redirect (301 or 302, default: `301`)
+
 ```python
 from xyra.middleware import https_redirect_middleware
 
@@ -289,6 +308,11 @@ app.use(https_redirect_middleware(redirect_status_code=301))
 ```
 
 ### Trusted Host
+
+Validates that the request's `Host` header is in the list of allowed hosts to prevent host header attacks.
+
+**Parameters:**
+- `allowed_hosts`: List of allowed hostnames
 
 ```python
 from xyra.middleware import trusted_host_middleware
@@ -298,10 +322,23 @@ app.use(trusted_host_middleware(allowed_hosts=["myapp.com", "api.myapp.com"]))
 
 ### Rate Limiter
 
+Limits the number of requests per client within a time window using a sliding window algorithm.
+
+**Parameters:**
+- `requests`: Maximum number of requests allowed per window (default: `100`)
+- `window`: Time window in seconds (default: `60`)
+- `key_func`: Function to extract the key from the request (default: client IP address)
+
 ```python
 from xyra.middleware import rate_limiter
 
 app.use(rate_limiter(requests=100, window=60))
+
+# Custom key function (e.g., by user ID)
+def get_user_key(req):
+    return req.get_header("X-User-ID") or "anonymous"
+
+app.use(rate_limiter(requests=50, window=60, key_func=get_user_key))
 ```
 
 ---

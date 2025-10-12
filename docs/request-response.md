@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Request & Response in Xyra
 
 In Xyra, each route handler receives two main parameters: `Request` and `Response`. These objects provide full access to HTTP request data and complete control over the response sent back to the client.

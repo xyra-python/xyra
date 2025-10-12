@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Xyra API Reference
 
 Complete API documentation for the Xyra framework, including all available classes, methods, and properties.

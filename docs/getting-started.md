@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Getting Started"
+---
+
 # Getting Started with Xyra
 
 Welcome to Xyra! This section will help you create your first web application with the Xyra framework.

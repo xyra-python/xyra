@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Installing Xyra Framework
 
 This guide will help you install Xyra on your system.

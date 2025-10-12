@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Static Files in Xyra
 
 Xyra allows you to serve static files such as CSS, JavaScript, images, and other files. Static files are stored in a specific directory and accessed through a defined URL path.

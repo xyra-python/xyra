@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page.title | default: site.title }}</title>
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-container">
+                <a href="/" class="logo">XYRA</a>
+                <ul class="nav-links">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/getting-started">Getting Started</a></li>
+                    <li><a href="/installation">Installation</a></li>
+                    <li><a href="/api-reference">API Reference</a></li>
+                    <li><a href="/routing">Routing</a></li>
+                    <li><a href="/request-response">Request & Response</a></li>
+                    <li><a href="/middleware">Middleware</a></li>
+                    <li><a href="/templating">Templating</a></li>
+                    <li><a href="/static-files">Static Files</a></li>
+                    <li><a href="/websockets">WebSockets</a></li>
+                    <li><a href="/logger">Logger</a></li>
+                    <li><a href="/swagger">Swagger</a></li>
+                    <li><a href="/examples">Examples</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="container">
+            {{ content }}
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2023 Xyra Framework. Made with ❤️</p>
+    </footer>
+</body>
+</html>
