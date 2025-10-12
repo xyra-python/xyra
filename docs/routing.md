@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Routing in Xyra
 
 Routing is how Xyra handles HTTP requests and directs them to the appropriate handler. Xyra supports various HTTP methods and flexible routing with parameters and query strings.

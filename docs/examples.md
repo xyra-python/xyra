@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Complete Examples
 
 This section contains complete application examples that demonstrate various Xyra features in practice. These examples can be used as a starting point for your own projects.

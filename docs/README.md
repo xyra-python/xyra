@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Xyra Documentation"
+---
+
 # Xyra Framework Documentation
 
 Xyra is a lightweight and fast Python web framework built on top of socketify for high performance. The framework provides modern features such as flexible routing, templating, WebSocket support, and automatic API documentation.
@@ -69,13 +74,6 @@ Xyra leverages socketify's high-performance networking capabilities, making it s
 - Automatic API documentation
 - Static file serving
 - CORS support
-
-## Community & Support
-
-- 📖 [Documentation](https://xyra-framework.github.io/)
-- 💬 [Discord Community](https://discord.gg/xyra)
-- 🐛 [Issue Tracker](https://github.com/xyra-python/xyra/issues)
-- 📧 [Mailing List](https://groups.google.com/g/xyra-framework)
 
 ## Contributing
 

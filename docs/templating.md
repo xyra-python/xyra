@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Templating in Xyra
 
 Xyra uses Jinja2 for templating. Templates allow you to generate dynamic HTML pages with data from your routes.

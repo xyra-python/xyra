@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # API Documentation with Swagger
 
 Xyra integrates with Swagger (OpenAPI) to automatically generate API documentation. This documentation allows developers and API users to understand available endpoints, parameters, and responses.

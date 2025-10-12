@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Logger
 
 Xyra provides built-in logging functionality to help you monitor your application's behavior and performance.
