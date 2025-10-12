@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Xyra Documentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+</head>
+<body class="bg-white text-gray-800">
+    <div class="sidebar">
+        <div class="flex-shrink-0 flex items-center mb-8">
+            <a href="/index.html" class="text-2xl font-bold text-primary">XYRA</a>
+        </div>
+        <nav>
+            <a href="/index.html" class="nav-link">Home</a>
+            <a href="/getting-started.html" class="nav-link">Getting Started</a>
+            <a href="/installation.html" class="nav-link">Installation</a>
+            <a href="/api-reference.html" class="nav-link">API Reference</a>
+            <a href="/routing.html" class="nav-link">Routing</a>
+            <a href="/request-response.html" class="nav-link">Request & Response</a>
+            <a href="/middleware.html" class="nav-link">Middleware</a>
+            <a href="/templating.html" class="nav-link">Templating</a>
+            <a href="/static-files.html" class="nav-link">Static Files</a>
+            <a href="/websockets.html" class="nav-link">WebSockets</a>
+            <a href="/logger.html" class="nav-link">Logger</a>
+            <a href="/swagger.html" class="nav-link">Swagger</a>
+            <a href="/examples.html" class="nav-link">Examples</a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <main>
+            {{ content }}
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        // Set active link in sidebar
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+            hljs.highlightAll();
+        });
+    </script>
+</body>
+</html>

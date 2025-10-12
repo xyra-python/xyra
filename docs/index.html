@@ -1,149 +1,79 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XYRA Documentation - Readme</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#3b82f6',
-                        secondary: '#64748b'
-                    }
-                }
-            }
-        }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
-</head>
-<body class="bg-gray-50 text-gray-900">
-    <header class="bg-white shadow-sm border-b border-gray-200">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex">
-                    <div class="flex-shrink-0 flex items-center">
-                        <a href="index.html" class="text-2xl font-bold text-primary">XYRA</a>
-                    </div>
-                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                        <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
-                        <a href="getting-started.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Getting Started</a>
-                        <a href="installation.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Installation</a>
-                        <a href="api-reference.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">API Reference</a>
-                        <a href="routing.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Routing</a>
-                        <a href="request-response.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Request & Response</a>
-                        <a href="middleware.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Middleware</a>
-                        <a href="templating.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Templating</a>
-                        <a href="static-files.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Static Files</a>
-                        <a href="websockets.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">WebSockets</a>
-                        <a href="logger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Logger</a>
-                        <a href="swagger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Swagger</a>
-                        <a href="examples.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Examples</a>
-                    </div>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="px-4 py-6 sm:px-0">
-            <div class="bg-white shadow rounded-lg p-6">
-                <hr />
-<p>layout: default
-title: "Xyra Documentation"</p>
-<hr />
+---
+layout: default
+title: "Xyra Documentation"
+---
+
 <h1 id="xyra-framework-documentation">Xyra Framework Documentation</h1>
 <p>Xyra is a lightweight and fast Python web framework built on top of socketify for high performance. The framework provides modern features such as flexible routing, templating, WebSocket support, and automatic API documentation.</p>
+
 <h2 id="key-features">Key Features</h2>
 <ul>
-<li>🚀 High performance with socketify</li>
-<li>🛣️ Flexible routing with parameters and query strings</li>
-<li>📝 Jinja2 templating engine</li>
-<li>🔌 WebSocket support for real-time applications</li>
-<li>📚 Automatic API documentation with Swagger/OpenAPI</li>
-<li>🔄 Asynchronous request handling</li>
-<li>🧩 Middleware support for cross-cutting concerns</li>
-<li>📁 Static file serving</li>
-<li>🔧 Type hints and modern Python support</li>
+    <li>🚀 High performance with socketify</li>
+    <li>🛣️ Flexible routing with parameters and query strings</li>
+    <li>📝 Jinja2 templating engine</li>
+    <li>🔌 WebSocket support for real-time applications</li>
+    <li>📚 Automatic API documentation with Swagger/OpenAPI</li>
+    <li>🔄 Asynchronous request handling</li>
+    <li>🧩 Middleware support for cross-cutting concerns</li>
+    <li>📁 Static file serving</li>
+    <li>🔧 Type hints and modern Python support</li>
 </ul>
-<h2 id="table-of-contents">Table of Contents</h2>
-<ul>
-<li><a href="installation.md">Installation</a></li>
-<li><a href="getting-started.md">Getting Started</a></li>
-<li><a href="routing.md">Routing</a></li>
-<li><a href="request-response.md">Request &amp; Response</a></li>
-<li><a href="logger.md">Logger</a></li>
-<li><a href="templating.md">Templating</a></li>
-<li><a href="websocket.md">WebSocket</a></li>
-<li><a href="swagger.md">Swagger Documentation</a></li>
-<li><a href="middleware.md">Middleware</a></li>
-<li><a href="static-files.md">Static Files</a></li>
-<li><a href="examples.md">Complete Examples</a></li>
-<li><a href="api-reference.md">API Reference</a></li>
-</ul>
+
 <h2 id="quick-start">Quick Start</h2>
-<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
+<pre><code class="language-python">
+from xyra import App, Request, Response
 
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">()</span>
+app = App()
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">home</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Hello, Xyra!&quot;</span><span class="p">})</span>
+@app.get("/")
+def home(req: Request, res: Response):
+    res.json({"message": "Hello, Xyra!"})
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Enable logging</span>
-</code></pre></div>
-
+if __name__ == "__main__":
+    app.listen(8000, logger=True)
+</code></pre>
 <p>Visit <code>http://localhost:8000</code> to see the result.</p>
+
 <h2 id="why-xyra">Why Xyra?</h2>
 <p>Xyra is designed to be simple yet powerful, providing the essential features you need for modern web development without unnecessary complexity. Built on socketify, it offers excellent performance while maintaining a clean, Pythonic API.</p>
+
 <h3 id="performance">Performance</h3>
 <p>Xyra leverages socketify's high-performance networking capabilities, making it suitable for applications requiring low latency and high throughput.</p>
+
 <h3 id="developer-experience">Developer Experience</h3>
 <ul>
-<li>Intuitive API design</li>
-<li>Comprehensive documentation</li>
-<li>Type hints support</li>
-<li>Modern Python features</li>
-<li>Easy testing and debugging</li>
+    <li>Intuitive API design</li>
+    <li>Comprehensive documentation</li>
+    <li>Type hints support</li>
+    <li>Modern Python features</li>
+    <li>Easy testing and debugging</li>
 </ul>
+
 <h3 id="production-ready">Production Ready</h3>
 <ul>
-<li>Built-in middleware for common tasks</li>
-<li>WebSocket support for real-time features</li>
-<li>Automatic API documentation</li>
-<li>Static file serving</li>
-<li>CORS support</li>
+    <li>Built-in middleware for common tasks</li>
+    <li>WebSocket support for real-time features</li>
+    <li>Automatic API documentation</li>
+    <li>Static file serving</li>
+    <li>CORS support</li>
 </ul>
+
 <h2 id="contributing">Contributing</h2>
 <p>Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests on GitHub.</p>
+
 <h3 id="development-setup">Development Setup</h3>
-<div class="hljs"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/xyra-python/xyra.git
-<span class="nb">cd</span><span class="w"> </span>xyra
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
-</code></pre></div>
+<pre><code class="language-bash">
+git clone https://github.com/xyra-python/xyra.git
+cd xyra
+pip install -e .
+</code></pre>
 
 <h3 id="running-tests">Running Tests</h3>
-<div class="hljs"><pre><span></span><code>pytest
-</code></pre></div>
+<pre><code class="language-bash">
+pytest
+</code></pre>
 
 <h2 id="license">License</h2>
 <p>MIT License - see the LICENSE file for details.</p>
 <hr />
 <p>Made with ❤️ using Xyra Framework</p>
-            </div>
-        </div>
-    </main>
-    <footer class="bg-white border-t border-gray-200">
-        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-            <p class="text-center text-sm text-gray-500">&copy; <span id="current-year"></span> Xyra Framework. Made with ❤️</p>
-        </div>
-        <script>
-            document.getElementById('current-year').textContent = new Date().getFullYear();
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-        <script>hljs.highlightAll();</script>
-    </footer>
-</body>
-</html>

@@ -1,0 +1,108 @@
+---
+layout: default
+title: "WebSockets"
+---
+
+<h1 id="websockets">WebSockets</h1>
+<p>Xyra provides built-in support for WebSockets, allowing for real-time, bidirectional communication between the client and the server.</p>
+
+<h2 id="creating-a-websocket-handler">Creating a WebSocket Handler</h2>
+<p>To create a WebSocket handler, you can use the <code>@app.websocket(path)</code> decorator. The handler function will receive a <code>WebSocket</code> object as an argument. This is the simplest way to handle WebSocket connections and is suitable for many use cases.</p>
+<pre><code class="language-python">
+from xyra import App, WebSocket
+
+app = App()
+
+@app.websocket("/ws")
+async def websocket_handler(ws: WebSocket):
+    # This function is called when a new WebSocket connection is opened.
+    await ws.send("Welcome to the WebSocket server!")
+
+    try:
+        while True:
+            message = await ws.receive_text()
+            print(f"Received message: {message}")
+            await ws.send_text(f"You said: {message}")
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+    finally:
+        print("WebSocket connection closed")
+
+</code></pre>
+<p>The decorated function handles the entire lifecycle of the WebSocket connection after it's opened.</p>
+
+<h2 id="handling-websocket-events">Handling WebSocket Events</h2>
+<p>For more control over the WebSocket lifecycle, you can provide a dictionary of event handlers to the <code>app.websocket()</code> method. This allows you to define separate functions for handling connection open, message, and close events.</p>
+<pre><code class="language-python">
+from xyra import App, WebSocket
+
+app = App()
+
+async def on_open(ws: WebSocket):
+    print(f"WebSocket connection opened: {ws}")
+    await ws.send("Connection established.")
+
+async def on_message(ws: WebSocket, message, opcode):
+    print(f"Received message: {message}")
+    await ws.send_text(f"Echo: {message}")
+
+async def on_close(ws: WebSocket, code, message):
+    print(f"WebSocket connection closed: {code} {message}")
+
+app.websocket("/ws_events", {
+    "open": on_open,
+    "message": on_message,
+    "close": on_close
+})
+</code></pre>
+
+<h2 id="websocket-methods">WebSocket Methods</h2>
+<p>The <code>WebSocket</code> object has the following methods:</p>
+<ul>
+    <li><code>send(data: str | bytes)</code>: Sends a text or binary message to the client.</li>
+    <li><code>receive()</code>: Asynchronously receives a message.</li>
+    <li><code>close(code: int = 1000)</code>: Closes the WebSocket connection.</li>
+    <li><code>is_open() -> bool</code>: Returns <code>True</code> if the connection is open.</li>
+</ul>
+
+<h2 id="client-side-example">Client-Side Example</h2>
+<p>Here is a simple HTML and JavaScript example of a WebSocket client:</p>
+<pre><code class="language-html">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;WebSocket Client&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;WebSocket Test&lt;/h1&gt;
+    <input type="text" id="messageInput" placeholder="Enter a message">
+    <button onclick="sendMessage()">Send</button>
+    &lt;div id="messages"&gt;&lt;/div&gt;
+
+    &lt;script&gt;
+        const ws = new WebSocket("ws://localhost:8000/ws");
+
+        ws.onopen = function(event) {
+            console.log("WebSocket connection opened.");
+        };
+
+        ws.onmessage = function(event) {
+            const messages = document.getElementById('messages');
+            const message = document.createElement('p');
+            message.textContent = event.data;
+            messages.appendChild(message);
+        };
+
+        ws.onclose = function(event) {
+            console.log("WebSocket connection closed.");
+        };
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            ws.send(input.value);
+            input.value = '';
+        }
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
