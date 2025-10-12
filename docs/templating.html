@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XYRA Documentation - Templating</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="index.html" class="text-2xl font-bold text-primary">XYRA</a>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                        <a href="getting-started.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Getting Started</a>
+                        <a href="installation.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Installation</a>
+                        <a href="api-reference.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">API Reference</a>
+                        <a href="routing.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Routing</a>
+                        <a href="request-response.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Request & Response</a>
+                        <a href="middleware.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Middleware</a>
+                        <a href="templating.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Templating</a>
+                        <a href="static-files.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Static Files</a>
+                        <a href="websockets.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">WebSockets</a>
+                        <a href="logger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Logger</a>
+                        <a href="swagger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Swagger</a>
+                        <a href="examples.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Examples</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="px-4 py-6 sm:px-0">
+            <div class="bg-white shadow rounded-lg p-6">
+                <hr />
+<h2 id="layout-default">layout: default</h2>
+<h1 id="templating-in-xyra">Templating in Xyra</h1>
+<p>Xyra uses Jinja2 for templating. Templates allow you to generate dynamic HTML pages with data from your routes.</p>
+<h2 id="setup-templates">Setup Templates</h2>
+<p>By default, Xyra looks for templates in the <code>templates/</code> directory. You can change it with the <code>templates_directory</code> parameter.</p>
+<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span>
+
+<span class="c1"># Initialize with templates directory</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">templates_directory</span><span class="o">=</span><span class="s2">&quot;templates&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<h2 id="render-template">Render Template</h2>
+<p>To render a template, use the <code>render()</code> method on the Response object:</p>
+<div class="hljs"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/page&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">render_page</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;page.html&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;My Page&quot;</span><span class="p">,</span> <span class="n">users</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;Bob&quot;</span><span class="p">])</span>
+</code></pre></div>
+
+<p>The first parameter is the template file name, followed by context variables that will be available in the template.</p>
+<h2 id="html-template">HTML Template</h2>
+<p>Templates use Jinja2 syntax. Here is an example HTML template:</p>
+<p>{% raw %}</p>
+<div class="hljs"><pre><span></span><code><span class="cm">&lt;!-- templates/page.html --&gt;</span>
+<span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;en&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content</span><span class="o">=</span><span class="s">&quot;width=device-width, initial-scale=1.0&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;{{ static(&#39;css/style.css&#39;) }}&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">header</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">nav</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;{{ url_for(&#39;home&#39;) }}&quot;</span><span class="p">&gt;</span>Home<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;{{ url_for(&#39;about&#39;) }}&quot;</span><span class="p">&gt;</span>About<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+        <span class="p">&lt;/</span><span class="nt">nav</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">header</span><span class="p">&gt;</span>
+
+    <span class="p">&lt;</span><span class="nt">main</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">h2</span><span class="p">&gt;</span>Users<span class="p">&lt;/</span><span class="nt">h2</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+        {% for user in users %}
+            <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>{{ user }}<span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+        {% endfor %}
+        <span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+
+        {% if users %}
+            <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Total users: {{ users|length }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+        {% else %}
+            <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>No users found.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+        {% endif %}
+    <span class="p">&lt;/</span><span class="nt">main</span><span class="p">&gt;</span>
+
+    <span class="p">&lt;</span><span class="nt">footer</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span><span class="ni">&amp;copy;</span> {{ current_year }} My App<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">footer</span><span class="p">&gt;</span>
+
+    <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;{{ static(&#39;js/app.js&#39;) }}&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<p>{% endraw %}</p>
+<h2 id="jinja2-syntax">Jinja2 Syntax</h2>
+<h3 id="variables">Variables</h3>
+<p>Use <code>{{ variable }}</code> to display variable values:</p>
+<div class="hljs"><pre><span></span><code><span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>Hello, {{ name }}!<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Age: {{ age }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<h3 id="filters">Filters</h3>
+<p>Filters modify variable values. Use the pipe <code>|</code> to apply a filter:</p>
+<div class="hljs"><pre><span></span><code><span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>{{ name|upper }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>  <span class="cm">&lt;!-- ALL CAPS --&gt;</span>
+<span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>{{ price|currency }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>  <span class="cm">&lt;!-- $1,234.56 --&gt;</span>
+<span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>{{ text|truncate(50) }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>  <span class="cm">&lt;!-- Truncate text to 50 characters --&gt;</span>
+</code></pre></div>
+
+<p>Built-in Jinja2 filters:
+- <code>upper</code>, <code>lower</code>: Change case
+- <code>truncate</code>: Truncate text
+- <code>length</code>: Length of string/list
+- <code>default</code>: Default value if empty</p>
+<h3 id="control-structures">Control Structures</h3>
+<h4 id="if-statement">If Statement</h4>
+<p>{% raw %}</p>
+<div class="hljs"><pre><span></span><code>{% if user.is_admin %}
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Welcome, admin!<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+{% elif user.is_moderator %}
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Welcome, moderator!<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+{% else %}
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Welcome, user!<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+{% endif %}
+</code></pre></div>
+
+<p>{% endraw %}</p>
+<h4 id="for-loop">For Loop</h4>
+<p>{% raw %}</p>
+<div class="hljs"><pre><span></span><code><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+{% for item in items %}
+    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>{{ item.name }}<span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+{% endfor %}
+<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<p>{% endraw %}</p>
+<h4 id="macros">Macros</h4>
+<p>{% raw %}</p>
+<div class="hljs"><pre><span></span><code>{% macro render_user(user) %}
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;user&quot;</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">h3</span><span class="p">&gt;</span>{{ user.name }}<span class="p">&lt;/</span><span class="nt">h3</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>{{ user.email }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+{% endmacro %}
+
+{{ render_user(current_user) }}
+</code></pre></div>
+
+<p>{% endraw %}</p>
+<h2 id="custom-filters-and-globals">Custom Filters and Globals</h2>
+<p>Xyra allows you to add custom filters and global functions to templates.</p>
+<h3 id="custom-filters">Custom Filters</h3>
+<div class="hljs"><pre><span></span><code><span class="c1"># Add custom filter</span>
+<span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">add_filter</span><span class="p">(</span><span class="s2">&quot;currency&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">value</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s2">&quot;$&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">symbol</span><span class="si">}{</span><span class="n">value</span><span class="si">:</span><span class="s2">,.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">add_filter</span><span class="p">(</span><span class="s2">&quot;uppercase&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">text</span><span class="p">:</span> <span class="n">text</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+
+<span class="c1"># Usage in template</span>
+<span class="p">{{</span> <span class="mf">1234.56</span> <span class="o">|</span> <span class="n">currency</span> <span class="p">}}</span>  <span class="o">&lt;</span><span class="err">!</span><span class="o">--</span> <span class="err">$</span><span class="mi">1</span><span class="p">,</span><span class="mf">234.56</span> <span class="o">--&gt;</span>
+<span class="p">{{</span> <span class="mf">1234.56</span> <span class="o">|</span> <span class="n">currency</span><span class="p">(</span><span class="s2">&quot;€&quot;</span><span class="p">)</span> <span class="p">}}</span>  <span class="o">&lt;</span><span class="err">!</span><span class="o">--</span> <span class="err">€</span><span class="mi">1</span><span class="p">,</span><span class="mf">234.56</span> <span class="o">--&gt;</span>
+<span class="p">{{</span> <span class="s2">&quot;hello&quot;</span> <span class="o">|</span> <span class="n">uppercase</span> <span class="p">}}</span>  <span class="o">&lt;</span><span class="err">!</span><span class="o">--</span> <span class="n">HELLO</span> <span class="o">--&gt;</span>
+</code></pre></div>
+
+<h3 id="global-functions">Global Functions</h3>
+<div class="hljs"><pre><span></span><code><span class="c1"># Add global function</span>
+<span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;current_year&quot;</span><span class="p">,</span> <span class="mi">2024</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;url_for&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">route</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">route</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Usage in template</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;&amp;</span><span class="n">copy</span><span class="p">;</span> <span class="p">{{</span> <span class="n">current_year</span> <span class="p">}}</span> <span class="n">My</span> <span class="n">App</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;{{ url_for(&#39;about&#39;) }}&quot;</span><span class="o">&gt;</span><span class="n">About</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span>
+</code></pre></div>
+
+<h2 id="static-files">Static Files</h2>
+<p>For static files (CSS, JS, images), use the <code>static()</code> helper:</p>
+<div class="hljs"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;static&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">path</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;/static/</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Then in the template:</p>
+<div class="hljs"><pre><span></span><code><span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;{{ static(&#39;css/style.css&#39;) }}&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;{{ static(&#39;js/app.js&#39;) }}&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">img</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;{{ static(&#39;images/logo.png&#39;) }}&quot;</span> <span class="na">alt</span><span class="o">=</span><span class="s">&quot;Logo&quot;</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<h2 id="render-from-string">Render from String</h2>
+<p>In addition to files, you can also render templates from strings:</p>
+<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">()</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/dynamic&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dynamic_template</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">template_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    &lt;h1&gt;{{ title }}&lt;/h1&gt;</span>
+<span class="s2">    &lt;p&gt;Message: {{ message }}&lt;/p&gt;</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Render from string</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">render_string</span><span class="p">(</span><span class="n">template_string</span><span class="p">,</span> 
+                                      <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Dynamic Page&quot;</span><span class="p">,</span> 
+                                      <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Hello from string template!&quot;</span><span class="p">)</span>
+
+    <span class="n">res</span><span class="o">.</span><span class="n">html</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+</code></pre></div>
+
+<h2 id="complete-example">Complete Example</h2>
+<p>Here is a complete application example with templating:</p>
+<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">templates_directory</span><span class="o">=</span><span class="s2">&quot;templates&quot;</span><span class="p">)</span>
+
+<span class="c1"># Setup custom filters and globals</span>
+<span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">add_filter</span><span class="p">(</span><span class="s2">&quot;currency&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">value</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Rp</span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;current_year&quot;</span><span class="p">,</span> <span class="mi">2024</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;static&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">path</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;/static/</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Routes</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">home</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">products</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Laptop&quot;</span><span class="p">,</span> <span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="mi">15000000</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;Electronics&quot;</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Book&quot;</span><span class="p">,</span> <span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="mi">50000</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;Education&quot;</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Chair&quot;</span><span class="p">,</span> <span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="mi">750000</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;Furniture&quot;</span><span class="p">}</span>
+    <span class="p">]</span>
+
+    <span class="n">res</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;home.html&quot;</span><span class="p">,</span> 
+              <span class="n">title</span><span class="o">=</span><span class="s2">&quot;My Store&quot;</span><span class="p">,</span> 
+              <span class="n">products</span><span class="o">=</span><span class="n">products</span><span class="p">,</span>
+              <span class="n">featured_product</span><span class="o">=</span><span class="n">products</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/product/</span><span class="si">{product_id}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">product_detail</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">product_id</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;product_id&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Simulate get product from database</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">product_id</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Product </span><span class="si">{</span><span class="n">product_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="mi">100000</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;This is product </span><span class="si">{</span><span class="n">product_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;General&quot;</span>
+    <span class="p">}</span>
+
+    <span class="n">res</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;product.html&quot;</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="n">product</span><span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/about&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">about</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;about.html&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;About Us&quot;</span><span class="p">)</span>
+
+<span class="c1"># Static files</span>
+<span class="n">app</span><span class="o">.</span><span class="n">static_files</span><span class="p">(</span><span class="s2">&quot;/static&quot;</span><span class="p">,</span> <span class="s2">&quot;static&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Template <code>templates/home.html</code>:</p>
+<p>{% raw %}</p>
+<div class="hljs"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;{{ static(&#39;css/style.css&#39;) }}&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">header</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">nav</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;/&quot;</span><span class="p">&gt;</span>Home<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;/about&quot;</span><span class="p">&gt;</span>About<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+        <span class="p">&lt;/</span><span class="nt">nav</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">header</span><span class="p">&gt;</span>
+
+    <span class="p">&lt;</span><span class="nt">main</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">section</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;featured&quot;</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">h2</span><span class="p">&gt;</span>Featured Product<span class="p">&lt;/</span><span class="nt">h2</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;product&quot;</span><span class="p">&gt;</span>
+                <span class="p">&lt;</span><span class="nt">h3</span><span class="p">&gt;</span>{{ featured_product.name }}<span class="p">&lt;/</span><span class="nt">h3</span><span class="p">&gt;</span>
+                <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Price: {{ featured_product.price | currency }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+                <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Category: {{ featured_product.category }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+            <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;/</span><span class="nt">section</span><span class="p">&gt;</span>
+
+        <span class="p">&lt;</span><span class="nt">section</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;products&quot;</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">h2</span><span class="p">&gt;</span>All Products<span class="p">&lt;/</span><span class="nt">h2</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;product-grid&quot;</span><span class="p">&gt;</span>
+            {% for product in products %}
+                <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;product-card&quot;</span><span class="p">&gt;</span>
+                    <span class="p">&lt;</span><span class="nt">h3</span><span class="p">&gt;</span>{{ product.name }}<span class="p">&lt;/</span><span class="nt">h3</span><span class="p">&gt;</span>
+                    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Price: {{ product.price | currency }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+                    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Category: {{ product.category }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+                    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;/product/{{ loop.index }}&quot;</span><span class="p">&gt;</span>View Details<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+                <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+            {% endfor %}
+            <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;/</span><span class="nt">section</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">main</span><span class="p">&gt;</span>
+
+    <span class="p">&lt;</span><span class="nt">footer</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span><span class="ni">&amp;copy;</span> {{ current_year }} {{ title }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">footer</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<p>{% endraw %}</p>
+<h2 id="templating-tips">Templating Tips</h2>
+<ol>
+<li><strong>Use inheritance</strong>: Leverage Jinja2 template inheritance for consistent layouts</li>
+<li><strong>Validate context</strong>: Ensure all variables used in the template are available in the context</li>
+<li><strong>Escape output</strong>: Jinja2 automatically escapes HTML, but be careful with the <code>|safe</code> filter</li>
+<li><strong>Performance optimization</strong>: Use caching for frequently used templates</li>
+<li><strong>File organization</strong>: Separate templates into subfolders based on features</li>
+</ol>
+<hr />
+<p><a href="../README.md">Back to Table of Contents</a></p>
+            </div>
+        </div>
+    </main>
+    <footer class="bg-white border-t border-gray-200">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm text-gray-500">&copy; <span id="current-year"></span> Xyra Framework. Made with ❤️</p>
+        </div>
+        <script>
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+    </footer>
+</body>
+</html>

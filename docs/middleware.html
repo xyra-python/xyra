@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XYRA Documentation - Middleware</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="index.html" class="text-2xl font-bold text-primary">XYRA</a>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                        <a href="getting-started.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Getting Started</a>
+                        <a href="installation.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Installation</a>
+                        <a href="api-reference.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">API Reference</a>
+                        <a href="routing.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Routing</a>
+                        <a href="request-response.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Request & Response</a>
+                        <a href="middleware.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Middleware</a>
+                        <a href="templating.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Templating</a>
+                        <a href="static-files.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Static Files</a>
+                        <a href="websockets.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">WebSockets</a>
+                        <a href="logger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Logger</a>
+                        <a href="swagger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Swagger</a>
+                        <a href="examples.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Examples</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="px-4 py-6 sm:px-0">
+            <div class="bg-white shadow rounded-lg p-6">
+                <hr />
+<h2 id="layout-default">layout: default</h2>
+<h1 id="middleware-in-xyra">Middleware in Xyra</h1>
+<p>Middleware are functions that are executed before the main route handler. Middleware allows you to add common logic such as authentication, logging, CORS handling, or input validation to routes.</p>
+<h2 id="how-middleware-works">How Middleware Works</h2>
+<p>Middleware in Xyra are functions that receive <code>req</code> (Request) and <code>res</code> (Response) parameters. They are executed in the order they are registered before the route handler.</p>
+<div class="hljs"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">my_middleware</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="c1"># Middleware logic</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Request to: </span><span class="si">{</span><span class="n">req</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># Continue to next middleware/route handler</span>
+    <span class="c1"># (handled internally by the framework)</span>
+</code></pre></div>
+
+<h2 id="adding-middleware">Adding Middleware</h2>
+<p>Use the <code>use()</code> method on the App object to add middleware:</p>
+<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">()</span>
+
+<span class="c1"># Logging middleware</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">logging_middleware</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">req</span><span class="o">.</span><span class="n">method</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">req</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># CORS middleware</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">xyra.middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">cors</span>
+
+<span class="c1"># Add middleware</span>
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">logging_middleware</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">cors</span><span class="p">())</span>
+</code></pre></div>
+
+<h2 id="execution-order">Execution Order</h2>
+<p>Middleware are executed in the order they are added:</p>
+<div class="hljs"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">middleware1</span><span class="p">)</span>  <span class="c1"># Executed first</span>
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">middleware2</span><span class="p">)</span>  <span class="c1"># Executed second</span>
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">middleware3</span><span class="p">)</span>  <span class="c1"># Executed third</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/test&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">handler</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+    <span class="c1"># Executed last</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;OK&quot;</span><span class="p">})</span>
+</code></pre></div>
+
+<h2 id="middleware-with-error-handling">Middleware with Error Handling</h2>
+<p>Middleware can stop request processing by sending a response:</p>
+<div class="hljs"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">auth_middleware</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">get_header</span><span class="p">(</span><span class="s2">&quot;Authorization&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span><span class="p">:</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">401</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Unauthorized&quot;</span><span class="p">})</span>
+        <span class="k">return</span>  <span class="c1"># Stop execution</span>
+
+    <span class="c1"># Verify token...</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid_token</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">403</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid token&quot;</span><span class="p">})</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Continue to next handler</span>
+</code></pre></div>
+
+<h2 id="middleware-untuk-validasi">Middleware untuk Validasi</h2>
+<div class="hljs"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">json_validation_middleware</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="s2">&quot;PUT&quot;</span><span class="p">,</span> <span class="s2">&quot;PATCH&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">req</span><span class="o">.</span><span class="n">get_header</span><span class="p">(</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;application/json&quot;</span><span class="p">:</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Content-Type must be application/json&quot;</span><span class="p">})</span>
+            <span class="k">return</span>
+</code></pre></div>
+
+<h2 id="rate-limiting-middleware">Rate Limiting Middleware</h2>
+<p>Xyra provides a built-in rate limiter middleware to limit requests per client:</p>
+<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">xyra.middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">rate_limiter</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">()</span>
+
+<span class="c1"># Add rate limiter: 100 requests per minute per IP</span>
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">rate_limiter</span><span class="p">(</span><span class="n">requests</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">60</span><span class="p">))</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">home</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Hello World&quot;</span><span class="p">})</span>
+</code></pre></div>
+
+<h3 id="rate-limiter-options">Rate Limiter Options</h3>
+<div class="hljs"><pre><span></span><code><span class="c1"># 10 requests per second</span>
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">rate_limiter</span><span class="p">(</span><span class="n">requests</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="c1"># 1000 requests per hour</span>
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">rate_limiter</span><span class="p">(</span><span class="n">requests</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">3600</span><span class="p">))</span>
+
+<span class="c1"># Custom key function (by user ID instead of IP)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_user_key</span><span class="p">(</span><span class="n">req</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">req</span><span class="o">.</span><span class="n">get_header</span><span class="p">(</span><span class="s2">&quot;X-User-ID&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;anonymous&quot;</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">rate_limiter</span><span class="p">(</span><span class="n">requests</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">key_func</span><span class="o">=</span><span class="n">get_user_key</span><span class="p">))</span>
+</code></pre></div>
+
+<h3 id="rate-limit-headers">Rate Limit Headers</h3>
+<p>The middleware adds standard rate limit headers:</p>
+<ul>
+<li><code>X-RateLimit-Limit</code>: Maximum requests allowed</li>
+<li><code>X-RateLimit-Remaining</code>: Remaining requests in current window</li>
+<li><code>X-RateLimit-Reset</code>: Time when the limit resets (Unix timestamp)</li>
+</ul>
+<h3 id="rate-limit-response">Rate Limit Response</h3>
+<p>When limit is exceeded, returns HTTP 429 with:</p>
+<div class="hljs"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Too Many Requests&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Rate limit exceeded. Please try again later.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;retry_after&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Plus <code>Retry-After</code> header with seconds until reset.</p>
+<h2 id="middleware-untuk-static-files">Middleware untuk Static Files</h2>
+<div class="hljs"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">static_files_middleware</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;/static/&quot;</span><span class="p">):</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">url</span><span class="p">[</span><span class="mi">8</span><span class="p">:]</span>  <span class="c1"># Remove &quot;/static/&quot;</span>
+        <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;static&quot;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">full_path</span><span class="p">):</span>
+            <span class="c1"># Serve file (simplified)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">set_header</span><span class="p">(</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">,</span> <span class="s2">&quot;application/octet-stream&quot;</span><span class="p">)</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+            <span class="c1"># In real implementation, you&#39;d stream the file</span>
+            <span class="k">return</span>
+
+        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;File not found&quot;</span><span class="p">})</span>
+</code></pre></div>
+
+<h2 id="full-example">Full example</h2>
+<p>This example middleware in xyra framework:</p>
+<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">xyra.middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">rate_limiter</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">()</span>
+
+<span class="c1"># Rate limiting: 100 requests per minute</span>
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">rate_limiter</span><span class="p">(</span><span class="n">requests</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">60</span><span class="p">))</span>
+
+<span class="c1"># CORS middleware</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">xyra.middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">cors</span>
+
+<span class="c1"># Authentication middleware</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">auth_middleware</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="c1"># Skip auth for login and register</span>
+    <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">url</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;/login&quot;</span><span class="p">,</span> <span class="s2">&quot;/register&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">req</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;OPTIONS&quot;</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">token</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">get_header</span><span class="p">(</span><span class="s2">&quot;Authorization&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;Bearer &quot;</span><span class="p">):</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">401</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Authorization header required&quot;</span><span class="p">})</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Verify token (simplified)</span>
+    <span class="n">token_value</span> <span class="o">=</span> <span class="n">token</span><span class="p">[</span><span class="mi">7</span><span class="p">:]</span>  <span class="c1"># Remove &quot;Bearer &quot;</span>
+    <span class="k">if</span> <span class="n">token_value</span> <span class="o">!=</span> <span class="s2">&quot;valid-token&quot;</span><span class="p">:</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">403</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid token&quot;</span><span class="p">})</span>
+        <span class="k">return</span>
+
+<span class="c1"># JSON Content-Type validation</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">json_middleware</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="s2">&quot;PUT&quot;</span><span class="p">,</span> <span class="s2">&quot;PATCH&quot;</span><span class="p">]:</span>
+        <span class="n">content_type</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">get_header</span><span class="p">(</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">content_type</span> <span class="ow">and</span> <span class="s2">&quot;application/json&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">content_type</span><span class="p">:</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Content-Type must be application/json&quot;</span><span class="p">})</span>
+            <span class="k">return</span>
+
+<span class="c1"># Register middleware</span>
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">cors</span><span class="p">())</span>
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">auth_middleware</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">json_middleware</span><span class="p">)</span>
+
+<span class="c1"># Routes</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">home</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Welcome to API&quot;</span><span class="p">,</span> <span class="s2">&quot;middleware&quot;</span><span class="p">:</span> <span class="s2">&quot;applied&quot;</span><span class="p">})</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/login&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">login</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="c1"># Simulate login</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;admin&quot;</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;password&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;password&quot;</span><span class="p">:</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="s2">&quot;valid-token&quot;</span><span class="p">})</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">401</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid credentials&quot;</span><span class="p">})</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/protected&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">protected</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;This is protected content&quot;</span><span class="p">})</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/data&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_data</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">201</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🚀 API with middleware running on http://localhost:8000&quot;</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">)</span>
+</code></pre></div>
+
+<h2 id="middleware-usage-tips">Middleware Usage Tips</h2>
+<ol>
+<li><strong>Order Matters</strong>: Middleware are executed in registration order</li>
+<li><strong>Error Handling</strong>: Middleware can stop request processing by sending a response</li>
+<li><strong>Performance</strong>: Optimize heavy middleware operations</li>
+<li><strong>Testing</strong>: Test middleware separately from route handlers</li>
+<li><strong>Modularity</strong>: Create middleware focused on single responsibilities</li>
+<li><strong>Configuration</strong>: Use parameters to make configurable middleware</li>
+</ol>
+<h2 id="built-in-middleware">Built-in Middleware</h2>
+<p>Xyra provides several built-in middleware for common use cases:</p>
+<h3 id="cors-middleware">CORS Middleware</h3>
+<p>Handles Cross-Origin Resource Sharing (CORS) by setting appropriate headers on responses.</p>
+<p><strong>Parameters:</strong>
+- <code>allowed_origins</code>: List of allowed origins or <code>"*"</code> (default: <code>["*"]</code>)
+- <code>allowed_methods</code>: List of allowed HTTP methods (default: <code>["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"]</code>)
+- <code>allowed_headers</code>: List of allowed headers (default: <code>["Content-Type", "Authorization", "X-Requested-With"]</code>)
+- <code>allow_credentials</code>: Whether to allow credentials (default: <code>False</code>)
+- <code>max_age</code>: Max age for preflight cache in seconds (default: <code>3600</code>)</p>
+<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra.middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">cors</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">cors</span><span class="p">(</span>
+    <span class="n">allowed_origins</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;http://localhost:3000&quot;</span><span class="p">,</span> <span class="s2">&quot;https://myapp.com&quot;</span><span class="p">],</span>
+    <span class="n">allowed_methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span> <span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="s2">&quot;PUT&quot;</span><span class="p">,</span> <span class="s2">&quot;DELETE&quot;</span><span class="p">],</span>
+    <span class="n">allowed_headers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">,</span> <span class="s2">&quot;Authorization&quot;</span><span class="p">],</span>
+    <span class="n">allow_credentials</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">max_age</span><span class="o">=</span><span class="mi">3600</span>
+<span class="p">))</span>
+</code></pre></div>
+
+<h3 id="gzip-compression">Gzip Compression</h3>
+<p>Compresses response data using gzip compression when the client supports it and the response size meets the minimum threshold.</p>
+<p><strong>Parameters:</strong>
+- <code>minimum_size</code>: Minimum response size to compress in bytes (default: <code>1024</code>)
+- <code>compress_level</code>: Gzip compression level (1-9, default: <code>6</code>)</p>
+<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra.middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">gzip_middleware</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">gzip_middleware</span><span class="p">(</span><span class="n">minimum_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">compress_level</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span>
+</code></pre></div>
+
+<h3 id="https-redirect">HTTPS Redirect</h3>
+<p>Redirects HTTP requests to HTTPS to enforce secure connections.</p>
+<p><strong>Parameters:</strong>
+- <code>redirect_status_code</code>: HTTP status code for the redirect (301 or 302, default: <code>301</code>)</p>
+<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra.middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">https_redirect_middleware</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">https_redirect_middleware</span><span class="p">(</span><span class="n">redirect_status_code</span><span class="o">=</span><span class="mi">301</span><span class="p">))</span>
+</code></pre></div>
+
+<h3 id="trusted-host">Trusted Host</h3>
+<p>Validates that the request's <code>Host</code> header is in the list of allowed hosts to prevent host header attacks.</p>
+<p><strong>Parameters:</strong>
+- <code>allowed_hosts</code>: List of allowed hostnames</p>
+<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra.middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">trusted_host_middleware</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">trusted_host_middleware</span><span class="p">(</span><span class="n">allowed_hosts</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;myapp.com&quot;</span><span class="p">,</span> <span class="s2">&quot;api.myapp.com&quot;</span><span class="p">]))</span>
+</code></pre></div>
+
+<h3 id="rate-limiter">Rate Limiter</h3>
+<p>Limits the number of requests per client within a time window using a sliding window algorithm.</p>
+<p><strong>Parameters:</strong>
+- <code>requests</code>: Maximum number of requests allowed per window (default: <code>100</code>)
+- <code>window</code>: Time window in seconds (default: <code>60</code>)
+- <code>key_func</code>: Function to extract the key from the request (default: client IP address)</p>
+<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra.middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">rate_limiter</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">rate_limiter</span><span class="p">(</span><span class="n">requests</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">60</span><span class="p">))</span>
+
+<span class="c1"># Custom key function (e.g., by user ID)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_user_key</span><span class="p">(</span><span class="n">req</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">req</span><span class="o">.</span><span class="n">get_header</span><span class="p">(</span><span class="s2">&quot;X-User-ID&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;anonymous&quot;</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">rate_limiter</span><span class="p">(</span><span class="n">requests</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">key_func</span><span class="o">=</span><span class="n">get_user_key</span><span class="p">))</span>
+</code></pre></div>
+
+<hr />
+<p><a href="../README.md">Back to Table of Contents</a></p>
+            </div>
+        </div>
+    </main>
+    <footer class="bg-white border-t border-gray-200">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm text-gray-500">&copy; <span id="current-year"></span> Xyra Framework. Made with ❤️</p>
+        </div>
+        <script>
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+    </footer>
+</body>
+</html>

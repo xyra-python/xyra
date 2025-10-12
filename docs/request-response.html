@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XYRA Documentation - Request Response</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="index.html" class="text-2xl font-bold text-primary">XYRA</a>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                        <a href="getting-started.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Getting Started</a>
+                        <a href="installation.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Installation</a>
+                        <a href="api-reference.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">API Reference</a>
+                        <a href="routing.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Routing</a>
+                        <a href="request-response.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Request & Response</a>
+                        <a href="middleware.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Middleware</a>
+                        <a href="templating.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Templating</a>
+                        <a href="static-files.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Static Files</a>
+                        <a href="websockets.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">WebSockets</a>
+                        <a href="logger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Logger</a>
+                        <a href="swagger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Swagger</a>
+                        <a href="examples.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Examples</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="px-4 py-6 sm:px-0">
+            <div class="bg-white shadow rounded-lg p-6">
+                <hr />
+<h2 id="layout-default">layout: default</h2>
+<h1 id="request-response-in-xyra">Request &amp; Response in Xyra</h1>
+<p>In Xyra, each route handler receives two main parameters: <code>Request</code> and <code>Response</code>. These objects provide full access to HTTP request data and complete control over the response sent back to the client.</p>
+<h2 id="request-object">Request Object</h2>
+    <p>The <code>Request</code> object contains all information about the incoming HTTP request, including headers, body, parameters, and query string.</p>
+<h3 id="properties">Properties</h3>
+<div class="hljs"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/info&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">request_info</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="c1"># HTTP Method</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">method</span>  <span class="c1"># &quot;GET&quot;, &quot;POST&quot;, etc</span>
+
+    <span class="c1"># Full URL</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">url</span>  <span class="c1"># &quot;http://localhost:8000/info?page=1&quot;</span>
+
+    <span class="c1"># Headers as dictionary</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">headers</span>
+    <span class="n">user_agent</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">get_header</span><span class="p">(</span><span class="s2">&quot;User-Agent&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Content type and length</span>
+    <span class="n">content_type</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">content_type</span>
+    <span class="n">content_length</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">content_length</span>
+
+    <span class="c1"># Route parameters</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">params</span>  <span class="c1"># Dictionary of route parameters</span>
+
+    <span class="c1"># Raw query string</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">query</span>  <span class="c1"># &quot;?page=1&amp;limit=10&quot;</span>
+
+    <span class="c1"># Parsed query parameters</span>
+    <span class="n">query_params</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">query_params</span>  <span class="c1"># Dictionary with list values</span>
+
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span>
+        <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="n">method</span><span class="p">,</span>
+        <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span>
+        <span class="s2">&quot;headers&quot;</span><span class="p">:</span> <span class="n">headers</span><span class="p">,</span>
+        <span class="s2">&quot;content_type&quot;</span><span class="p">:</span> <span class="n">content_type</span><span class="p">,</span>
+        <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="n">params</span><span class="p">,</span>
+        <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span>
+        <span class="s2">&quot;query_params&quot;</span><span class="p">:</span> <span class="n">query_params</span>
+    <span class="p">})</span>
+</code></pre></div>
+
+<h3 id="methods">Methods</h3>
+<h4 id="get_headername-defaultnone"><code>get_header(name, default=None)</code></h4>
+<p>Retrieves the value of a specific header.</p>
+<div class="hljs"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/headers&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_headers</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">auth_token</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">get_header</span><span class="p">(</span><span class="s2">&quot;Authorization&quot;</span><span class="p">)</span>
+    <span class="n">content_type</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">get_header</span><span class="p">(</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">,</span> <span class="s2">&quot;application/json&quot;</span><span class="p">)</span>
+
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span>
+        <span class="s2">&quot;auth_token&quot;</span><span class="p">:</span> <span class="n">auth_token</span><span class="p">,</span>
+        <span class="s2">&quot;content_type&quot;</span><span class="p">:</span> <span class="n">content_type</span>
+    <span class="p">})</span>
+</code></pre></div>
+
+<h4 id="get_parameterindex"><code>get_parameter(index)</code></h4>
+<p>Retrieves route parameters by index (rarely used, better to use <code>req.params</code>).</p>
+<h4 id="text"><code>text()</code></h4>
+<p>Retrieves the request body as text.</p>
+<div class="hljs"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/text&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_text</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">text_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;received_text&quot;</span><span class="p">:</span> <span class="n">text_data</span><span class="p">})</span>
+</code></pre></div>
+
+<h4 id="json"><code>json()</code></h4>
+<p>Parses the request body as JSON.</p>
+<div class="hljs"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/json&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_json</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;received_json&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid JSON&quot;</span><span class="p">})</span>
+</code></pre></div>
+
+<h4 id="form"><code>form()</code></h4>
+<p>Parses the request body as form data.</p>
+<div class="hljs"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/form&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_form</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">form_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">form</span><span class="p">()</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;received_form&quot;</span><span class="p">:</span> <span class="n">form_data</span><span class="p">})</span>
+</code></pre></div>
+
+<h4 id="is_json"><code>is_json()</code></h4>
+<p>Checks if the content-type is JSON.</p>
+<div class="hljs"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/smart&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">smart_handler</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">is_json</span><span class="p">():</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+    <span class="k">elif</span> <span class="n">req</span><span class="o">.</span><span class="n">is_form</span><span class="p">():</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">form</span><span class="p">()</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;form&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">text</span><span class="p">})</span>
+</code></pre></div>
+
+<h4 id="is_form"><code>is_form()</code></h4>
+<p>Checks if the content-type is form data.</p>
+<h2 id="response-object">Response Object</h2>
+    <p>The <code>Response</code> object is used to send responses back to the client. You can set status codes, headers, and response body.</p>
+<h3 id="methods_1">Methods</h3>
+<h4 id="jsondata"><code>json(data)</code></h4>
+<p>Sends a JSON response.</p>
+<div class="hljs"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/data&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">api_data</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;users&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;Bob&quot;</span><span class="p">],</span> <span class="s2">&quot;total&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</code></pre></div>
+
+<h4 id="htmlcontent"><code>html(content)</code></h4>
+<p>Sends an HTML response.</p>
+<div class="hljs"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/page&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">html_page</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="s2">&quot;&lt;h1&gt;Hello World&lt;/h1&gt;&lt;p&gt;This is HTML response&lt;/p&gt;&quot;</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">html</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+</code></pre></div>
+
+<h4 id="textcontent"><code>text(content)</code></h4>
+<p>Sends a plain text response.</p>
+<div class="hljs"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/text&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">text_response</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;This is plain text response&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<h4 id="statuscode"><code>status(code)</code></h4>
+<p>Sets the HTTP status code.</p>
+<div class="hljs"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/not-found&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">not_found</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Not Found&quot;</span><span class="p">})</span>
+</code></pre></div>
+
+<h4 id="set_headername-value"><code>set_header(name, value)</code></h4>
+<p>Sets a response header.</p>
+<div class="hljs"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/custom-headers&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">custom_headers</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">set_header</span><span class="p">(</span><span class="s2">&quot;X-Custom-Header&quot;</span><span class="p">,</span> <span class="s2">&quot;My Value&quot;</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">set_header</span><span class="p">(</span><span class="s2">&quot;Cache-Control&quot;</span><span class="p">,</span> <span class="s2">&quot;no-cache&quot;</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Check headers&quot;</span><span class="p">})</span>
+</code></pre></div>
+
+<h4 id="redirecturl"><code>redirect(url)</code></h4>
+<p>Redirects to another URL.</p>
+<div class="hljs"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/old-page&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">old_page</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s2">&quot;/new-page&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<h4 id="set_cookiename-value"><code>set_cookie(name, value)</code></h4>
+<p>Sets a cookie.</p>
+<div class="hljs"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/set-cookie&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_cookie_example</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="s2">&quot;session_id&quot;</span><span class="p">,</span> <span class="s2">&quot;abc123&quot;</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="s2">&quot;theme&quot;</span><span class="p">,</span> <span class="s2">&quot;dark&quot;</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="mi">86400</span><span class="p">)</span>  <span class="c1"># 24 hours</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Cookies set&quot;</span><span class="p">})</span>
+</code></pre></div>
+
+<h4 id="rendertemplate-context"><code>render(template, **context)</code></h4>
+<p>Renders a template (see <a href="templating.html">Templating</a>).</p>
+<div class="hljs"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/template&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">render_template_example</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;page.html&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;My Page&quot;</span><span class="p">,</span> <span class="n">users</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;Bob&quot;</span><span class="p">])</span>
+</code></pre></div>
+
+<h2 id="complete-example">Complete Example</h2>
+<p>Here is a complete example demonstrating the use of Request and Response:</p>
+<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">()</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/user/</span><span class="si">{user_id}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_user</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">user_id</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user_id&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Validate parameter</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_id</span><span class="p">:</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;User ID is required&quot;</span><span class="p">})</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Simulate database lookup</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;User </span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;user</span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">@example.com&quot;</span><span class="p">}</span>
+
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/user&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_user</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="c1"># Check content type</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">req</span><span class="o">.</span><span class="n">is_json</span><span class="p">():</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Content-Type must be application/json&quot;</span><span class="p">})</span>
+        <span class="k">return</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">user_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+        <span class="c1"># Validate data</span>
+        <span class="n">required_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;email&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">required_fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">user_data</span><span class="p">:</span>
+                <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+                <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2"> is required&quot;</span><span class="p">})</span>
+                <span class="k">return</span>
+
+        <span class="c1"># Simulate create user</span>
+        <span class="n">user_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;123&quot;</span>  <span class="c1"># Generated ID</span>
+
+        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">201</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">set_header</span><span class="p">(</span><span class="s2">&quot;Location&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;/user/</span><span class="si">{</span><span class="n">user_data</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">user_data</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid JSON data&quot;</span><span class="p">})</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/search&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">search_users</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="c1"># Query parameters</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">query_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;q&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">query_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;limit&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;10&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">query_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;offset&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># Simulate search</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;User </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;user</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">@example.com&quot;</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">limit</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">query</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="sa">f</span><span class="s2">&quot;user</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="p">]</span>
+
+    <span class="n">res</span><span class="o">.</span><span class="n">set_header</span><span class="p">(</span><span class="s2">&quot;X-Total-Count&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)))</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span>
+        <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span>
+        <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="n">limit</span><span class="p">,</span>
+        <span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="n">offset</span><span class="p">,</span>
+        <span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="n">results</span>
+    <span class="p">})</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/user/</span><span class="si">{user_id}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">delete_user</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">user_id</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user_id&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_id</span><span class="p">:</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;User ID is required&quot;</span><span class="p">})</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Simulate delete</span>
+    <span class="c1"># In real app, check if user exists and delete from database</span>
+
+    <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">204</span><span class="p">)</span>  <span class="c1"># No Content</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">)</span>
+</code></pre></div>
+
+<h2 id="usage-tips">Usage Tips</h2>
+<ol>
+<li><strong>Always validate input</strong>: Check parameters and request body before processing</li>
+<li><strong>Use appropriate status codes</strong>: 200 for OK, 201 for Created, 400 for Bad Request, 404 for Not Found, 500 for Internal Error</li>
+<li><strong>Set appropriate headers</strong>: Content-Type, Cache-Control, CORS headers, etc</li>
+<li><strong>Handle errors well</strong>: Use try-catch for JSON parsing and other operations</li>
+<li><strong>Use async for I/O</strong>: Use <code>await</code> for <code>req.json()</code>, <code>req.text()</code>, etc</li>
+</ol>
+<hr />
+<p><a href="README.html">Back to Table of Contents</a></p>
+            </div>
+        </div>
+    </main>
+    <footer class="bg-white border-t border-gray-200">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm text-gray-500">&copy; <span id="current-year"></span> Xyra Framework. Made with ❤️</p>
+        </div>
+        <script>
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+    </footer>
+</body>
+</html>

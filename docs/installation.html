@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XYRA Documentation - Installation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="index.html" class="text-2xl font-bold text-primary">XYRA</a>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                        <a href="getting-started.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Getting Started</a>
+                        <a href="installation.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Installation</a>
+                        <a href="api-reference.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">API Reference</a>
+                        <a href="routing.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Routing</a>
+                        <a href="request-response.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Request & Response</a>
+                        <a href="middleware.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Middleware</a>
+                        <a href="templating.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Templating</a>
+                        <a href="static-files.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Static Files</a>
+                        <a href="websockets.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">WebSockets</a>
+                        <a href="logger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Logger</a>
+                        <a href="swagger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Swagger</a>
+                        <a href="examples.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Examples</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="px-4 py-6 sm:px-0">
+            <div class="bg-white shadow rounded-lg p-6">
+                <hr />
+<h2 id="layout-default">layout: default</h2>
+<h1 id="installing-xyra-framework">Installing Xyra Framework</h1>
+<p>This guide will help you install Xyra on your system.</p>
+<h2 id="system-requirements">System Requirements</h2>
+<ul>
+<li><strong>Python</strong>: 3.11 or higher</li>
+<li><strong>Operating System</strong>: Linux, macOS, or Windows</li>
+<li><strong>Package Manager</strong>: pip (comes with Python)</li>
+</ul>
+<h2 id="installation-methods">Installation Methods</h2>
+<h3 id="method-1-install-from-pypi-recommended">Method 1: Install from PyPI (Recommended)</h3>
+<p>The easiest way to install Xyra is from PyPI:</p>
+<div class="hljs"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>xyra
+</code></pre></div>
+
+<p>For development or if you want the latest features:</p>
+<div class="hljs"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--pre<span class="w"> </span>xyra
+</code></pre></div>
+
+<h3 id="method-2-install-from-source">Method 2: Install from Source</h3>
+<p>If you want to contribute to Xyra or need the latest development version:</p>
+<div class="hljs"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/xyra-python/xyra.git
+<span class="nb">cd</span><span class="w"> </span>xyra
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</code></pre></div>
+
+<p>This installs Xyra in development mode, so changes to the source code are immediately available.</p>
+<h3 id="method-3-using-poetry">Method 3: Using Poetry</h3>
+<p>If you're using Poetry for dependency management:</p>
+<div class="hljs"><pre><span></span><code>poetry<span class="w"> </span>add<span class="w"> </span>xyra
+</code></pre></div>
+
+<p>Or for development:</p>
+<div class="hljs"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/xyra-python/xyra.git
+<span class="nb">cd</span><span class="w"> </span>xyra
+poetry<span class="w"> </span>install
+</code></pre></div>
+
+<h3 id="method-4-using-uv">Method 4: Using uv</h3>
+<p>For faster package management with uv:</p>
+<div class="hljs"><pre><span></span><code>uv<span class="w"> </span>add<span class="w"> </span>xyra
+</code></pre></div>
+
+<h2 id="dependencies">Dependencies</h2>
+<p>Xyra has minimal dependencies to keep it lightweight:</p>
+<ul>
+<li><strong>socketify</strong>: High-performance networking library</li>
+<li><strong>jinja2</strong>: Template engine for HTML rendering</li>
+<li><strong>typing-extensions</strong>: Backport of typing features for older Python versions</li>
+</ul>
+<p>These dependencies are automatically installed when you install Xyra.</p>
+<h2 id="verifying-installation">Verifying Installation</h2>
+<p>After installation, verify that Xyra is working correctly:</p>
+<div class="hljs"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">xyra</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Xyra installed successfully!&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Version: </span><span class="si">{</span><span class="n">xyra</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p>You can also run a quick test:</p>
+<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">()</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">hello</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Xyra is working!&quot;</span><span class="p">})</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Testing Xyra installation...&quot;</span><span class="p">)</span>
+    <span class="c1"># Just test that the app can be created without errors</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ Xyra is ready to use!&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<h2 id="platform-specific-instructions">Platform-Specific Instructions</h2>
+<h3 id="linux">Linux</h3>
+<p>Xyra works out of the box on most Linux distributions. If you encounter issues with socketify, you may need to install development headers:</p>
+<div class="hljs"><pre><span></span><code><span class="c1"># Ubuntu/Debian</span>
+sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>build-essential<span class="w"> </span>python3-dev
+
+<span class="c1"># CentOS/RHEL</span>
+sudo<span class="w"> </span>yum<span class="w"> </span>groupinstall<span class="w"> </span><span class="s2">&quot;Development Tools&quot;</span>
+sudo<span class="w"> </span>yum<span class="w"> </span>install<span class="w"> </span>python3-devel
+
+<span class="c1"># Arch Linux</span>
+sudo<span class="w"> </span>pacman<span class="w"> </span>-S<span class="w"> </span>base-devel<span class="w"> </span>python
+</code></pre></div>
+
+<h3 id="macos">macOS</h3>
+<p>Xyra works on macOS with Xcode command line tools:</p>
+<div class="hljs"><pre><span></span><code>xcode-select<span class="w"> </span>--install
+</code></pre></div>
+
+<h3 id="windows">Windows</h3>
+<p>Xyra supports Windows, but for the best experience, consider using WSL (Windows Subsystem for Linux) or a Linux container.</p>
+<p>If you must use Windows natively, ensure you have:</p>
+<ul>
+<li>Visual Studio Build Tools (for socketify compilation)</li>
+<li>Windows SDK</li>
+</ul>
+<h2 id="virtual-environments">Virtual Environments</h2>
+<p>It's recommended to use virtual environments to isolate your project dependencies:</p>
+<h3 id="using-venv">Using venv</h3>
+<div class="hljs"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>xyra_env
+<span class="nb">source</span><span class="w"> </span>xyra_env/bin/activate<span class="w">  </span><span class="c1"># On Windows: xyra_env\Scripts\activate</span>
+pip<span class="w"> </span>install<span class="w"> </span>xyra
+</code></pre></div>
+
+<h3 id="using-conda">Using conda</h3>
+<div class="hljs"><pre><span></span><code>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>xyra_env<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11
+conda<span class="w"> </span>activate<span class="w"> </span>xyra_env
+pip<span class="w"> </span>install<span class="w"> </span>xyra
+</code></pre></div>
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="common-installation-issues">Common Installation Issues</h3>
+<ol>
+<li>
+<p><strong>Permission denied</strong>: Use <code>pip install --user xyra</code> or use a virtual environment</p>
+</li>
+<li>
+<p><strong>Compilation errors</strong>: Ensure you have build tools installed (see platform-specific instructions above)</p>
+</li>
+<li>
+<p><strong>Import errors after installation</strong>: Try reinstalling with <code>pip install --force-reinstall xyra</code></p>
+</li>
+<li>
+<p><strong>SSL certificate issues</strong>: Update pip and certificates:
+   <code>bash
+   pip install --upgrade pip
+   pip install --upgrade certifi</code></p>
+</li>
+</ol>
+<h3 id="checking-python-version">Checking Python Version</h3>
+<p>Ensure you have the correct Python version:</p>
+<div class="hljs"><pre><span></span><code>python<span class="w"> </span>--version
+<span class="c1"># Should show Python 3.11 or higher</span>
+</code></pre></div>
+
+<h3 id="checking-pip-version">Checking pip Version</h3>
+<p>Make sure pip is up to date:</p>
+<div class="hljs"><pre><span></span><code>pip<span class="w"> </span>--version
+pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>pip
+</code></pre></div>
+
+<h3 id="firewallantivirus-issues">Firewall/Antivirus Issues</h3>
+<p>If installation fails due to network issues, temporarily disable your firewall/antivirus or configure them to allow pip downloads.</p>
+<h2 id="upgrading-xyra">Upgrading Xyra</h2>
+<p>To upgrade to the latest version:</p>
+<div class="hljs"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>xyra
+</code></pre></div>
+
+<p>For development installations:</p>
+<div class="hljs"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/path/to/xyra/source
+git<span class="w"> </span>pull
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</code></pre></div>
+
+<h2 id="uninstalling-xyra">Uninstalling Xyra</h2>
+<p>To remove Xyra from your system:</p>
+<div class="hljs"><pre><span></span><code>pip<span class="w"> </span>uninstall<span class="w"> </span>xyra
+</code></pre></div>
+
+<h2 id="next-steps">Next Steps</h2>
+<p>Now that you have Xyra installed, check out:</p>
+<ul>
+<li><a href="getting-started.md">Getting Started</a> - Your first Xyra application</li>
+<li><a href="examples.md">Examples</a> - Complete example applications</li>
+<li><a href="api-reference.md">API Reference</a> - Detailed API documentation</li>
+</ul>
+<hr />
+<p><a href="../README.md">Back to Table of Contents</a></p>
+            </div>
+        </div>
+    </main>
+    <footer class="bg-white border-t border-gray-200">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm text-gray-500">&copy; <span id="current-year"></span> Xyra Framework. Made with ❤️</p>
+        </div>
+        <script>
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+    </footer>
+</body>
+</html>
