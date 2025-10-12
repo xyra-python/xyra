@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XYRA Documentation - Logger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="index.html" class="text-2xl font-bold text-primary">XYRA</a>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                        <a href="getting-started.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Getting Started</a>
+                        <a href="installation.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Installation</a>
+                        <a href="api-reference.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">API Reference</a>
+                        <a href="routing.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Routing</a>
+                        <a href="request-response.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Request & Response</a>
+                        <a href="middleware.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Middleware</a>
+                        <a href="templating.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Templating</a>
+                        <a href="static-files.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Static Files</a>
+                        <a href="websockets.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">WebSockets</a>
+                        <a href="logger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Logger</a>
+                        <a href="swagger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Swagger</a>
+                        <a href="examples.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Examples</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="px-4 py-6 sm:px-0">
+            <div class="bg-white shadow rounded-lg p-6">
+                <hr />
+<h2 id="layout-default">layout: default</h2>
+<h1 id="logger">Logger</h1>
+<p>Xyra provides built-in logging functionality to help you monitor your application's behavior and performance.</p>
+<h2 id="startup-logging">Startup Logging</h2>
+<p>When the server starts, Xyra automatically logs important startup information:</p>
+<div class="hljs"><pre><span></span><code><span class="nv">INFO</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">xyra</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">Started</span><span class="w"> </span><span class="nv">server</span><span class="w"> </span><span class="nv">process</span><span class="w"> </span>[<span class="mi">12345</span>]
+<span class="nv">INFO</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">xyra</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">Waiting</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">application</span><span class="w"> </span><span class="nv">startup</span>.
+<span class="nv">INFO</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">xyra</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">Application</span><span class="w"> </span><span class="nv">startup</span><span class="w"> </span><span class="nv">complete</span>.
+<span class="nv">INFO</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">xyra</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">Xyra</span><span class="w"> </span><span class="nv">server</span><span class="w"> </span><span class="nv">running</span><span class="w"> </span><span class="nv">on</span><span class="w"> </span><span class="nv">http</span>:<span class="o">//</span><span class="nv">localhost</span>:<span class="mi">8000</span>
+<span class="nv">INFO</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">xyra</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">API</span><span class="w"> </span><span class="nv">docs</span><span class="w"> </span><span class="nv">available</span><span class="w"> </span><span class="nv">at</span><span class="w"> </span><span class="nv">http</span>:<span class="o">//</span><span class="nv">localhost</span>:<span class="mi">8000</span><span class="o">/</span><span class="nv">docs</span>
+<span class="nv">INFO</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">xyra</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">Listening</span><span class="w"> </span><span class="nv">on</span><span class="w"> </span><span class="nv">port</span><span class="w"> </span><span class="mi">8000</span>
+</code></pre></div>
+
+<h2 id="request-logging">Request Logging</h2>
+<p>For each HTTP request, Xyra logs the method, URL, status code, and response time:</p>
+<div class="hljs"><pre><span></span><code>INFO - xyra - GET http://localhost:8000/ 200 5ms
+INFO - xyra - POST http://localhost:8000/api/users 201 45ms
+INFO - xyra - GET http://localhost:8000/api/users/1 404 12ms
+</code></pre></div>
+
+<h2 id="controlling-logging">Controlling Logging</h2>
+<h3 id="enable-full-logging">Enable Full Logging</h3>
+<p>To enable startup and request logging:</p>
+<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">()</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+
+<h3 id="disable-request-logging-default">Disable Request Logging (Default)</h3>
+<p>By default, only startup messages are shown and request logs are hidden:</p>
+<div class="hljs"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">)</span>
+<span class="c1"># or explicitly</span>
+<span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+
+<p>This will display startup information but not log individual requests.</p>
+<h2 id="custom-logging">Custom Logging</h2>
+<p>You can also use the built-in logger in your application code:</p>
+<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;my_app&quot;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Custom log message&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<h2 id="log-levels">Log Levels</h2>
+<p>Xyra uses Python's standard logging levels:
+- DEBUG
+- INFO (default for startup and requests)
+- WARNING
+- ERROR
+- CRITICAL</p>
+<h2 id="configuration">Configuration</h2>
+<p>Logging is automatically configured when the server starts. For custom configuration, you can modify the logging setup in your application.</p>
+            </div>
+        </div>
+    </main>
+    <footer class="bg-white border-t border-gray-200">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm text-gray-500">&copy; <span id="current-year"></span> Xyra Framework. Made with ❤️</p>
+        </div>
+        <script>
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+    </footer>
+</body>
+</html>

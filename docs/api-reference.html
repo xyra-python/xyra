@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XYRA Documentation - Api Reference</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="index.html" class="text-2xl font-bold text-primary">XYRA</a>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                        <a href="getting-started.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Getting Started</a>
+                        <a href="installation.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Installation</a>
+                        <a href="api-reference.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">API Reference</a>
+                        <a href="routing.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Routing</a>
+                        <a href="request-response.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Request & Response</a>
+                        <a href="middleware.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Middleware</a>
+                        <a href="templating.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Templating</a>
+                        <a href="static-files.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Static Files</a>
+                        <a href="websockets.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">WebSockets</a>
+                        <a href="logger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Logger</a>
+                        <a href="swagger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Swagger</a>
+                        <a href="examples.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Examples</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="px-4 py-6 sm:px-0">
+            <div class="bg-white shadow rounded-lg p-6">
+                <hr />
+<h2 id="layout-default">layout: default</h2>
+<h1 id="xyra-api-reference">Xyra API Reference</h1>
+<p>Complete API documentation for the Xyra framework, including all available classes, methods, and properties.</p>
+<h2 id="app-class">App Class</h2>
+<p>The main class for creating Xyra applications.</p>
+<h3 id="constructor">Constructor</h3>
+<div class="hljs"><pre><span></span><code><span class="n">App</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">templates_directory</span><span class="o">=</span><span class="s2">&quot;templates&quot;</span><span class="p">,</span> <span class="n">swagger_options</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>options</code> (dict, optional): Options for socketify
+- <code>templates_directory</code> (str): Directory for template files (default: "templates")
+- <code>swagger_options</code> (dict, optional): Configuration for Swagger documentation</p>
+<h3 id="methods">Methods</h3>
+<h4 id="routemethod-path-handlernone">route(method, path, handler=None)</h4>
+<p>Register route with specific HTTP method.</p>
+<div class="hljs"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span> <span class="s2">&quot;/users&quot;</span><span class="p">,</span> <span class="n">handler_function</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="s2">&quot;/users&quot;</span><span class="p">,</span> <span class="n">handler_function</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>method</code> (str): HTTP method (GET, POST, PUT, DELETE, etc.)
+- <code>path</code> (str): Route path
+- <code>handler</code> (callable, optional): Handler function</p>
+<p><strong>Returns:</strong> Union[callable, App]</p>
+<h4 id="getpath-handlernone">get(path, handler=None)</h4>
+<p>Register GET route.</p>
+<div class="hljs"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/users&quot;</span><span class="p">,</span> <span class="n">get_users_handler</span><span class="p">)</span>
+</code></pre></div>
+
+<h4 id="postpath-handlernone">post(path, handler=None)</h4>
+<p>Register POST route.</p>
+<div class="hljs"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/users&quot;</span><span class="p">,</span> <span class="n">create_user_handler</span><span class="p">)</span>
+</code></pre></div>
+
+<h4 id="putpath-handlernone">put(path, handler=None)</h4>
+<p>Register PUT route.</p>
+<div class="hljs"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;/users/</span><span class="si">{id}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">update_user_handler</span><span class="p">)</span>
+</code></pre></div>
+
+<h4 id="deletepath-handlernone">delete(path, handler=None)</h4>
+<p>Register DELETE route.</p>
+<div class="hljs"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/users/</span><span class="si">{id}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">delete_user_handler</span><span class="p">)</span>
+</code></pre></div>
+
+<h4 id="patchpath-handlernone">patch(path, handler=None)</h4>
+<p>Register PATCH route.</p>
+<div class="hljs"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;/users/</span><span class="si">{id}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">patch_user_handler</span><span class="p">)</span>
+</code></pre></div>
+
+<h4 id="headpath-handlernone">head(path, handler=None)</h4>
+<p>Register HEAD route.</p>
+<div class="hljs"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="s2">&quot;/users&quot;</span><span class="p">,</span> <span class="n">head_users_handler</span><span class="p">)</span>
+</code></pre></div>
+
+<h4 id="optionspath-handlernone">options(path, handler=None)</h4>
+<p>Register OPTIONS route.</p>
+<div class="hljs"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">options</span><span class="p">(</span><span class="s2">&quot;/users&quot;</span><span class="p">,</span> <span class="n">options_users_handler</span><span class="p">)</span>
+</code></pre></div>
+
+<h4 id="usemiddleware">use(middleware)</h4>
+<p>Add middleware to the application.</p>
+<div class="hljs"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">my_middleware</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+    <span class="c1"># middleware logic</span>
+    <span class="k">pass</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">my_middleware</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>middleware</code> (callable): Middleware function</p>
+<h4 id="static_filespath-directory">static_files(path, directory)</h4>
+<p>Setup serving static files.</p>
+<div class="hljs"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">static_files</span><span class="p">(</span><span class="s2">&quot;/static&quot;</span><span class="p">,</span> <span class="s2">&quot;static&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>path</code> (str): URL path for static files
+- <code>directory</code> (str): Filesystem directory for static files</p>
+<h4 id="websocketpath-handler">websocket(path, handler)</h4>
+<p>Register WebSocket route.</p>
+<div class="hljs"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">websocket</span><span class="p">(</span><span class="s2">&quot;/ws&quot;</span><span class="p">,</span> <span class="n">websocket_handler</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>path</code> (str): WebSocket path
+- <code>handler</code> (callable or dict): WebSocket handler</p>
+<h4 id="listenport8000-host0000">listen(port=8000, host="0.0.0.0")</h4>
+<p>Run the server.</p>
+<div class="hljs"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">)</span>  <span class="c1"># localhost:8000</span>
+<span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">3000</span><span class="p">,</span> <span class="s2">&quot;127.0.0.1&quot;</span><span class="p">)</span>  <span class="c1"># localhost:3000</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>port</code> (int): Port for server (default: 8000)
+- <code>host</code> (str): Host address (default: "0.0.0.0")</p>
+<h3 id="properties">Properties</h3>
+<h4 id="router">router</h4>
+<p>Access to router instance.</p>
+<div class="hljs"><pre><span></span><code><span class="n">routes</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">routes</span>
+</code></pre></div>
+
+<h4 id="middlewares">middlewares</h4>
+<p>List of registered middlewares.</p>
+<div class="hljs"><pre><span></span><code><span class="n">middlewares</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">middlewares</span>
+</code></pre></div>
+
+<h4 id="ws_routes">ws_routes</h4>
+<p>List of registered WebSocket routes.</p>
+<div class="hljs"><pre><span></span><code><span class="n">ws_routes</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">ws_routes</span>
+</code></pre></div>
+
+<h4 id="templates">templates</h4>
+<p>Templating instance.</p>
+<div class="hljs"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">add_filter</span><span class="p">(</span><span class="s2">&quot;custom&quot;</span><span class="p">,</span> <span class="n">custom_filter</span><span class="p">)</span>
+</code></pre></div>
+
+<h2 id="request-class">Request Class</h2>
+<p>Class for handling HTTP requests. Supports both synchronous and asynchronous operations.</p>
+<h3 id="constructor_1">Constructor</h3>
+<div class="hljs"><pre><span></span><code><span class="n">Request</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>req</code>: Internal request object
+- <code>params</code> (dict, optional): Route parameters</p>
+<h3 id="handler-types">Handler Types</h3>
+<p>Xyra supports both synchronous and asynchronous route handlers:</p>
+<div class="hljs"><pre><span></span><code><span class="c1"># Synchronous handler</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/sync&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sync_handler</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;sync&quot;</span><span class="p">})</span>
+
+<span class="c1"># Asynchronous handler</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/async&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">async_handler</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;async&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+</code></pre></div>
+
+<p>Use async handlers for operations requiring <code>await</code> (like <code>req.json()</code>, <code>req.text()</code>, background tasks). Use sync handlers for simple operations.</p>
+<h3 id="properties_1">Properties</h3>
+<h4 id="method">method</h4>
+<p>HTTP method of the request.</p>
+<div class="hljs"><pre><span></span><code><span class="n">method</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">method</span>  <span class="c1"># &quot;GET&quot;, &quot;POST&quot;, etc.</span>
+</code></pre></div>
+
+<p><strong>Type:</strong> str</p>
+<h4 id="url">url</h4>
+<p>Full URL of the request.</p>
+<div class="hljs"><pre><span></span><code><span class="n">url</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">url</span>  <span class="c1"># &quot;http://localhost:8000/users?page=1&quot;</span>
+</code></pre></div>
+
+<p><strong>Type:</strong> str</p>
+<h4 id="headers">headers</h4>
+<p>Dictionary of all headers.</p>
+<div class="hljs"><pre><span></span><code><span class="n">headers</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">headers</span>
+<span class="n">user_agent</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;User-Agent&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Type:</strong> Dict[str, str]</p>
+<h4 id="query">query</h4>
+<p>Raw query string.</p>
+<div class="hljs"><pre><span></span><code><span class="n">query</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">query</span>  <span class="c1"># &quot;?page=1&amp;limit=10&quot;</span>
+</code></pre></div>
+
+<p><strong>Type:</strong> str</p>
+<h4 id="query_params">query_params</h4>
+<p>Parsed query parameters as dictionary with list values.</p>
+<div class="hljs"><pre><span></span><code><span class="n">params</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">query_params</span>
+<span class="n">page</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;page&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+</code></pre></div>
+
+<p><strong>Type:</strong> Dict[str, List[str]]</p>
+<h4 id="params">params</h4>
+<p>Route parameters.</p>
+<div class="hljs"><pre><span></span><code><span class="n">user_id</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user_id&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Type:</strong> Dict[str, str]</p>
+<h4 id="content_type">content_type</h4>
+<p>Content-Type header.</p>
+<div class="hljs"><pre><span></span><code><span class="n">content_type</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">content_type</span>
+</code></pre></div>
+
+<p><strong>Type:</strong> Optional[str]</p>
+<h4 id="content_length">content_length</h4>
+<p>Content-Length header.</p>
+<div class="hljs"><pre><span></span><code><span class="n">length</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">content_length</span>
+</code></pre></div>
+
+<p><strong>Type:</strong> Optional[int]</p>
+<h3 id="methods_1">Methods</h3>
+<h4 id="get_headername-defaultnone">get_header(name, default=None)</h4>
+<p>Get specific header value.</p>
+<div class="hljs"><pre><span></span><code><span class="n">auth</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">get_header</span><span class="p">(</span><span class="s2">&quot;Authorization&quot;</span><span class="p">)</span>
+<span class="n">content_type</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">get_header</span><span class="p">(</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">,</span> <span class="s2">&quot;application/json&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>name</code> (str): Header name
+- <code>default</code> (str, optional): Default value if header doesn't exist</p>
+<p><strong>Returns:</strong> Optional[str]</p>
+<h4 id="get_parameterindex">get_parameter(index)</h4>
+<p>Get route parameter by index.</p>
+<div class="hljs"><pre><span></span><code><span class="n">param</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>index</code> (int): Parameter index</p>
+<p><strong>Returns:</strong> Optional[str]</p>
+<h4 id="text">text()</h4>
+<p>Get request body as text.</p>
+<div class="hljs"><pre><span></span><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handler</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+    <span class="n">text_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+</code></pre></div>
+
+<p><strong>Returns:</strong> str</p>
+<h4 id="json">json()</h4>
+<p>Parse request body as JSON (asynchronous).</p>
+<div class="hljs"><pre><span></span><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handler</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+</code></pre></div>
+
+<p><strong>Returns:</strong> Any</p>
+<p><strong>Raises:</strong> ValueError if JSON is invalid</p>
+<h4 id="parse_jsonjson_string">parse_json(json_string)</h4>
+<p>Parse a JSON string synchronously.</p>
+<div class="hljs"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">handler</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+    <span class="n">json_str</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">query_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">parse_json</span><span class="p">(</span><span class="n">json_str</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>json_string</code> (str): JSON string to parse</p>
+<p><strong>Returns:</strong> Any</p>
+<p><strong>Raises:</strong> ValueError if JSON is invalid</p>
+<h4 id="form">form()</h4>
+<p>Parse request body as form data.</p>
+<div class="hljs"><pre><span></span><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handler</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+    <span class="n">form_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">form</span><span class="p">()</span>
+</code></pre></div>
+
+<p><strong>Returns:</strong> Dict[str, str]</p>
+<h4 id="is_json">is_json()</h4>
+<p>Check if content-type is JSON.</p>
+<div class="hljs"><pre><span></span><code><span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">is_json</span><span class="p">():</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+</code></pre></div>
+
+<p><strong>Returns:</strong> bool</p>
+<h4 id="is_form">is_form()</h4>
+<p>Check if content-type is form data.</p>
+<div class="hljs"><pre><span></span><code><span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">is_form</span><span class="p">():</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">form</span><span class="p">()</span>
+</code></pre></div>
+
+<p><strong>Returns:</strong> bool</p>
+<h2 id="response-class">Response Class</h2>
+<p>Class for creating HTTP responses.</p>
+<h3 id="methods_2">Methods</h3>
+<h4 id="jsondata">json(data)</h4>
+<p>Send JSON response.</p>
+<div class="hljs"><pre><span></span><code><span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">[]})</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>data</code> (Any): Data to be serialized to JSON</p>
+<h4 id="htmlcontent">html(content)</h4>
+<p>Send HTML response.</p>
+<div class="hljs"><pre><span></span><code><span class="n">res</span><span class="o">.</span><span class="n">html</span><span class="p">(</span><span class="s2">&quot;&lt;h1&gt;Hello World&lt;/h1&gt;&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>content</code> (str): HTML content</p>
+<h4 id="textcontent">text(content)</h4>
+<p>Send plain text response.</p>
+<div class="hljs"><pre><span></span><code><span class="n">res</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;Hello World&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>content</code> (str): Text content</p>
+<h4 id="statuscode">status(code)</h4>
+<p>Set HTTP status code.</p>
+<div class="hljs"><pre><span></span><code><span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
+<span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Not found&quot;</span><span class="p">})</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>code</code> (int): HTTP status code</p>
+<h4 id="set_headername-value">set_header(name, value)</h4>
+<p>Set response header.</p>
+<div class="hljs"><pre><span></span><code><span class="n">res</span><span class="o">.</span><span class="n">set_header</span><span class="p">(</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">,</span> <span class="s2">&quot;application/json&quot;</span><span class="p">)</span>
+<span class="n">res</span><span class="o">.</span><span class="n">set_header</span><span class="p">(</span><span class="s2">&quot;X-Custom&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>name</code> (str): Header name
+- <code>value</code> (str): Header value</p>
+<h4 id="redirecturl">redirect(url)</h4>
+<p>Redirect to another URL.</p>
+<div class="hljs"><pre><span></span><code><span class="n">res</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s2">&quot;/login&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>url</code> (str): Target URL</p>
+<h4 id="set_cookiename-value">set_cookie(name, value)</h4>
+<p>Set cookie.</p>
+<div class="hljs"><pre><span></span><code><span class="n">res</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="s2">&quot;session_id&quot;</span><span class="p">,</span> <span class="s2">&quot;abc123&quot;</span><span class="p">)</span>
+<span class="n">res</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="s2">&quot;theme&quot;</span><span class="p">,</span> <span class="s2">&quot;dark&quot;</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="mi">86400</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>name</code> (str): Cookie name
+- <code>value</code> (str): Cookie value
+- <code>max_age</code> (int, optional): Max age in seconds</p>
+<h4 id="rendertemplate-context">render(template, **context)</h4>
+<p>Render template.</p>
+<div class="hljs"><pre><span></span><code><span class="n">res</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;index.html&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Home&quot;</span><span class="p">,</span> <span class="n">users</span><span class="o">=</span><span class="n">users</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>template</code> (str): Template filename
+- <code>**context</code>: Context variables for template</p>
+<h2 id="websocket-class">WebSocket Class</h2>
+<p>Class for handling WebSocket connections.</p>
+<h3 id="methods_3">Methods</h3>
+<h4 id="sendmessage-opcodeopcodetext">send(message, opcode=OpCode.TEXT)</h4>
+<p>Send message to client.</p>
+<div class="hljs"><pre><span></span><code><span class="n">ws</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;Hello World&quot;</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;Binary data&quot;</span><span class="p">,</span> <span class="n">OpCode</span><span class="o">.</span><span class="n">BINARY</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>message</code> (str or bytes): Message content
+- <code>opcode</code> (OpCode): Message type (default: OpCode.TEXT)</p>
+<h4 id="send_textmessage">send_text(message)</h4>
+<p>Send text message.</p>
+<div class="hljs"><pre><span></span><code><span class="n">ws</span><span class="o">.</span><span class="n">send_text</span><span class="p">(</span><span class="s2">&quot;Hello World&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>message</code> (str): Text message</p>
+<h4 id="send_binarymessage">send_binary(message)</h4>
+<p>Send binary message.</p>
+<div class="hljs"><pre><span></span><code><span class="n">ws</span><span class="o">.</span><span class="n">send_binary</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;Binary data&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>message</code> (bytes): Binary data</p>
+<h4 id="publishtopic-message-opcodeopcodetext-compressfalse">publish(topic, message, opcode=OpCode.TEXT, compress=False)</h4>
+<p>Publish message to topic (broadcast).</p>
+<div class="hljs"><pre><span></span><code><span class="n">ws</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="s2">&quot;room1&quot;</span><span class="p">,</span> <span class="s2">&quot;Hello everyone!&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>topic</code> (str): Topic name
+- <code>message</code> (str or bytes): Message content
+- <code>opcode</code> (OpCode): Message type
+- <code>compress</code> (bool): Enable compression</p>
+<h4 id="subscribetopic">subscribe(topic)</h4>
+<p>Subscribe to topic.</p>
+<div class="hljs"><pre><span></span><code><span class="n">ws</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s2">&quot;notifications&quot;</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s2">&quot;room1&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>topic</code> (str): Topic name</p>
+<h4 id="unsubscribetopic">unsubscribe(topic)</h4>
+<p>Unsubscribe from topic.</p>
+<div class="hljs"><pre><span></span><code><span class="n">ws</span><span class="o">.</span><span class="n">unsubscribe</span><span class="p">(</span><span class="s2">&quot;room1&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>topic</code> (str): Topic name</p>
+<h4 id="closecode1000-messagenone">close(code=1000, message=None)</h4>
+<p>Close WebSocket connection.</p>
+<div class="hljs"><pre><span></span><code><span class="n">ws</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># Normal closure</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="mi">1001</span><span class="p">,</span> <span class="s2">&quot;Going away&quot;</span><span class="p">)</span>  <span class="c1"># With code and message</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>code</code> (int): Close code (default: 1000)
+- <code>message</code> (str, optional): Close message</p>
+<h4 id="pingmessageb">ping(message=b"")</h4>
+<p>Send ping frame.</p>
+<div class="hljs"><pre><span></span><code><span class="n">ws</span><span class="o">.</span><span class="n">ping</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;ping data&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>message</code> (str or bytes): Ping data</p>
+<h4 id="pongmessageb">pong(message=b"")</h4>
+<p>Send pong frame.</p>
+<div class="hljs"><pre><span></span><code><span class="n">ws</span><span class="o">.</span><span class="n">pong</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;pong data&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>message</code> (str or bytes): Pong data</p>
+<h3 id="properties_2">Properties</h3>
+<h4 id="closed">closed</h4>
+<p>Check if connection is closed.</p>
+<div class="hljs"><pre><span></span><code><span class="k">if</span> <span class="n">ws</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Connection is closed&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Type:</strong> bool</p>
+<h2 id="templating-class">Templating Class</h2>
+<p>Class for handling template rendering with Jinja2.</p>
+<h3 id="constructor_2">Constructor</h3>
+<div class="hljs"><pre><span></span><code><span class="n">Templating</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="s2">&quot;templates&quot;</span><span class="p">,</span> <span class="n">auto_reload</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>directory</code> (str): Template directory
+- <code>auto_reload</code> (bool): Auto reload templates during development</p>
+<h3 id="methods_4">Methods</h3>
+<h4 id="rendertemplate_name-context">render(template_name, **context)</h4>
+<p>Render template file.</p>
+<div class="hljs"><pre><span></span><code><span class="n">html</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;index.html&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Home&quot;</span><span class="p">,</span> <span class="n">users</span><span class="o">=</span><span class="n">users</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>template_name</code> (str): Template filename
+- <code>**context</code>: Context variables</p>
+<p><strong>Returns:</strong> str</p>
+<h4 id="render_stringtemplate_string-context">render_string(template_string, **context)</h4>
+<p>Render template from string.</p>
+<div class="hljs"><pre><span></span><code><span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;&lt;h1&gt;{{ title }}&lt;/h1&gt;&quot;</span>
+<span class="n">html</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">render_string</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Hello&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>template_string</code> (str): Template content
+- <code>**context</code>: Context variables</p>
+<p><strong>Returns:</strong> str</p>
+<h4 id="add_globalname-value">add_global(name, value)</h4>
+<p>Add global variable to all templates.</p>
+<div class="hljs"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;current_year&quot;</span><span class="p">,</span> <span class="mi">2024</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;url_for&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">route</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">route</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>name</code> (str): Global variable name
+- <code>value</code> (Any): Variable value</p>
+<h4 id="add_filtername-func">add_filter(name, func)</h4>
+<p>Add custom filter.</p>
+<div class="hljs"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">currency_filter</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Rp</span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">add_filter</span><span class="p">(</span><span class="s2">&quot;currency&quot;</span><span class="p">,</span> <span class="n">currency_filter</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>name</code> (str): Filter name
+- <code>func</code> (callable): Filter function</p>
+<h4 id="list_templates">list_templates()</h4>
+<p>List all available templates.</p>
+<div class="hljs"><pre><span></span><code><span class="n">templates</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">list_templates</span><span class="p">()</span>
+</code></pre></div>
+
+<p><strong>Returns:</strong> List[str]</p>
+<h4 id="template_existstemplate_name">template_exists(template_name)</h4>
+<p>Check if template exists.</p>
+<div class="hljs"><pre><span></span><code><span class="k">if</span> <span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">template_exists</span><span class="p">(</span><span class="s2">&quot;index.html&quot;</span><span class="p">):</span>
+    <span class="c1"># Template exists</span>
+    <span class="k">pass</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>template_name</code> (str): Template name</p>
+<p><strong>Returns:</strong> bool</p>
+<h4 id="get_template_sourcetemplate_name">get_template_source(template_name)</h4>
+<p>Get template source code (for debugging).</p>
+<div class="hljs"><pre><span></span><code><span class="n">source</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">uptodate</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">get_template_source</span><span class="p">(</span><span class="s2">&quot;index.html&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>template_name</code> (str): Template name</p>
+<p><strong>Returns:</strong> tuple</p>
+<h2 id="background-tasks">Background Tasks</h2>
+<p>Xyra supports running background tasks asynchronously.</p>
+<h3 id="create_background_taskfunc-args-kwargs">create_background_task(func, <em>args, </em>*kwargs)</h3>
+<p>Create and run a background task.</p>
+<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra.background</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_background_task</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_email</span><span class="p">(</span><span class="n">email</span><span class="p">):</span>
+    <span class="c1"># Simulate sending email</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Email sent to </span><span class="si">{</span><span class="n">email</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/send-email&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_email_endpoint</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Run in background</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">create_background_task</span><span class="p">(</span><span class="n">send_email</span><span class="p">,</span> <span class="n">email</span><span class="p">)</span>
+
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Email will be sent in background&quot;</span><span class="p">})</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>func</code> (callable): Async function to run
+- <code>*args</code>, <code>**kwargs</code>: Arguments for the function</p>
+<p><strong>Returns:</strong> Task object</p>
+<h2 id="concurrency">Concurrency</h2>
+<p>Xyra provides utilities for concurrent operations.</p>
+<h3 id="to_threadfunc">to_thread(func)</h3>
+<p>Run a blocking function in a thread pool.</p>
+<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra.concurrency</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_thread</span>
+
+<span class="nd">@to_thread</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">blocking_operation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="c1"># Simulate blocking I/O</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/compute&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">blocking_operation</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">})</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong>
+- <code>func</code> (callable): Function to run in thread</p>
+<p><strong>Returns:</strong> Decorated async function</p>
+<hr />
+<p><a href="../README.md">Back to Table of Contents</a></p>
+            </div>
+        </div>
+    </main>
+    <footer class="bg-white border-t border-gray-200">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm text-gray-500">&copy; <span id="current-year"></span> Xyra Framework. Made with ❤️</p>
+        </div>
+        <script>
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+    </footer>
+</body>
+</html>
