@@ -33,6 +33,7 @@ The first parameter is the template file name, followed by context variables tha
 
 Templates use Jinja2 syntax. Here is an example HTML template:
 
+{% raw %}
 ```html
 <!-- templates/page.html -->
 <!DOCTYPE html>
@@ -75,6 +76,7 @@ Templates use Jinja2 syntax. Here is an example HTML template:
 </body>
 </html>
 ```
+{% endraw %}
 
 ## Jinja2 Syntax
 
@@ -107,6 +109,7 @@ Built-in Jinja2 filters:
 
 #### If Statement
 
+{% raw %}
 ```html
 {% if user.is_admin %}
     <p>Welcome, admin!</p>
@@ -116,9 +119,11 @@ Built-in Jinja2 filters:
     <p>Welcome, user!</p>
 {% endif %}
 ```
+{% endraw %}
 
 #### For Loop
 
+{% raw %}
 ```html
 <ul>
 {% for item in items %}
@@ -126,9 +131,11 @@ Built-in Jinja2 filters:
 {% endfor %}
 </ul>
 ```
+{% endraw %}
 
 #### Macros
 
+{% raw %}
 ```html
 {% macro render_user(user) %}
     <div class="user">
@@ -139,6 +146,7 @@ Built-in Jinja2 filters:
 
 {{ render_user(current_user) }}
 ```
+{% endraw %}
 
 ## Custom Filters and Globals
 
@@ -265,6 +273,7 @@ if __name__ == "__main__":
 
 Template `templates/home.html`:
 
+{% raw %}
 ```html
 <!DOCTYPE html>
 <html>
@@ -312,6 +321,7 @@ Template `templates/home.html`:
 </body>
 </html>
 ```
+{% endraw %}
 
 ## Templating Tips
 
