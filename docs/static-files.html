@@ -1,235 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XYRA Documentation - Static Files</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#3b82f6',
-                        secondary: '#64748b'
-                    }
-                }
-            }
-        }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
-</head>
-<body class="bg-gray-50 text-gray-900">
-    <header class="bg-white shadow-sm border-b border-gray-200">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex">
-                    <div class="flex-shrink-0 flex items-center">
-                        <a href="index.html" class="text-2xl font-bold text-primary">XYRA</a>
-                    </div>
-                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                        <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
-                        <a href="getting-started.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Getting Started</a>
-                        <a href="installation.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Installation</a>
-                        <a href="api-reference.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">API Reference</a>
-                        <a href="routing.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Routing</a>
-                        <a href="request-response.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Request & Response</a>
-                        <a href="middleware.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Middleware</a>
-                        <a href="templating.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Templating</a>
-                        <a href="static-files.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Static Files</a>
-                        <a href="websockets.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">WebSockets</a>
-                        <a href="logger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Logger</a>
-                        <a href="swagger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Swagger</a>
-                        <a href="examples.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Examples</a>
-                    </div>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="px-4 py-6 sm:px-0">
-            <div class="bg-white shadow rounded-lg p-6">
-                <hr />
-<h2 id="layout-default">layout: default</h2>
-<h1 id="static-files-in-xyra">Static Files in Xyra</h1>
-<p>Xyra allows you to serve static files such as CSS, JavaScript, images, and other files. Static files are stored in a specific directory and accessed through a defined URL path.</p>
-<h2 id="setup-static-files">Setup Static Files</h2>
-<p>Use the <code>static_files()</code> method on the App object to set up serving static files:</p>
-<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span>
+---
+layout: default
+title: "Static Files"
+---
 
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">()</span>
+<h1 id="static-files">Static Files</h1>
+<p>Xyra can serve static files such as CSS, JavaScript, and images. This is useful for serving the assets required by your web application's frontend.</p>
 
-<span class="c1"># Serve static files from the &quot;static&quot; directory to the &quot;/static&quot; path</span>
-<span class="n">app</span><span class="o">.</span><span class="n">static_files</span><span class="p">(</span><span class="s2">&quot;/static&quot;</span><span class="p">,</span> <span class="s2">&quot;static&quot;</span><span class="p">)</span>
-</code></pre></div>
+<h2 id="configuring-static-files">Configuring Static Files</h2>
+<p>You can configure a directory for static files when you create the <code>App</code> instance.</p>
+<pre><code class="language-python">
+from xyra import App
 
-<p>Parameters:
-- First path: The URL path used to access the files (e.g., "/static")
-- Second path: The directory in the filesystem where static files are stored</p>
-<h2 id="directory-structure">Directory Structure</h2>
-<p>Recommended directory organization:</p>
-<div class="hljs"><pre><span></span><code>project/
-├── app.py
-├── static/
-│   ├── css/
-│   │   └── style.css
-│   ├── js/
-│   │   └── app.js
-│   ├── images/
-│   │   └── logo.png
-│   └── favicon.ico
-└── templates/
-    └── index.html
-</code></pre></div>
+app = App(static_directory="static")
+</code></pre>
+<p>Any files in the <code>static</code> directory will be served automatically. For example, a file at <code>static/css/style.css</code> will be available at <code>/css/style.css</code>.</p>
 
-<h2 id="accessing-static-files">Accessing Static Files</h2>
-<p>After setup, files can be accessed via URL:</p>
-<ul>
-<li><code>http://localhost:8000/static/css/style.css</code></li>
-<li><code>http://localhost:8000/static/js/app.js</code></li>
-<li><code>http://localhost:8000/static/images/logo.png</code></li>
-</ul>
-<h2 id="using-in-templates">Using in Templates</h2>
-<p>In Jinja2 templates, you can use a helper function to generate URLs:</p>
-<div class="hljs"><pre><span></span><code><span class="c1"># Add a global function for static files</span>
-<span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;static&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">path</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;/static/</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</code></pre></div>
+<h2 id="custom-static-routes">Custom Static Routes</h2>
+<p>You can also define custom routes for serving static files from different directories using the <code>app.static()</code> method.</p>
+<pre><code class="language-python">
+from xyra import App
 
-<p>Then in the template:</p>
-<div class="hljs"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
-<span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;{{ static(&#39;css/style.css&#39;) }}&quot;</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;{{ static(&#39;js/app.js&#39;) }}&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">img</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;{{ static(&#39;images/logo.png&#39;) }}&quot;</span> <span class="na">alt</span><span class="o">=</span><span class="s">&quot;Logo&quot;</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
-</code></pre></div>
+app = App()
 
-<h2 id="complete-example">Complete Example</h2>
-<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">templates_directory</span><span class="o">=</span><span class="s2">&quot;templates&quot;</span><span class="p">)</span>
-
-<span class="c1"># Setup static files</span>
-<span class="n">app</span><span class="o">.</span><span class="n">static_files</span><span class="p">(</span><span class="s2">&quot;/assets&quot;</span><span class="p">,</span> <span class="s2">&quot;static&quot;</span><span class="p">)</span>
-
-<span class="c1"># Setup template helper</span>
-<span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;static&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">path</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;/assets/</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">home</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;home.html&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Home Page&quot;</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/about&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">about</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;about.html&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;About Us&quot;</span><span class="p">)</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🚀 Server running on http://localhost:8000&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;📁 Static files available at /assets&quot;</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">)</span>
-</code></pre></div>
-
-<p>Template <code>templates/home.html</code>:</p>
-<div class="hljs"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
-<span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;{{ static(&#39;css/style.css&#39;) }}&quot;</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Welcome to our website!<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">img</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;{{ static(&#39;images/logo.png&#39;) }}&quot;</span> <span class="na">alt</span><span class="o">=</span><span class="s">&quot;Company Logo&quot;</span><span class="p">&gt;</span>
-
-    <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;{{ static(&#39;js/app.js&#39;) }}&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
-</code></pre></div>
-
-<h2 id="css-file-staticcssstylecss">CSS File (static/css/style.css)</h2>
-<div class="hljs"><pre><span></span><code><span class="nt">body</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">font-family</span><span class="p">:</span><span class="w"> </span><span class="n">Arial</span><span class="p">,</span><span class="w"> </span><span class="kc">sans-serif</span><span class="p">;</span>
-<span class="w">    </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="w">    </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="kt">px</span><span class="p">;</span>
-<span class="w">    </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#f5f5f5</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="nt">h1</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#333</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="nt">img</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">max-width</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="kt">px</span><span class="p">;</span>
-<span class="w">    </span><span class="k">height</span><span class="p">:</span><span class="w"> </span><span class="kc">auto</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div>
-
-<h2 id="javascript-file-staticjsappjs">JavaScript File (static/js/app.js)</h2>
-<div class="hljs"><pre><span></span><code><span class="nb">document</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;DOMContentLoaded&#39;</span><span class="p">,</span><span class="w"> </span><span class="kd">function</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Page loaded!&#39;</span><span class="p">);</span>
-
-<span class="w">    </span><span class="c1">// Add some interactivity</span>
-<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">h1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">&#39;h1&#39;</span><span class="p">);</span>
-<span class="w">    </span><span class="nx">h1</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span><span class="w"> </span><span class="kd">function</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nx">alert</span><span class="p">(</span><span class="s1">&#39;Hello from static JS file!&#39;</span><span class="p">);</span>
-<span class="w">    </span><span class="p">});</span>
-<span class="p">});</span>
-</code></pre></div>
-
-<h2 id="multiple-static-directories">Multiple Static Directories</h2>
-<p>You can set up multiple static directories for better organization:</p>
-<div class="hljs"><pre><span></span><code><span class="c1"># Public assets</span>
-<span class="n">app</span><span class="o">.</span><span class="n">static_files</span><span class="p">(</span><span class="s2">&quot;/public&quot;</span><span class="p">,</span> <span class="s2">&quot;public&quot;</span><span class="p">)</span>
-
-<span class="c1"># Admin assets</span>
-<span class="n">app</span><span class="o">.</span><span class="n">static_files</span><span class="p">(</span><span class="s2">&quot;/admin-assets&quot;</span><span class="p">,</span> <span class="s2">&quot;static/admin&quot;</span><span class="p">)</span>
-
-<span class="c1"># User uploads</span>
-<span class="n">app</span><span class="o">.</span><span class="n">static_files</span><span class="p">(</span><span class="s2">&quot;/uploads&quot;</span><span class="p">,</span> <span class="s2">&quot;uploads&quot;</span><span class="p">)</span>
-</code></pre></div>
-
-<h2 id="security-considerations">Security Considerations</h2>
-<ol>
-<li><strong>Path Traversal</strong>: Xyra automatically prevents path traversal attacks</li>
-<li><strong>File Permissions</strong>: Ensure files have appropriate permissions</li>
-<li><strong>Caching Headers</strong>: Add cache headers for performance</li>
-</ol>
-<div class="hljs"><pre><span></span><code><span class="c1"># Middleware for cache headers</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">cache_middleware</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;/static/&quot;</span><span class="p">):</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">set_header</span><span class="p">(</span><span class="s2">&quot;Cache-Control&quot;</span><span class="p">,</span> <span class="s2">&quot;public, max-age=31536000&quot;</span><span class="p">)</span>  <span class="c1"># 1 year</span>
-</code></pre></div>
-
-<h2 id="static-files-tips">Static Files Tips</h2>
-<ol>
-<li><strong>Versioning</strong>: Add version/hash to filename for cache busting</li>
-<li><strong>CDN</strong>: For production, use CDN for static files</li>
-<li><strong>Compression</strong>: Enable gzip compression for text files</li>
-<li><strong>Organization</strong>: Group files by type (css, js, images)</li>
-<li><strong>Minification</strong>: Minify CSS and JS for production</li>
-</ol>
-<h2 id="troubleshooting">Troubleshooting</h2>
-<p><strong>File not found</strong>: Ensure the directory path is correct and the file exists in the right location.</p>
-<p><strong>CORS issues</strong>: If static files are accessed from a different domain, add CORS headers.</p>
-<p><strong>Performance</strong>: For large applications, use a web server like Nginx to serve static files.</p>
-<hr />
-<p><a href="index.html">Back to Table of Contents</a></p>
-            </div>
-        </div>
-    </main>
-    <footer class="bg-white border-t border-gray-200">
-        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-            <p class="text-center text-sm text-gray-500">&copy; <span id="current-year"></span> Xyra Framework. Made with ❤️</p>
-        </div>
-        <script>
-            document.getElementById('current-year').textContent = new Date().getFullYear();
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-        <script>hljs.highlightAll();</script>
-    </footer>
-</body>
-</html>
+# Serve files from the "assets" directory under the "/assets" URL path
+app.static("/assets", "assets")
+</code></pre>
+<p>With this configuration, a file at <code>assets/img/logo.png</code> will be accessible at <code>/assets/img/logo.png</code>.</p>

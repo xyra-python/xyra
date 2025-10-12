@@ -1,690 +1,83 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XYRA Documentation - Examples</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#3b82f6',
-                        secondary: '#64748b'
-                    }
-                }
-            }
-        }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
-</head>
-<body class="bg-gray-50 text-gray-900">
-    <header class="bg-white shadow-sm border-b border-gray-200">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex">
-                    <div class="flex-shrink-0 flex items-center">
-                        <a href="index.html" class="text-2xl font-bold text-primary">XYRA</a>
-                    </div>
-                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                        <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
-                        <a href="getting-started.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Getting Started</a>
-                        <a href="installation.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Installation</a>
-                        <a href="api-reference.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">API Reference</a>
-                        <a href="routing.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Routing</a>
-                        <a href="request-response.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Request & Response</a>
-                        <a href="middleware.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Middleware</a>
-                        <a href="templating.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Templating</a>
-                        <a href="static-files.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Static Files</a>
-                        <a href="websockets.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">WebSockets</a>
-                        <a href="logger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Logger</a>
-                        <a href="swagger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Swagger</a>
-                        <a href="examples.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Examples</a>
-                    </div>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="px-4 py-6 sm:px-0">
-            <div class="bg-white shadow rounded-lg p-6">
-                <hr />
-<h2 id="layout-default">layout: default</h2>
-<h1 id="complete-examples">Complete Examples</h1>
-<p>This section contains complete application examples that demonstrate various Xyra features in practice. These examples can be used as a starting point for your own projects.</p>
-<h2 id="simple-rest-api">Simple REST API</h2>
-<p>Example API for user management with CRUD operations.</p>
-<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">()</span>
-
-<span class="c1"># In-memory storage (use database in production)</span>
-<span class="n">users_db</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;alice@example.com&quot;</span><span class="p">},</span>
-    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;bob@example.com&quot;</span><span class="p">}</span>
-<span class="p">]</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/users&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_users</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all users.&quot;&quot;&quot;</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">users_db</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/users/</span><span class="si">{user_id}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_user</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get user by ID.&quot;&quot;&quot;</span>
-    <span class="n">user_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user_id&quot;</span><span class="p">))</span>
-    <span class="n">user</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">users_db</span> <span class="k">if</span> <span class="n">u</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">user_id</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">user</span><span class="p">:</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;User not found&quot;</span><span class="p">})</span>
-        <span class="k">return</span>
-
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/users&quot;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_user</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new user.&quot;&quot;&quot;</span>
-    <span class="n">user_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-
-    <span class="c1"># Simple validation</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">user_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;email&quot;</span><span class="p">):</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Name and email are required&quot;</span><span class="p">})</span>
-        <span class="k">return</span>
-
-    <span class="c1"># Generate ID</span>
-    <span class="n">new_id</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">users_db</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">users_db</span> <span class="k">else</span> <span class="mi">1</span>
-    <span class="n">user</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">new_id</span><span class="p">,</span> <span class="o">**</span><span class="n">user_data</span><span class="p">}</span>
-    <span class="n">users_db</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-
-    <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">201</span><span class="p">)</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;/users/</span><span class="si">{user_id}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_user</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update user by ID.&quot;&quot;&quot;</span>
-    <span class="n">user_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user_id&quot;</span><span class="p">))</span>
-    <span class="n">user_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-
-    <span class="n">user</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">users_db</span> <span class="k">if</span> <span class="n">u</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">user_id</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">user</span><span class="p">:</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;User not found&quot;</span><span class="p">})</span>
-        <span class="k">return</span>
-
-    <span class="n">user</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">user_data</span><span class="p">)</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/users/</span><span class="si">{user_id}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">delete_user</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Delete user by ID.&quot;&quot;&quot;</span>
-    <span class="n">user_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user_id&quot;</span><span class="p">))</span>
-
-    <span class="k">global</span> <span class="n">users_db</span>
-    <span class="n">users_db</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">users_db</span> <span class="k">if</span> <span class="n">u</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">user_id</span><span class="p">]</span>
-
-    <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">204</span><span class="p">)</span>  <span class="c1"># No Content</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🚀 Users API running on http://localhost:8000&quot;</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">)</span>
-</code></pre></div>
-
-<h2 id="blog-api-with-templating">Blog API with Templating</h2>
-<p>Complete blog application with templating and static files.</p>
-<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span>
-    <span class="n">templates_directory</span><span class="o">=</span><span class="s2">&quot;templates&quot;</span><span class="p">,</span>
-    <span class="n">swagger_options</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Blog API&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Blog API with templates&quot;</span>
-    <span class="p">}</span>
-<span class="p">)</span>
-
-<span class="c1"># Setup static files</span>
-<span class="n">app</span><span class="o">.</span><span class="n">static_files</span><span class="p">(</span><span class="s2">&quot;/static&quot;</span><span class="p">,</span> <span class="s2">&quot;static&quot;</span><span class="p">)</span>
-
-<span class="c1"># Setup template helpers</span>
-<span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;static&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">path</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;/static/</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="c1"># Sample blog posts</span>
-<span class="n">posts</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">{</span>
-        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Welcome to Xyra&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;This is our first blog post about Xyra framework.&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;Admin&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;2024-01-01&quot;</span>
-    <span class="p">},</span>
-    <span class="p">{</span>
-        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Getting Started&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;Learn how to build web applications with Xyra.&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;Admin&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;2024-01-02&quot;</span>
-    <span class="p">}</span>
-<span class="p">]</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">home</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Home page with latest posts.&quot;&quot;&quot;</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;home.html&quot;</span><span class="p">,</span> 
-              <span class="n">title</span><span class="o">=</span><span class="s2">&quot;My Blog&quot;</span><span class="p">,</span>
-              <span class="n">posts</span><span class="o">=</span><span class="n">posts</span><span class="p">[:</span><span class="mi">5</span><span class="p">])</span>  <span class="c1"># Show latest 5 posts</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/posts&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">list_posts</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;List all posts.&quot;&quot;&quot;</span>
-    <span class="n">page</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">query_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;page&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">per_page</span> <span class="o">=</span> <span class="mi">10</span>
-    <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="n">page</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">per_page</span>
-    <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">per_page</span>
-
-    <span class="n">res</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;posts.html&quot;</span><span class="p">,</span>
-              <span class="n">title</span><span class="o">=</span><span class="s2">&quot;All Posts&quot;</span><span class="p">,</span>
-              <span class="n">posts</span><span class="o">=</span><span class="n">posts</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">],</span>
-              <span class="n">page</span><span class="o">=</span><span class="n">page</span><span class="p">,</span>
-              <span class="n">has_next</span><span class="o">=</span><span class="n">end</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">posts</span><span class="p">))</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/posts/</span><span class="si">{post_id}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">view_post</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;View single post.&quot;&quot;&quot;</span>
-    <span class="n">post_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;post_id&quot;</span><span class="p">))</span>
-    <span class="n">post</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">posts</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">post_id</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">post</span><span class="p">:</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;404.html&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Post Not Found&quot;</span><span class="p">)</span>
-        <span class="k">return</span>
-
-    <span class="n">res</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;post.html&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">post</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">],</span> <span class="n">post</span><span class="o">=</span><span class="n">post</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/posts&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">api_posts</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;JSON API for posts.&quot;&quot;&quot;</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">posts</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/api/posts&quot;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_create_post</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create new post via API.&quot;&quot;&quot;</span>
-    <span class="n">post_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-
-    <span class="n">new_post</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">posts</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">post_data</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">post_data</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="n">post_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;author&quot;</span><span class="p">,</span> <span class="s2">&quot;Anonymous&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;2024-01-01&quot;</span>  <span class="c1"># In real app, use current date</span>
-    <span class="p">}</span>
-
-    <span class="n">posts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_post</span><span class="p">)</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">201</span><span class="p">)</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">new_post</span><span class="p">)</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🚀 Blog running on http://localhost:8000&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;📚 API docs: http://localhost:8000/docs&quot;</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">)</span>
-</code></pre></div>
-
-<p>Template <code>templates/home.html</code>:</p>
-<div class="hljs"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
-<span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;{{ static(&#39;css/style.css&#39;) }}&quot;</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">header</span><span class="p">&gt;</span>
-        <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
-        <span class="p">&lt;</span><span class="nt">nav</span><span class="p">&gt;</span>
-            <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;/&quot;</span><span class="p">&gt;</span>Home<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
-            <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;/posts&quot;</span><span class="p">&gt;</span>All Posts<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
-        <span class="p">&lt;/</span><span class="nt">nav</span><span class="p">&gt;</span>
-    <span class="p">&lt;/</span><span class="nt">header</span><span class="p">&gt;</span>
-
-    <span class="p">&lt;</span><span class="nt">main</span><span class="p">&gt;</span>
-        <span class="p">&lt;</span><span class="nt">h2</span><span class="p">&gt;</span>Latest Posts<span class="p">&lt;/</span><span class="nt">h2</span><span class="p">&gt;</span>
-        {% for post in posts %}
-        <span class="p">&lt;</span><span class="nt">article</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;post&quot;</span><span class="p">&gt;</span>
-            <span class="p">&lt;</span><span class="nt">h3</span><span class="p">&gt;&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;/posts/{{ post.id }}&quot;</span><span class="p">&gt;</span>{{ post.title }}<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;&lt;/</span><span class="nt">h3</span><span class="p">&gt;</span>
-            <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;meta&quot;</span><span class="p">&gt;</span>By {{ post.author }} on {{ post.date }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
-            <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>{{ post.content[:100] }}...<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
-            <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;/posts/{{ post.id }}&quot;</span><span class="p">&gt;</span>Read more<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
-        <span class="p">&lt;/</span><span class="nt">article</span><span class="p">&gt;</span>
-        {% endfor %}
-    <span class="p">&lt;/</span><span class="nt">main</span><span class="p">&gt;</span>
-
-    <span class="p">&lt;</span><span class="nt">footer</span><span class="p">&gt;</span>
-        <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span><span class="ni">&amp;copy;</span> 2024 {{ title }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
-    <span class="p">&lt;/</span><span class="nt">footer</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
-</code></pre></div>
-
-<h2 id="real-time-chat-application-with-websocket">Real-time Chat Application with WebSocket</h2>
-<p>A real-time chat application using WebSocket.</p>
-<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">()</span>
-
-<span class="c1"># Store connected clients</span>
-<span class="n">connected_clients</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">on_open</span><span class="p">(</span><span class="n">ws</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handle new WebSocket connection.&quot;&quot;&quot;</span>
-    <span class="n">connected_clients</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ws</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Client connected. Total: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">connected_clients</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="c1"># Send welcome message</span>
-    <span class="n">ws</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Welcome to the chat!&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;online_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">connected_clients</span><span class="p">)</span>
-    <span class="p">}))</span>
-
-    <span class="c1"># Notify others</span>
-    <span class="n">broadcast</span><span class="p">({</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;A new user joined the chat&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;online_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">connected_clients</span><span class="p">)</span>
-    <span class="p">},</span> <span class="n">exclude</span><span class="o">=</span><span class="n">ws</span><span class="p">)</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">on_message</span><span class="p">(</span><span class="n">ws</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">opcode</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handle incoming message.&quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;chat&quot;</span><span class="p">:</span>
-            <span class="c1"># Broadcast chat message to all clients</span>
-            <span class="n">broadcast</span><span class="p">({</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;chat&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;message&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">,</span> <span class="s2">&quot;now&quot;</span><span class="p">)</span>
-            <span class="p">},</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-
-        <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;typing&quot;</span><span class="p">:</span>
-            <span class="c1"># Notify others that someone is typing</span>
-            <span class="n">broadcast</span><span class="p">({</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;typing&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;Anonymous&quot;</span><span class="p">)</span>
-            <span class="p">},</span> <span class="n">exclude</span><span class="o">=</span><span class="n">ws</span><span class="p">)</span>
-
-    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
-        <span class="n">ws</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid JSON&quot;</span><span class="p">}))</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">on_close</span><span class="p">(</span><span class="n">ws</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handle WebSocket disconnection.&quot;&quot;&quot;</span>
-    <span class="n">connected_clients</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">ws</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Client disconnected. Total: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">connected_clients</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="c1"># Notify others</span>
-    <span class="n">broadcast</span><span class="p">({</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;A user left the chat&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;online_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">connected_clients</span><span class="p">)</span>
-    <span class="p">})</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">broadcast</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Broadcast message to all connected clients.&quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="n">connected_clients</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">client</span> <span class="o">!=</span> <span class="n">exclude</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="c1"># Client might be disconnected</span>
-                <span class="n">connected_clients</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
-
-<span class="c1"># WebSocket route</span>
-<span class="n">app</span><span class="o">.</span><span class="n">websocket</span><span class="p">(</span><span class="s2">&quot;/chat&quot;</span><span class="p">,</span> <span class="p">{</span>
-    <span class="s2">&quot;open&quot;</span><span class="p">:</span> <span class="n">on_open</span><span class="p">,</span>
-    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">on_message</span><span class="p">,</span>
-    <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="n">on_close</span>
-<span class="p">})</span>
-
-<span class="c1"># HTTP routes for the chat interface</span>
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">chat_page</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Serve chat interface.&quot;&quot;&quot;</span>
-    <span class="n">html</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">    &lt;!DOCTYPE html&gt;</span>
-<span class="s2">    &lt;html&gt;</span>
-<span class="s2">    &lt;head&gt;</span>
-<span class="s2">        &lt;title&gt;Chat Room&lt;/title&gt;</span>
-<span class="s2">        &lt;style&gt;</span>
-<span class="s2">            body { font-family: Arial, sans-serif; margin: 20px; }</span>
-<span class="s2">            #messages { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }</span>
-<span class="s2">            #messageInput { width: 70%; padding: 5px; }</span>
-<span class="s2">            button { padding: 5px 10px; }</span>
-<span class="s2">            .message { margin-bottom: 5px; }</span>
-<span class="s2">            .system { color: #666; font-style: italic; }</span>
-<span class="s2">        &lt;/style&gt;</span>
-<span class="s2">    &lt;/head&gt;</span>
-<span class="s2">    &lt;body&gt;</span>
-<span class="s2">        &lt;h1&gt;Chat Room&lt;/h1&gt;</span>
-<span class="s2">        &lt;div id=&quot;messages&quot;&gt;&lt;/div&gt;</span>
-<span class="s2">        &lt;input type=&quot;text&quot; id=&quot;messageInput&quot; placeholder=&quot;Type your message...&quot;&gt;</span>
-<span class="s2">        &lt;button onclick=&quot;sendMessage()&quot;&gt;Send&lt;/button&gt;</span>
-
-<span class="s2">        &lt;script&gt;</span>
-<span class="s2">            const ws = new WebSocket(&#39;ws://localhost:8000/chat&#39;);</span>
-<span class="s2">            const messages = document.getElementById(&#39;messages&#39;);</span>
-<span class="s2">            const input = document.getElementById(&#39;messageInput&#39;);</span>
-
-<span class="s2">            ws.onmessage = function(event) {</span>
-<span class="s2">                const data = JSON.parse(event.data);</span>
-<span class="s2">                const messageDiv = document.createElement(&#39;div&#39;);</span>
-<span class="s2">                messageDiv.className = &#39;message&#39;;</span>
-
-<span class="s2">                if (data.type === &#39;chat&#39;) {</span>
-<span class="s2">                    messageDiv.textContent = `$</span><span class="si">{data.timestamp}</span><span class="s2">: $</span><span class="si">{data.message}</span><span class="s2">`;</span>
-<span class="s2">                } else if (data.type === &#39;system&#39;) {</span>
-<span class="s2">                    messageDiv.textContent = `System: $</span><span class="si">{data.message}</span><span class="s2">`;</span>
-<span class="s2">                    messageDiv.className += &#39; system&#39;;</span>
-<span class="s2">                }</span>
-
-<span class="s2">                messages.appendChild(messageDiv);</span>
-<span class="s2">                messages.scrollTop = messages.scrollHeight;</span>
-<span class="s2">            };</span>
-
-<span class="s2">            function sendMessage() {</span>
-<span class="s2">                const message = input.value.trim();</span>
-<span class="s2">                if (message) {</span>
-<span class="s2">                    ws.send(JSON.stringify({</span>
-<span class="s2">                        type: &#39;chat&#39;,</span>
-<span class="s2">                        message: message,</span>
-<span class="s2">                        timestamp: new Date().toLocaleTimeString()</span>
-<span class="s2">                    }));</span>
-<span class="s2">                    input.value = &#39;&#39;;</span>
-<span class="s2">                }</span>
-<span class="s2">            }</span>
-
-<span class="s2">            input.addEventListener(&#39;keypress&#39;, function(e) {</span>
-<span class="s2">                if (e.key === &#39;Enter&#39;) {</span>
-<span class="s2">                    sendMessage();</span>
-<span class="s2">                }</span>
-<span class="s2">            });</span>
-<span class="s2">        &lt;/script&gt;</span>
-<span class="s2">    &lt;/body&gt;</span>
-<span class="s2">    &lt;/html&gt;</span>
-<span class="s2">    &quot;&quot;&quot;</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">html</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🚀 Chat server running on http://localhost:8000&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🌐 Open http://localhost:8000 in your browser&quot;</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">)</span>
-</code></pre></div>
-
-<h2 id="file-upload-api">File Upload API</h2>
-<p>Contoh API untuk upload file.</p>
-<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">()</span>
-
-<span class="c1"># Create uploads directory if it doesn&#39;t exist</span>
-<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s2">&quot;uploads&quot;</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/upload&quot;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">upload_file</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Upload a file.&quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># In a real implementation, you&#39;d handle multipart form data</span>
-        <span class="c1"># This is a simplified example</span>
-        <span class="n">file_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>  <span class="c1"># Simulate file content</span>
-
-        <span class="c1"># Generate unique filename</span>
-        <span class="n">file_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
-        <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_id</span><span class="si">}</span><span class="s2">.txt&quot;</span>
-        <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;uploads&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
-
-        <span class="c1"># Save file</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">file_data</span><span class="p">)</span>
-
-        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">201</span><span class="p">)</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span>
-            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;File uploaded successfully&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;file_id&quot;</span><span class="p">:</span> <span class="n">file_id</span><span class="p">,</span>
-            <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="n">filename</span><span class="p">,</span>
-            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;/files/</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="p">})</span>
-
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Upload failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/files/</span><span class="si">{filename}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_file</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Serve uploaded file.&quot;&quot;&quot;</span>
-    <span class="n">filename</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;filename&quot;</span><span class="p">)</span>
-    <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;uploads&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;File not found&quot;</span><span class="p">})</span>
-        <span class="k">return</span>
-
-    <span class="c1"># In a real implementation, you&#39;d stream the file</span>
-    <span class="c1"># This is simplified</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-
-    <span class="n">res</span><span class="o">.</span><span class="n">set_header</span><span class="p">(</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">,</span> <span class="s2">&quot;text/plain&quot;</span><span class="p">)</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/files&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">list_files</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;List uploaded files.&quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="s2">&quot;uploads&quot;</span><span class="p">):</span>
-            <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;uploads&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
-            <span class="n">stat</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
-            <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-                <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="n">filename</span><span class="p">,</span>
-                <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="n">stat</span><span class="o">.</span><span class="n">st_size</span><span class="p">,</span>
-                <span class="s2">&quot;modified&quot;</span><span class="p">:</span> <span class="n">stat</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">,</span>
-                <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;/files/</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">})</span>
-
-        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;files&quot;</span><span class="p">:</span> <span class="n">files</span><span class="p">})</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)})</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🚀 File upload API running on http://localhost:8000&quot;</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">)</span>
-</code></pre></div>
-
-<h2 id="aplikasi-full-stack">Aplikasi Full-Stack</h2>
-<p>Contoh aplikasi lengkap dengan frontend dan backend.</p>
-<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">templates_directory</span><span class="o">=</span><span class="s2">&quot;templates&quot;</span><span class="p">)</span>
-
-<span class="c1"># Setup static files</span>
-<span class="n">app</span><span class="o">.</span><span class="n">static_files</span><span class="p">(</span><span class="s2">&quot;/static&quot;</span><span class="p">,</span> <span class="s2">&quot;static&quot;</span><span class="p">)</span>
-
-<span class="c1"># Setup template helpers</span>
-<span class="n">app</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;static&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">path</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;/static/</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="c1"># In-memory todo list</span>
-<span class="n">todos</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Learn Xyra&quot;</span><span class="p">,</span> <span class="s2">&quot;completed&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
-    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Build an app&quot;</span><span class="p">,</span> <span class="s2">&quot;completed&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
-<span class="p">]</span>
-
-<span class="c1"># API Routes</span>
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/todos&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_todos</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all todos.&quot;&quot;&quot;</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">todos</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/api/todos&quot;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_todo</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create new todo.&quot;&quot;&quot;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-
-    <span class="n">new_todo</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">todos</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;completed&quot;</span><span class="p">:</span> <span class="kc">False</span>
-    <span class="p">}</span>
-
-    <span class="n">todos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_todo</span><span class="p">)</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">201</span><span class="p">)</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">new_todo</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;/api/todos/</span><span class="si">{todo_id}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_todo</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update todo.&quot;&quot;&quot;</span>
-    <span class="n">todo_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;todo_id&quot;</span><span class="p">))</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-
-    <span class="n">todo</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">todos</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">todo_id</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">todo</span><span class="p">:</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Todo not found&quot;</span><span class="p">})</span>
-        <span class="k">return</span>
-
-    <span class="n">todo</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">todo</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/api/todos/</span><span class="si">{todo_id}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">delete_todo</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Delete todo.&quot;&quot;&quot;</span>
-    <span class="n">todo_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;todo_id&quot;</span><span class="p">))</span>
-
-    <span class="k">global</span> <span class="n">todos</span>
-    <span class="n">todos</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">todos</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">todo_id</span><span class="p">]</span>
-
-    <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">204</span><span class="p">)</span>
-
-<span class="c1"># Web Routes</span>
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">home</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Serve the main application.&quot;&quot;&quot;</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;index.html&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Todo App&quot;</span><span class="p">)</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🚀 Todo App running on http://localhost:8000&quot;</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">)</span>
-</code></pre></div>
-
-<p>Template <code>templates/index.html</code>:</p>
-<div class="hljs"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
-<span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;{{ static(&#39;css/style.css&#39;) }}&quot;</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;container&quot;</span><span class="p">&gt;</span>
-        <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
-
-        <span class="p">&lt;</span><span class="nt">form</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;todoForm&quot;</span><span class="p">&gt;</span>
-            <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text&quot;</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;todoInput&quot;</span> <span class="na">placeholder</span><span class="o">=</span><span class="s">&quot;Add new todo...&quot;</span> <span class="na">required</span><span class="p">&gt;</span>
-            <span class="p">&lt;</span><span class="nt">button</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;submit&quot;</span><span class="p">&gt;</span>Add<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
-        <span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
-
-        <span class="p">&lt;</span><span class="nt">ul</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;todoList&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
-    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
-
-    <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;{{ static(&#39;js/app.js&#39;) }}&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
-</code></pre></div>
-
-<p>JavaScript file <code>static/js/app.js</code>:</p>
-<div class="hljs"><pre><span></span><code><span class="nb">document</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;DOMContentLoaded&#39;</span><span class="p">,</span><span class="w"> </span><span class="kd">function</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">todoForm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;todoForm&#39;</span><span class="p">);</span>
-<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">todoInput</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;todoInput&#39;</span><span class="p">);</span>
-<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">todoList</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;todoList&#39;</span><span class="p">);</span>
-
-<span class="w">    </span><span class="c1">// Load todos</span>
-<span class="w">    </span><span class="nx">loadTodos</span><span class="p">();</span>
-
-<span class="w">    </span><span class="c1">// Add todo</span>
-<span class="w">    </span><span class="nx">todoForm</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;submit&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nx">e</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
-<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">todoInput</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">trim</span><span class="p">();</span>
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">title</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="k">await</span><span class="w"> </span><span class="nx">createTodo</span><span class="p">(</span><span class="nx">title</span><span class="p">);</span>
-<span class="w">            </span><span class="nx">todoInput</span><span class="p">.</span><span class="nx">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">;</span>
-<span class="w">            </span><span class="nx">loadTodos</span><span class="p">();</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">    </span><span class="p">});</span>
-
-<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">loadTodos</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="s1">&#39;/api/todos&#39;</span><span class="p">);</span>
-<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">todos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">();</span>
-
-<span class="w">        </span><span class="nx">todoList</span><span class="p">.</span><span class="nx">innerHTML</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">;</span>
-<span class="w">        </span><span class="nx">todos</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">todo</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="kd">const</span><span class="w"> </span><span class="nx">li</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s1">&#39;li&#39;</span><span class="p">);</span>
-<span class="w">            </span><span class="nx">li</span><span class="p">.</span><span class="nx">innerHTML</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`</span>
-<span class="sb">                &lt;span class=&quot;</span><span class="si">${</span><span class="nx">todo</span><span class="p">.</span><span class="nx">completed</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s1">&#39;completed&#39;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}</span><span class="sb">&quot;&gt;</span><span class="si">${</span><span class="nx">todo</span><span class="p">.</span><span class="nx">title</span><span class="si">}</span><span class="sb">&lt;/span&gt;</span>
-<span class="sb">                &lt;button onclick=&quot;toggleTodo(</span><span class="si">${</span><span class="nx">todo</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span><span class="sb">, </span><span class="si">${</span><span class="nx">todo</span><span class="p">.</span><span class="nx">completed</span><span class="si">}</span><span class="sb">)&quot;&gt;</span>
-<span class="sb">                    </span><span class="si">${</span><span class="nx">todo</span><span class="p">.</span><span class="nx">completed</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s1">&#39;Undo&#39;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Complete&#39;</span><span class="si">}</span>
-<span class="sb">                &lt;/button&gt;</span>
-<span class="sb">                &lt;button onclick=&quot;deleteTodo(</span><span class="si">${</span><span class="nx">todo</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span><span class="sb">)&quot;&gt;Delete&lt;/button&gt;</span>
-<span class="sb">            `</span><span class="p">;</span>
-<span class="w">            </span><span class="nx">todoList</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">li</span><span class="p">);</span>
-<span class="w">        </span><span class="p">});</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">createTodo</span><span class="p">(</span><span class="nx">title</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="s1">&#39;/api/todos&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;POST&#39;</span><span class="p">,</span>
-<span class="w">            </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s1">&#39;Content-Type&#39;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;application/json&#39;</span><span class="w"> </span><span class="p">},</span>
-<span class="w">            </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span><span class="w"> </span><span class="nx">title</span><span class="w"> </span><span class="p">})</span>
-<span class="w">        </span><span class="p">});</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">toggleTodo</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">completed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="sb">`/api/todos/</span><span class="si">${</span><span class="nx">id</span><span class="si">}</span><span class="sb">`</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;PUT&#39;</span><span class="p">,</span>
-<span class="w">            </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s1">&#39;Content-Type&#39;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;application/json&#39;</span><span class="w"> </span><span class="p">},</span>
-<span class="w">            </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span><span class="w"> </span><span class="nx">completed</span><span class="o">:</span><span class="w"> </span><span class="o">!</span><span class="nx">completed</span><span class="w"> </span><span class="p">})</span>
-<span class="w">        </span><span class="p">});</span>
-<span class="w">        </span><span class="nx">loadTodos</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">deleteTodo</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="sb">`/api/todos/</span><span class="si">${</span><span class="nx">id</span><span class="si">}</span><span class="sb">`</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;DELETE&#39;</span>
-<span class="w">        </span><span class="p">});</span>
-<span class="w">        </span><span class="nx">loadTodos</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">});</span>
-</code></pre></div>
-
-<hr />
-<p><a href="index.html">Back to Table of Contents</a></p>
-            </div>
-        </div>
-    </main>
-    <footer class="bg-white border-t border-gray-200">
-        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-            <p class="text-center text-sm text-gray-500">&copy; <span id="current-year"></span> Xyra Framework. Made with ❤️</p>
-        </div>
-        <script>
-            document.getElementById('current-year').textContent = new Date().getFullYear();
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-        <script>hljs.highlightAll();</script>
-    </footer>
-</body>
-</html>
+---
+layout: default
+title: "Examples"
+---
+
+<h1 id="examples">Examples</h1>
+<p>This section provides complete examples of Xyra applications to help you get started.</p>
+
+<h2 id="hello-world">Hello, World!</h2>
+<p>A minimal Xyra application.</p>
+<pre><code class="language-python">
+from xyra import App, Request, Response
+
+app = App()
+
+@app.get("/")
+def home(req: Request, res: Response):
+    res.json({"message": "Hello, World!"})
+
+if __name__ == "__main__":
+    app.listen(8000)
+</code></pre>
+
+<h2 id="simple-todo-api">Simple TODO API</h2>
+<p>A simple in-memory TODO list API.</p>
+<pre><code class="language-python">
+import asyncio
+from xyra import App, Request, Response
+
+app = App()
+
+# In-memory database
+todos = []
+
+@app.get("/todos")
+def get_todos(req: Request, res: Response):
+    res.json(todos)
+
+@app.post("/todos")
+async def create_todo(req: Request, res: Response):
+    data = await req.json()
+    todos.append(data)
+    res.status(201).json(data)
+
+@app.get("/todos/{todo_id}")
+def get_todo(req: Request, res: Response):
+    todo_id = int(req.params.get("todo_id"))
+    todo = next((t for t in todos if t["id"] == todo_id), None)
+    if todo:
+        res.json(todo)
+    else:
+        res.status(404).json({"error": "Todo not found"})
+
+if __name__ == "__main__":
+    app.listen(8000)
+</code></pre>
+
+<h2 id="web-socket-chat">WebSocket Chat</h2>
+<p>A simple real-time chat application using WebSockets.</p>
+<pre><code class="language-python">
+import asyncio
+from xyra import App, WebSocket
+
+app = App()
+connections = set()
+
+@app.ws("/ws")
+async def chat_socket(ws: WebSocket):
+    await ws.accept()
+    connections.add(ws)
+    try:
+        while True:
+            message = await ws.receive_text()
+            for connection in connections:
+                await connection.send_text(message)
+    except Exception:
+        pass
+    finally:
+        connections.remove(ws)
+
+if __name__ == "__main__":
+    app.listen(8000)
+</code></pre>

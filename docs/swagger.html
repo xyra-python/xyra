@@ -1,350 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XYRA Documentation - Swagger</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#3b82f6',
-                        secondary: '#64748b'
-                    }
-                }
-            }
-        }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
-</head>
-<body class="bg-gray-50 text-gray-900">
-    <header class="bg-white shadow-sm border-b border-gray-200">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex">
-                    <div class="flex-shrink-0 flex items-center">
-                        <a href="index.html" class="text-2xl font-bold text-primary">XYRA</a>
-                    </div>
-                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                        <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
-                        <a href="getting-started.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Getting Started</a>
-                        <a href="installation.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Installation</a>
-                        <a href="api-reference.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">API Reference</a>
-                        <a href="routing.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Routing</a>
-                        <a href="request-response.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Request & Response</a>
-                        <a href="middleware.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Middleware</a>
-                        <a href="templating.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Templating</a>
-                        <a href="static-files.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Static Files</a>
-                        <a href="websockets.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">WebSockets</a>
-                        <a href="logger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Logger</a>
-                        <a href="swagger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Swagger</a>
-                        <a href="examples.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Examples</a>
-                    </div>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="px-4 py-6 sm:px-0">
-            <div class="bg-white shadow rounded-lg p-6">
-                <hr />
-<h2 id="layout-default">layout: default</h2>
-<h1 id="api-documentation-with-swagger">API Documentation with Swagger</h1>
-<p>Xyra integrates with Swagger (OpenAPI) to automatically generate API documentation. This documentation allows developers and API users to understand available endpoints, parameters, and responses.</p>
-<h2 id="enable-swagger">Enable Swagger</h2>
-<p>To enable Swagger in a Xyra application, provide the <code>swagger_options</code> option during app initialization:</p>
-<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span>
+---
+layout: default
+title: "Swagger/OpenAPI"
+---
 
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">swagger_options</span><span class="o">=</span><span class="p">{</span>
-    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;My API&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;API documentation for My App&quot;</span>
-<span class="p">})</span>
-</code></pre></div>
+<h1 id="swagger-openapi-documentation">Swagger/OpenAPI Documentation</h1>
+<p>Xyra can automatically generate interactive API documentation for your application using Swagger UI. This is a powerful feature for developing and testing your API.</p>
 
-<h2 id="access-documentation">Access Documentation</h2>
-<p>Once enabled, Swagger documentation will be available at:</p>
-<ul>
-<li><strong>Swagger UI</strong>: <code>http://localhost:8000/docs</code> (or custom path)</li>
-<li><strong>JSON Spec</strong>: <code>http://localhost:8000/docs/swagger.json</code> (or custom path)</li>
-</ul>
-<h2 id="swagger-configuration">Swagger Configuration</h2>
-<p>You can customize various aspects of the API documentation:</p>
-<div class="hljs"><pre><span></span><code><span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">swagger_options</span><span class="o">=</span><span class="p">{</span>
-    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Blog API&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;API for Blog Application&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;contact&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Developer Team&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;dev@example.com&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://example.com/contact&quot;</span>
-    <span class="p">},</span>
-    <span class="s2">&quot;license_info&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;MIT&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://opensource.org/licenses/MIT&quot;</span>
-    <span class="p">},</span>
-    <span class="s2">&quot;servers&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="p">{</span>
-            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;http://localhost:8000&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Development server&quot;</span>
-        <span class="p">},</span>
-        <span class="p">{</span>
-            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://api.example.com&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Production server&quot;</span>
-        <span class="p">}</span>
-    <span class="p">],</span>
-    <span class="s2">&quot;swagger_ui_path&quot;</span><span class="p">:</span> <span class="s2">&quot;/api-docs&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;swagger_json_path&quot;</span><span class="p">:</span> <span class="s2">&quot;/api-docs/swagger.json&quot;</span>
-<span class="p">})</span>
-</code></pre></div>
+<h2 id="enabling-swagger">Enabling Swagger</h2>
+<p>To enable Swagger, you need to provide <code>swagger_options</code> when creating the <code>App</code> instance. The <code>title</code> and <code>version</code> are required.</p>
+<pre><code class="language-python">
+from xyra import App
 
-<h3 id="configuration-options">Configuration Options</h3>
-<ul>
-<li><code>title</code>: API title</li>
-<li><code>version</code>: API version</li>
-<li><code>description</code>: API description</li>
-<li><code>contact</code>: Contact information (name, email, url)</li>
-<li><code>license_info</code>: License information (name, url)</li>
-<li><code>servers</code>: List of servers with URL and description</li>
-<li><code>swagger_ui_path</code>: Path for Swagger UI (default: "/docs")</li>
-<li><code>swagger_json_path</code>: Path for JSON spec (default: "/docs/swagger.json")</li>
-</ul>
-<h2 id="automatic-documentation">Automatic Documentation</h2>
-<p>Xyra automatically generates documentation from:</p>
-<ul>
-<li>Route definitions</li>
-<li>Parameter types (from docstrings)</li>
-<li>Request/response schemas</li>
-<li>HTTP methods</li>
-</ul>
-<h3 id="example-route-with-documentation">Example Route with Documentation</h3>
-<div class="hljs"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/users/</span><span class="si">{user_id}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_user</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get user by ID.</span>
+swagger_options = {
+    "title": "My Awesome API",
+    "version": "1.0.0",
+    "url": "/docs"  # The URL to access the Swagger UI
+}
 
-<span class="sd">    Args:</span>
-<span class="sd">        user_id (str): The ID of the user to retrieve.</span>
+app = App(swagger_options=swagger_options)
+</code></pre>
 
-<span class="sd">    Returns:</span>
-<span class="sd">        dict: User information including id, name, and email.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">user_id</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user_id&quot;</span><span class="p">)</span>
-    <span class="c1"># Logic to get user</span>
-    <span class="n">user</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;User </span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;user</span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">@example.com&quot;</span><span class="p">}</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+<h2 id="documenting-routes">Documenting Routes</h2>
+<p>Xyra generates API documentation from the docstrings of your route handler functions. The docstrings should be in YAML format.</p>
+<pre><code class="language-python">
+from xyra import App, Request, Response
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/users&quot;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_user</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create a new user.</span>
+app = App(swagger_options={"title": "My API", "version": "1.0.0"})
 
-<span class="sd">    Body:</span>
-<span class="sd">        name (str): User&#39;s full name</span>
-<span class="sd">        email (str): User&#39;s email address</span>
+@app.get("/users")
+def get_users(req: Request, res: Response):
+    """
+    summary: Get all users
+    description: Returns a list of all users in the system.
+    responses:
+      200:
+        description: A list of users.
+    """
+    res.json([{"id": 1, "name": "John Doe"}])
 
-<span class="sd">    Returns:</span>
-<span class="sd">        dict: Created user information.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">user_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-    <span class="c1"># Logic to create user</span>
-    <span class="n">user_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;123&quot;</span>  <span class="c1"># Generated ID</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">201</span><span class="p">)</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">user_data</span><span class="p">)</span>
-</code></pre></div>
+@app.post("/users")
+def create_user(req: Request, res: Response):
+    """
+    summary: Create a new user
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+    responses:
+      201:
+        description: User created successfully.
+    """
+    # Logic to create a user
+    res.status(201).json({"message": "User created"})
+</code></pre>
 
-<h2 id="custom-response-schemas">Custom Response Schemas</h2>
-<p>For better control over response schemas, you can use type hints and docstrings:</p>
-<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/users&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">list_users</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get list of users.</span>
-
-<span class="sd">    Query Parameters:</span>
-<span class="sd">        page (int): Page number (default: 1)</span>
-<span class="sd">        limit (int): Items per page (default: 10)</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        List[Dict]: List of user objects.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">users</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;alice@example.com&quot;</span><span class="p">},</span>
-        <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;bob@example.com&quot;</span><span class="p">}</span>
-    <span class="p">]</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">users</span><span class="p">)</span>
-</code></pre></div>
-
-<h2 id="security-schemes">Security Schemes</h2>
-<p>You can add authentication information to the documentation:</p>
-<div class="hljs"><pre><span></span><code><span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">swagger_options</span><span class="o">=</span><span class="p">{</span>
-    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Secure API&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;API with authentication&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;security&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="p">{</span><span class="s2">&quot;bearerAuth&quot;</span><span class="p">:</span> <span class="p">[]}</span>
-    <span class="p">],</span>
-    <span class="s2">&quot;components&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;securitySchemes&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;bearerAuth&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;http&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;scheme&quot;</span><span class="p">:</span> <span class="s2">&quot;bearer&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;bearerFormat&quot;</span><span class="p">:</span> <span class="s2">&quot;JWT&quot;</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-<span class="p">})</span>
-</code></pre></div>
-
-<h2 id="complete-example">Complete Example</h2>
-<p>Here is a complete example application with Swagger:</p>
-<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span>
-    <span class="n">templates_directory</span><span class="o">=</span><span class="s2">&quot;templates&quot;</span><span class="p">,</span>
-    <span class="n">swagger_options</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Blog API&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;API for Blog Application&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;contact&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Blog Team&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;api@blog.com&quot;</span>
-        <span class="p">},</span>
-        <span class="s2">&quot;servers&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;http://localhost:8000&quot;</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Development server&quot;</span><span class="p">}</span>
-        <span class="p">]</span>
-    <span class="p">}</span>
-<span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/posts&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_posts</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get all blog posts.</span>
-
-<span class="sd">    Query Parameters:</span>
-<span class="sd">        page (int): Page number</span>
-<span class="sd">        limit (int): Posts per page</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        List[Dict]: List of blog posts.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">posts</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;First Post&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;Content here&quot;</span><span class="p">,</span> <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;Admin&quot;</span><span class="p">},</span>
-        <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Second Post&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;More content&quot;</span><span class="p">,</span> <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;Admin&quot;</span><span class="p">}</span>
-    <span class="p">]</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">posts</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/posts/</span><span class="si">{post_id}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_post</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get a specific blog post.</span>
-
-<span class="sd">    Path Parameters:</span>
-<span class="sd">        post_id (int): The ID of the post to retrieve.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        Dict: Blog post information.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">post_id</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;post_id&quot;</span><span class="p">)</span>
-    <span class="n">post</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">post_id</span><span class="p">,</span> <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Post </span><span class="si">{</span><span class="n">post_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;Content&quot;</span><span class="p">,</span> <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;Admin&quot;</span><span class="p">}</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">post</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/posts&quot;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_post</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create a new blog post.</span>
-
-<span class="sd">    Body:</span>
-<span class="sd">        title (str): Post title</span>
-<span class="sd">        content (str): Post content</span>
-<span class="sd">        author (str): Post author</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        Dict: Created post information.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">post_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-    <span class="n">post_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">123</span>  <span class="c1"># Generated ID</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">201</span><span class="p">)</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">post_data</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;/posts/</span><span class="si">{post_id}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_post</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Update an existing blog post.</span>
-
-<span class="sd">    Path Parameters:</span>
-<span class="sd">        post_id (int): The ID of the post to update.</span>
-
-<span class="sd">    Body:</span>
-<span class="sd">        title (str): Updated post title</span>
-<span class="sd">        content (str): Updated post content</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        Dict: Updated post information.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">post_id</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;post_id&quot;</span><span class="p">)</span>
-    <span class="n">update_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-    <span class="n">post</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">post_id</span><span class="p">,</span> <span class="o">**</span><span class="n">update_data</span><span class="p">}</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">post</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/posts/</span><span class="si">{post_id}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">delete_post</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Delete a blog post.</span>
-
-<span class="sd">    Path Parameters:</span>
-<span class="sd">        post_id (int): The ID of the post to delete.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        Dict: Deletion confirmation.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">post_id</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;post_id&quot;</span><span class="p">)</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;deleted&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;post_id&quot;</span><span class="p">:</span> <span class="n">post_id</span><span class="p">})</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🚀 Blog API running on http://localhost:8000&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;📚 API docs: http://localhost:8000/docs&quot;</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">)</span>
-</code></pre></div>
-
-<h2 id="testing-api-via-swagger-ui">Testing API via Swagger UI</h2>
-<p>Swagger UI provides an interface for testing the API directly from the browser:</p>
-<ol>
-<li>Open <code>http://localhost:8000/docs</code></li>
-<li>Click on the endpoint you want to test</li>
-<li>Click "Try it out"</li>
-<li>Fill in parameters and body if required</li>
-<li>Click "Execute"</li>
-<li>View the response at the bottom</li>
-</ol>
-<h2 id="swagger-tips">Swagger Tips</h2>
-<ol>
-<li><strong>Clear Docstrings</strong>: Write descriptive docstrings for each endpoint</li>
-<li><strong>Type Hints</strong>: Use Python type hints for more accurate schemas</li>
-<li><strong>Response Codes</strong>: Document various response codes (200, 201, 400, 404, etc.)</li>
-<li><strong>Examples</strong>: Provide request/response examples in docstrings</li>
-<li><strong>Grouping</strong>: Group related endpoints with tags</li>
-<li><strong>Authentication</strong>: Document authentication requirements</li>
-<li><strong>Versioning</strong>: Update the API version when there are breaking changes</li>
-</ol>
-<hr />
-<p><a href="index.html">Back to Table of Contents</a></p>
-            </div>
-        </div>
-    </main>
-    <footer class="bg-white border-t border-gray-200">
-        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-            <p class="text-center text-sm text-gray-500">&copy; <span id="current-year"></span> Xyra Framework. Made with ❤️</p>
-        </div>
-        <script>
-            document.getElementById('current-year').textContent = new Date().getFullYear();
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-        <script>hljs.highlightAll();</script>
-    </footer>
-</body>
-</html>
+<h2 id="accessing-the-documentation">Accessing the Documentation</h2>
+<p>Once your application is running, you can access the Swagger UI at the URL you specified in <code>swagger_options</code> (e.g., <code>http://localhost:8000/docs</code>).</p>
+<p>The interactive documentation allows you to see your API endpoints, parameters, and response models, and even send test requests directly from your browser.</p>

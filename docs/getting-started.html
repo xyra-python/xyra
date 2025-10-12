@@ -1,278 +1,83 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XYRA Documentation - Getting Started</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#3b82f6',
-                        secondary: '#64748b'
-                    }
-                }
-            }
-        }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
-</head>
-<body class="bg-gray-50 text-gray-900">
-    <header class="bg-white shadow-sm border-b border-gray-200">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex">
-                    <div class="flex-shrink-0 flex items-center">
-                        <a href="index.html" class="text-2xl font-bold text-primary">XYRA</a>
-                    </div>
-                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                        <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
-                        <a href="getting-started.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Getting Started</a>
-                        <a href="installation.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Installation</a>
-                        <a href="api-reference.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">API Reference</a>
-                        <a href="routing.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Routing</a>
-                        <a href="request-response.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Request & Response</a>
-                        <a href="middleware.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Middleware</a>
-                        <a href="templating.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Templating</a>
-                        <a href="static-files.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Static Files</a>
-                        <a href="websockets.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">WebSockets</a>
-                        <a href="logger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Logger</a>
-                        <a href="swagger.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Swagger</a>
-                        <a href="examples.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Examples</a>
-                    </div>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="px-4 py-6 sm:px-0">
-            <div class="bg-white shadow rounded-lg p-6">
-                <hr />
-<p>layout: default
-title: "Getting Started"</p>
-<hr />
+---
+layout: default
+title: "Getting Started"
+---
+
 <h1 id="getting-started-with-xyra">Getting Started with Xyra</h1>
 <p>Welcome to Xyra! This section will help you create your first web application with the Xyra framework.</p>
+
 <h2 id="prerequisites">Prerequisites</h2>
 <p>Before you begin, make sure you have:</p>
 <ul>
-<li>Python 3.11 or higher</li>
-<li>pip package manager</li>
-<li>Basic knowledge of Python</li>
+    <li>Python 3.11 or higher</li>
+    <li>pip package manager</li>
+    <li>Basic knowledge of Python</li>
 </ul>
+
 <h2 id="installation">Installation</h2>
 <p>First, install Xyra using pip:</p>
-<div class="hljs"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>xyra
-</code></pre></div>
-
+<pre><code class="language-bash">
+pip install xyra
+</code></pre>
 <p>Or install from source:</p>
-<div class="hljs"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/xyra-python/xyra.git
-<span class="nb">cd</span><span class="w"> </span>xyra
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
-</code></pre></div>
+<pre><code class="language-bash">
+git clone https://github.com/xyra-python/xyra.git
+cd xyra
+pip install -e .
+</code></pre>
 
 <h2 id="your-first-application">Your First Application</h2>
 <p>Let's create a simple web application that displays "Hello, Xyra!".</p>
+
 <h3 id="1-create-the-application-file">1. Create the Application File</h3>
 <p>Create a new file named <code>app.py</code> and add the following code:</p>
-<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
+<pre><code class="language-python">
+from xyra import App, Request, Response
 
-<span class="c1"># Initialize the application</span>
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">()</span>
+# Initialize the application
+app = App()
 
-<span class="c1"># Define a route for the home page</span>
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">home</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Hello, Xyra!&quot;</span><span class="p">})</span>
+# Define a route for the home page
+@app.get("/")
+def home(req: Request, res: Response):
+    res.json({"message": "Hello, Xyra!"})
 
-<span class="c1"># Run the server</span>
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">)</span>
-</code></pre></div>
+# Run the server
+if __name__ == "__main__":
+    app.listen(8000)
+</code></pre>
 
 <h3 id="2-run-the-application">2. Run the Application</h3>
 <p>Run the application with the command:</p>
-<div class="hljs"><pre><span></span><code>python<span class="w"> </span>app.py
-</code></pre></div>
-
+<pre><code class="language-bash">
+python app.py
+</code></pre>
 <p>You should see output like:</p>
-<div class="hljs"><pre><span></span><code>🚀 Xyra server running on http://0.0.0.0:8000
-</code></pre></div>
+<pre><code class="language-bash">
+🚀 Xyra server running on http://0.0.0.0:8000
+</code></pre>
 
 <h3 id="3-access-the-application">3. Access the Application</h3>
 <p>Open your browser and visit <code>http://localhost:8000</code>. You will see a JSON response:</p>
-<div class="hljs"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hello, Xyra!&quot;</span>
-<span class="p">}</span>
-</code></pre></div>
+<pre><code class="language-json">
+{
+  "message": "Hello, Xyra!"
+}
+</code></pre>
 
 <h2 id="code-explanation">Code Explanation</h2>
 <ul>
-<li><code>from xyra import App, Request, Response</code>: Import the main components from Xyra</li>
-<li><code>app = App()</code>: Create an application instance</li>
-<li><code>@app.get("/")</code>: Decorator to handle GET requests to the root path "/"</li>
-<li><code>def home(req: Request, res: Response)</code>: Handler function that receives Request and Response objects</li>
-<li><code>res.json({"message": "Hello, Xyra!"})</code>: Send a JSON response</li>
-<li><code>app.listen(8000)</code>: Start the server on port 8000</li>
+    <li><code>from xyra import App, Request, Response</code>: Import the main components from Xyra</li>
+    <li><code>app = App()</code>: Create an application instance</li>
+    <li><code>@app.get("/")</code>: Decorator to handle GET requests to the root path "/"</li>
+    <li><code>def home(req: Request, res: Response)</code>: Handler function that receives Request and Response objects</li>
+    <li><code>res.json({"message": "Hello, Xyra!"})</code>: Send a JSON response</li>
+    <li><code>app.listen(8000)</code>: Start the server on port 8000</li>
 </ul>
-<h2 id="building-a-more-complex-application">Building a More Complex Application</h2>
-<p>Let's create a simple API for managing tasks:</p>
-<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">()</span>
-
-<span class="c1"># In-memory storage (use a database in production)</span>
-<span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Learn Xyra&quot;</span><span class="p">,</span> <span class="s2">&quot;completed&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
-    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Build an app&quot;</span><span class="p">,</span> <span class="s2">&quot;completed&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
-<span class="p">]</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/tasks&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_tasks</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all tasks.&quot;&quot;&quot;</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/tasks&quot;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_task</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new task.&quot;&quot;&quot;</span>
-    <span class="n">task_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-
-    <span class="c1"># Validate input</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">task_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">):</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Title is required&quot;</span><span class="p">})</span>
-        <span class="k">return</span>
-
-    <span class="c1"># Create new task</span>
-    <span class="n">new_task</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">task_data</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;completed&quot;</span><span class="p">:</span> <span class="n">task_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;completed&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_task</span><span class="p">)</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">201</span><span class="p">)</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">new_task</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;/tasks/</span><span class="si">{task_id}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_task</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update a task.&quot;&quot;&quot;</span>
-    <span class="n">task_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;task_id&quot;</span><span class="p">))</span>
-    <span class="n">update_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-
-    <span class="n">task</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tasks</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">task_id</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">task</span><span class="p">:</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Task not found&quot;</span><span class="p">})</span>
-        <span class="k">return</span>
-
-    <span class="n">task</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">update_data</span><span class="p">)</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/tasks/</span><span class="si">{task_id}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">delete_task</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Delete a task.&quot;&quot;&quot;</span>
-    <span class="n">task_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;task_id&quot;</span><span class="p">))</span>
-
-    <span class="k">global</span> <span class="n">tasks</span>
-    <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tasks</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">task_id</span><span class="p">]</span>
-
-    <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="mi">204</span><span class="p">)</span>  <span class="c1"># No Content</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🚀 Task API running on http://localhost:8000&quot;</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">)</span>
-</code></pre></div>
-
-<h2 id="testing-your-api">Testing Your API</h2>
-<p>You can test the API using curl:</p>
-<div class="hljs"><pre><span></span><code><span class="c1"># Get all tasks</span>
-curl<span class="w"> </span>http://localhost:8000/tasks
-
-<span class="c1"># Create a new task</span>
-curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/tasks<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;title&quot;: &quot;New task&quot;}&#39;</span>
-
-<span class="c1"># Update a task</span>
-curl<span class="w"> </span>-X<span class="w"> </span>PUT<span class="w"> </span>http://localhost:8000/tasks/1<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;completed&quot;: true}&#39;</span>
-
-<span class="c1"># Delete a task</span>
-curl<span class="w"> </span>-X<span class="w"> </span>DELETE<span class="w"> </span>http://localhost:8000/tasks/1
-</code></pre></div>
-
-<h2 id="adding-html-templates">Adding HTML Templates</h2>
-<p>Let's add HTML rendering to your application:</p>
-<div class="hljs"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xyra</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">templates_directory</span><span class="o">=</span><span class="s2">&quot;templates&quot;</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">home</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;home.html&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;My Xyra App&quot;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Welcome!&quot;</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/about&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">about</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;about.html&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;About&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;1.0.0&quot;</span><span class="p">)</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8000</span><span class="p">)</span>
-</code></pre></div>
-
-<p>Create a <code>templates</code> directory and add <code>home.html</code>:</p>
-<div class="hljs"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
-<span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>{{ message }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;/about&quot;</span><span class="p">&gt;</span>About<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
-</code></pre></div>
 
 <h2 id="next-steps">Next Steps</h2>
 <ul>
-<li>Learn <a href="routing.md">Routing</a> to add more endpoints</li>
-<li>Explore <a href="request-response.md">Request &amp; Response</a> to understand request/response objects</li>
-<li>Try <a href="templating.md">Templating</a> for HTML rendering</li>
-<li>Check out <a href="middleware.md">Middleware</a> for cross-cutting concerns</li>
-<li>See <a href="examples.md">Examples</a> for complete applications</li>
+    <li>Learn <a href="/routing.html">Routing</a> to add more endpoints</li>
+    <li>Explore <a href="/request-response.html">Request & Response</a> to understand request/response objects</li>
+    <li>Try <a href="/templating.html">Templating</a> for HTML rendering</li>
 </ul>
-<h2 id="troubleshooting">Troubleshooting</h2>
-<h3 id="common-issues">Common Issues</h3>
-<ol>
-<li><strong>Port already in use</strong>: Change the port number in <code>app.listen(port)</code></li>
-<li><strong>Import errors</strong>: Make sure Xyra is installed correctly with <code>pip install xyra</code></li>
-<li><strong>Template not found</strong>: Ensure the <code>templates</code> directory exists and contains your template files</li>
-</ol>
-<h3 id="getting-help">Getting Help</h3>
-<ul>
-<li>Check the <a href="api-reference.md">API Reference</a> for detailed documentation</li>
-<li>Visit the <a href="https://github.com/xyra-python/xyra/issues">GitHub Issues</a> for common problems</li>
-<li>Join our <a href="https://discord.gg/xyra">Discord Community</a> for support</li>
-</ul>
-<hr />
-<p><a href="index.html">Back to Table of Contents</a></p>
-            </div>
-        </div>
-    </main>
-    <footer class="bg-white border-t border-gray-200">
-        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-            <p class="text-center text-sm text-gray-500">&copy; <span id="current-year"></span> Xyra Framework. Made with ❤️</p>
-        </div>
-        <script>
-            document.getElementById('current-year').textContent = new Date().getFullYear();
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-        <script>hljs.highlightAll();</script>
-    </footer>
-</body>
-</html>
