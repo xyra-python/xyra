@@ -6,7 +6,7 @@ updates:
       interval: "daily"
     commit-message:
       prefix: ⬆
-  - package-ecosystem: "uv"
+  - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "daily"
