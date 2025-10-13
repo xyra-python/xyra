@@ -1,15 +1,97 @@
----
-layout: default
-title: "Examples"
----
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Examples - Xyra Framework</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
 
-<h1 id="examples">Examples</h1>
-<p>This section provides complete examples of Xyra applications to help you get started.</p>
+<body class="text-gray-300 font-sans">
+  <div class="gradient-bg"></div>
 
-<h2 id="hello-world">Hello, World!</h2>
-<p>A minimal Xyra application.</p>
-<pre><code class="language-python">
-from xyra import App, Request, Response
+  <!-- Menu Button -->
+  <button class="menu-btn" id="menuBtn" aria-label="Toggle Menu">
+    <div class="menu-icon"><span></span><span></span><span></span></div>
+  </button>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="p-6">
+      <div class="mb-10">
+        <a href="index.html" class="logo text-2xl font-bold transition-all hover:opacity-90">
+          Xyra Framework
+        </a>
+      </div>
+      <nav>
+        <ul class="space-y-1">
+          <li>
+            <h3 class="nav-heading">Introduction</h3>
+            <ul class="space-y-1">
+              <li><a href="getting-started.html" class="nav-link">Getting Started</a></li>
+              <li><a href="installation.html" class="nav-link">Installation</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Core Concepts</h3>
+            <ul class="space-y-1">
+              <li><a href="routing.html" class="nav-link">Routing</a></li>
+              <li><a href="request-response.html" class="nav-link">Request & Response</a></li>
+              <li><a href="middleware.html" class="nav-link">Middleware</a></li>
+              <li><a href="templating.html" class="nav-link">Templating</a></li>
+              <li><a href="static-files.html" class="nav-link">Static Files</a></li>
+              <li><a href="logger.html" class="nav-link">Logger</a></li>
+              <li><a href="concurrency.html" class="nav-link">Concurrency</a></li>
+              <li><a href="background-tasks.html" class="nav-link">Background Tasks</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Advanced</h3>
+            <ul class="space-y-1">
+              <li><a href="websockets.html" class="nav-link">WebSockets</a></li>
+              <li><a href="swagger.html" class="nav-link">Swagger/OpenAPI</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Reference</h3>
+            <ul class="space-y-1">
+              <li><a href="api-reference.html" class="nav-link">API Reference</a></li>
+              <li><a href="examples.html" class="nav-link">Examples</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="lg:ml-[280px] min-h-screen p-6 lg:p-12 transition-all duration-300 relative z-10">
+    <div class="max-w-5xl mx-auto pt-16 lg:pt-0">
+        
+      <div class="space-y-12">
+
+        <section>
+            <h1 class="hero-title text-4xl md:text-5xl font-black tracking-tight mb-4">Code Examples</h1>
+            <p class="text-lg text-gray-400 max-w-3xl leading-relaxed">This section provides complete, runnable examples of Xyra applications to demonstrate various features and help you get started quickly.</p>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Hello, World!</h2>
+            <p class="text-gray-400 mb-6 text-lg">A minimal Xyra application that returns a JSON response.</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python">from xyra import App, Request, Response
 
 app = App()
 
@@ -18,19 +100,28 @@ def home(req: Request, res: Response):
     res.json({"message": "Hello, World!"})
 
 if __name__ == "__main__":
-    app.listen(8000)
-</code></pre>
+    app.listen(8000, logger=True)</code></pre>
+            </div>
+        </section>
 
-<h2 id="simple-todo-api">Simple TODO API</h2>
-<p>A simple in-memory TODO list API.</p>
-<pre><code class="language-python">
-import asyncio
-from xyra import App, Request, Response
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Simple TODO API</h2>
+            <p class="text-gray-400 mb-6 text-lg">A simple in-memory TODO list API demonstrating basic CRUD operations with route parameters and JSON request bodies.</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python">from xyra import App, Request, Response
 
 app = App()
 
-# In-memory database
+# In-memory "database"
 todos = []
+next_id = 1
 
 @app.get("/todos")
 def get_todos(req: Request, res: Response):
@@ -38,46 +129,156 @@ def get_todos(req: Request, res: Response):
 
 @app.post("/todos")
 async def create_todo(req: Request, res: Response):
+    global next_id
     data = await req.json()
-    todos.append(data)
-    res.status(201).json(data)
+    if not data or "task" not in data:
+        res.status(400).json({"error": "Task is required"})
+        return
+    
+    new_todo = {"id": next_id, "task": data["task"], "completed": False}
+    todos.append(new_todo)
+    next_id += 1
+    res.status(201).json(new_todo)
 
 @app.get("/todos/{todo_id}")
 def get_todo(req: Request, res: Response):
     todo_id = int(req.params.get("todo_id"))
     todo = next((t for t in todos if t["id"] == todo_id), None)
+    
     if todo:
         res.json(todo)
     else:
         res.status(404).json({"error": "Todo not found"})
 
 if __name__ == "__main__":
-    app.listen(8000)
-</code></pre>
+    app.listen(8000, logger=True)</code></pre>
+            </div>
+        </section>
 
-<h2 id="web-socket-chat">WebSocket Chat</h2>
-<p>A simple real-time chat application using WebSockets.</p>
-<pre><code class="language-python">
-import asyncio
-from xyra import App, WebSocket
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">WebSocket Chat</h2>
+            <p class="text-gray-400 mb-6 text-lg">A simple real-time, multi-client chat application using WebSockets to broadcast messages.</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python">from xyra import App, WebSocket
 
 app = App()
+
+# Note: For production, a more robust solution like Redis Pub/Sub is recommended
 connections = set()
 
-@app.ws("/ws")
-async def chat_socket(ws: WebSocket):
-    await ws.accept()
+async def on_open(ws: WebSocket):
+    print("Client connected.")
     connections.add(ws)
-    try:
-        while True:
-            message = await ws.receive_text()
-            for connection in connections:
-                await connection.send_text(message)
-    except Exception:
-        pass
-    finally:
-        connections.remove(ws)
+    await ws.send("Welcome to the chat!")
+
+async def on_message(ws: WebSocket, message: str, opcode: int):
+    # Broadcast the message to all other connected clients
+    for client in connections:
+        if client != ws:
+            await client.send(f"User says: {message}")
+
+async def on_close(ws: WebSocket, code: int, message: str | None):
+    print("Client disconnected.")
+    connections.discard(ws)
+
+app.websocket("/ws", {
+    "open": on_open,
+    "message": on_message,
+    "close": on_close
+})
 
 if __name__ == "__main__":
-    app.listen(8000)
-</code></pre>
+    app.listen(8000, logger=True)</code></pre>
+            </div>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">More Examples</h2>
+            <p class="text-gray-400 mb-6 text-lg">For more comprehensive examples, including full applications with databases, authentication, and advanced features, check out the official Xyra examples repository on GitHub.</p>
+            <div class="flex items-center gap-4">
+                <a href="https://github.com/xyra-python/xyra-example" target="_blank" class="btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all hover:scale-105">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    View Examples on GitHub
+                </a>
+            </div>
+            <p class="text-gray-400 mt-4 text-lg">The repository includes examples for:</p>
+            <ul class="list-disc pl-6 space-y-2 text-gray-400 text-lg mt-4">
+                <li>REST API with database integration</li>
+                <li>WebSocket chat application</li>
+                <li>Authentication and authorization</li>
+                <li>File upload handling</li>
+                <li>Middleware usage</li>
+                <li>And much more!</li>
+            </ul>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Made with ❤️ for the Python community</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+  <script>
+    // Menu Toggle, Active Nav Link, and Copy Code Functionality
+    const menuBtn = document.getElementById('menuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    function toggleMenu() {
+      menuBtn.classList.toggle('active');
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+    }
+    menuBtn.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 1024) toggleMenu();
+      });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+      const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+      document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+          link.classList.add('active');
+        }
+      });
+    });
+    function copyCode(button) {
+      const codeContainer = button.closest('.code-container');
+      const codeBlock = codeContainer.querySelector('code');
+      const text = codeBlock.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const textSpan = button.querySelector('span');
+        if (textSpan) {
+            const originalText = textSpan.textContent;
+            textSpan.textContent = 'Copied!';
+            button.classList.add('copied');
+            setTimeout(() => {
+              textSpan.textContent = originalText;
+              button.classList.remove('copied');
+            }, 2000);
+        }
+      }).catch(err => {
+        console.error('Failed to copy code:', err);
+        const textSpan = button.querySelector('span');
+        if (textSpan) textSpan.textContent = 'Error';
+      });
+    }
+  </script>
+</body>
+</html>
