@@ -1,108 +1,239 @@
----
-layout: default
-title: "WebSockets"
----
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebSockets - Xyra Framework</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
 
-<h1 id="websockets">WebSockets</h1>
-<p>Xyra provides built-in support for WebSockets, allowing for real-time, bidirectional communication between the client and the server.</p>
+<body class="text-gray-300 font-sans">
+  <div class="gradient-bg"></div>
 
-<h2 id="creating-a-websocket-handler">Creating a WebSocket Handler</h2>
-<p>To create a WebSocket handler, you can use the <code>@app.websocket(path)</code> decorator. The handler function will receive a <code>WebSocket</code> object as an argument. This is the simplest way to handle WebSocket connections and is suitable for many use cases.</p>
-<pre><code class="language-python">
-from xyra import App, WebSocket
+  <!-- Menu Button -->
+  <button class="menu-btn" id="menuBtn" aria-label="Toggle Menu">
+    <div class="menu-icon"><span></span><span></span><span></span></div>
+  </button>
 
-app = App()
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
 
-@app.websocket("/ws")
-async def websocket_handler(ws: WebSocket):
-    # This function is called when a new WebSocket connection is opened.
-    await ws.send("Welcome to the WebSocket server!")
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="p-6">
+      <div class="mb-10">
+        <a href="index.html" class="logo text-2xl font-bold transition-all hover:opacity-90">
+          Xyra Framework
+        </a>
+      </div>
+      <nav>
+        <ul class="space-y-1">
+          <li>
+            <h3 class="nav-heading">Introduction</h3>
+            <ul class="space-y-1">
+              <li><a href="getting-started.html" class="nav-link">Getting Started</a></li>
+              <li><a href="installation.html" class="nav-link">Installation</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Core Concepts</h3>
+            <ul class="space-y-1">
+              <li><a href="routing.html" class="nav-link">Routing</a></li>
+              <li><a href="request-response.html" class="nav-link">Request & Response</a></li>
+              <li><a href="middleware.html" class="nav-link">Middleware</a></li>
+              <li><a href="templating.html" class="nav-link">Templating</a></li>
+              <li><a href="static-files.html" class="nav-link">Static Files</a></li>
+              <li><a href="logger.html" class="nav-link">Logger</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Advanced</h3>
+            <ul class="space-y-1">
+              <li><a href="websockets.html" class="nav-link">WebSockets</a></li>
+              <li><a href="swagger.html" class="nav-link">Swagger/OpenAPI</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Reference</h3>
+            <ul class="space-y-1">
+              <li><a href="api-reference.html" class="nav-link">API Reference</a></li>
+              <li><a href="examples.html" class="nav-link">Examples</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
 
-    try:
-        while True:
-            message = await ws.receive_text()
-            print(f"Received message: {message}")
-            await ws.send_text(f"You said: {message}")
-    except Exception as e:
-        print(f"WebSocket error: {e}")
-    finally:
-        print("WebSocket connection closed")
+  <!-- Main Content -->
+  <main class="lg:ml-[280px] min-h-screen p-6 lg:p-12 transition-all duration-300 relative z-10">
+    <div class="max-w-5xl mx-auto pt-16 lg:pt-0">
+        
+      <div class="space-y-12">
 
-</code></pre>
-<p>The decorated function handles the entire lifecycle of the WebSocket connection after it's opened.</p>
+        <section>
+            <h1 class="hero-title text-4xl md:text-5xl font-black tracking-tight mb-4">WebSockets</h1>
+            <p class="text-lg text-gray-400 max-w-3xl leading-relaxed">Xyra provides first-class support for WebSockets, allowing real-time, bidirectional communication between clients and the server.</p>
+        </section>
 
-<h2 id="handling-websocket-events">Handling WebSocket Events</h2>
-<p>For more control over the WebSocket lifecycle, you can provide a dictionary of event handlers to the <code>app.websocket()</code> method. This allows you to define separate functions for handling connection open, message, and close events.</p>
-<pre><code class="language-python">
-from xyra import App, WebSocket
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Event-Based Handlers</h2>
+            <p class="text-gray-400 mb-6 text-lg">You can handle WebSocket connections by providing a dictionary of event handlers to the <code>app.websocket()</code> method. This approach is excellent for organizing complex logic.</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 S.I.C.K. OF THE BUGS S.I.C.K. OF THE BUGS 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python">from xyra import App, WebSocket
 
 app = App()
 
 async def on_open(ws: WebSocket):
-    print(f"WebSocket connection opened: {ws}")
-    await ws.send("Connection established.")
+    print("Client connected.")
+    ws.subscribe("chat_room")
+    await ws.send("Welcome to the chat!")
 
-async def on_message(ws: WebSocket, message, opcode):
-    print(f"Received message: {message}")
-    await ws.send_text(f"Echo: {message}")
+async def on_message(ws: WebSocket, message: str, opcode: int):
+    print(f"Received: {message}")
+    # Broadcast the message to all clients in the "chat_room"
+    app.publish("chat_room", f"New message: {message}")
 
-async def on_close(ws: WebSocket, code, message):
-    print(f"WebSocket connection closed: {code} {message}")
+async def on_close(ws: WebSocket, code: int, message: str | None):
+    print("Client disconnected.")
 
-app.websocket("/ws_events", {
+app.websocket("/ws/chat", {
     "open": on_open,
     "message": on_message,
-    "close": on_close
-})
-</code></pre>
+    "close": on_close,
+})</code></pre>
+            </div>
+        </section>
+        
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Key WebSocket Methods</h2>
+            <p class="text-gray-400 mb-6 text-lg">The <code>WebSocket</code> object provides several methods for interaction:</p>
+            <ul class="list-disc pl-6 space-y-3 text-gray-400 text-lg">
+                <li><code>await ws.send(data: str | bytes)</code>: Sends a text or binary message.</li>
+                <li><code>await ws.receive()</code>: Asynchronously waits for and receives a message.</li>
+                <li><code>ws.close(code: int, message: str)</code>: Closes the connection.</li>
+                <li><code>ws.subscribe(topic: str)</code>: Subscribes the connection to a pub/sub topic.</li>
+                <li><code>app.publish(topic: str, message: str | bytes)</code>: Publishes a message from the app to all clients subscribed to a topic.</li>
+                <li><code>ws.unsubscribe(topic: str)</code>: Unsubscribes the connection from a topic.</li>
+            </ul>
+        </section>
 
-<h2 id="websocket-methods">WebSocket Methods</h2>
-<p>The <code>WebSocket</code> object has the following methods:</p>
-<ul>
-    <li><code>send(data: str | bytes)</code>: Sends a text or binary message to the client.</li>
-    <li><code>receive()</code>: Asynchronously receives a message.</li>
-    <li><code>close(code: int = 1000)</code>: Closes the WebSocket connection.</li>
-    <li><code>is_open() -> bool</code>: Returns <code>True</code> if the connection is open.</li>
-</ul>
-
-<h2 id="client-side-example">Client-Side Example</h2>
-<p>Here is a simple HTML and JavaScript example of a WebSocket client:</p>
-<pre><code class="language-html">
-&lt;!DOCTYPE html&gt;
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Client-Side Example</h2>
+            <p class="text-gray-400 mb-6 text-lg">Here is a simple HTML and JavaScript example for connecting to a WebSocket server.</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-bash">HTML</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
     &lt;title&gt;WebSocket Client&lt;/title&gt;
 &lt;/head&gt;
 &lt;body&gt;
     &lt;h1&gt;WebSocket Test&lt;/h1&gt;
-    <input type="text" id="messageInput" placeholder="Enter a message">
-    <button onclick="sendMessage()">Send</button>
-    &lt;div id="messages"&gt;&lt;/div&gt;
+    &lt;input type="text" id="messageInput" placeholder="Enter a message" /&gt;
+    &lt;button onclick="sendMessage()"&gt;Send&lt;/button&gt;
+    &lt;div id="messages" style="margin-top: 20px;"&gt;&lt;/div&gt;
 
     &lt;script&gt;
-        const ws = new WebSocket("ws://localhost:8000/ws");
+        const ws = new WebSocket("ws://localhost:8000/ws/chat");
+        const messagesDiv = document.getElementById('messages');
+        const input = document.getElementById('messageInput');
 
-        ws.onopen = function(event) {
-            console.log("WebSocket connection opened.");
-        };
+        ws.onopen = () => console.log("WebSocket connected.");
+        ws.onclose = () => console.log("WebSocket disconnected.");
 
-        ws.onmessage = function(event) {
-            const messages = document.getElementById('messages');
-            const message = document.createElement('p');
-            message.textContent = event.data;
-            messages.appendChild(message);
-        };
-
-        ws.onclose = function(event) {
-            console.log("WebSocket connection closed.");
+        ws.onmessage = (event) => {
+            const messageEl = document.createElement('p');
+            messageEl.textContent = `Server: ${event.data}`;
+            messagesDiv.appendChild(messageEl);
         };
 
         function sendMessage() {
-            const input = document.getElementById('messageInput');
-            ws.send(input.value);
-            input.value = '';
+            if (input.value) {
+                ws.send(input.value);
+                input.value = '';
+            }
         }
     &lt;/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;
-</code></pre>
+              </code></pre>
+            </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Made with ❤️ for the Python community</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+  <script>
+    // Menu Toggle, Active Nav Link, and Copy Code Functionality
+    const menuBtn = document.getElementById('menuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    function toggleMenu() {
+      menuBtn.classList.toggle('active');
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+    }
+    menuBtn.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 1024) toggleMenu();
+      });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+      const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+      document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+          link.classList.add('active');
+        }
+      });
+    });
+    function copyCode(button) {
+      const codeContainer = button.closest('.code-container');
+      const codeBlock = codeContainer.querySelector('code');
+      const text = codeBlock.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const textSpan = button.querySelector('span');
+        if (textSpan) {
+            const originalText = textSpan.textContent;
+            textSpan.textContent = 'Copied!';
+            button.classList.add('copied');
+            setTimeout(() => {
+              textSpan.textContent = originalText;
+              button.classList.remove('copied');
+            }, 2000);
+        }
+      }).catch(err => {
+        console.error('Failed to copy code:', err);
+        const textSpan = button.querySelector('span');
+        if (textSpan) textSpan.textContent = 'Error';
+      });
+    }
+  </script>
+</body>
+</html>

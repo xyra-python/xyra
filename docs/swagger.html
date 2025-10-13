@@ -1,15 +1,97 @@
----
-layout: default
-title: "Swagger/OpenAPI"
----
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Swagger/OpenAPI - Xyra Framework</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
 
-<h1 id="swagger-openapi-documentation">Swagger/OpenAPI Documentation</h1>
-<p>Xyra can automatically generate interactive API documentation for your application using Swagger UI. This is a powerful feature for developing and testing your API.</p>
+<body class="text-gray-300 font-sans">
+  <div class="gradient-bg"></div>
 
-<h2 id="enabling-swagger">Enabling Swagger</h2>
-<p>To enable Swagger, you need to provide <code>swagger_options</code> when creating the <code>App</code> instance. The <code>title</code> and <code>version</code> are required.</p>
-<pre><code class="language-python">
-from xyra import App
+  <!-- Menu Button -->
+  <button class="menu-btn" id="menuBtn" aria-label="Toggle Menu">
+    <div class="menu-icon"><span></span><span></span><span></span></div>
+  </button>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="p-6">
+      <div class="mb-10">
+        <a href="index.html" class="logo text-2xl font-bold transition-all hover:opacity-90">
+          Xyra Framework
+        </a>
+      </div>
+      <nav>
+        <ul class="space-y-1">
+          <li>
+            <h3 class="nav-heading">Introduction</h3>
+            <ul class="space-y-1">
+              <li><a href="getting-started.html" class="nav-link">Getting Started</a></li>
+              <li><a href="installation.html" class="nav-link">Installation</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Core Concepts</h3>
+            <ul class="space-y-1">
+              <li><a href="routing.html" class="nav-link">Routing</a></li>
+              <li><a href="request-response.html" class="nav-link">Request & Response</a></li>
+              <li><a href="middleware.html" class="nav-link">Middleware</a></li>
+              <li><a href="templating.html" class="nav-link">Templating</a></li>
+              <li><a href="static-files.html" class="nav-link">Static Files</a></li>
+              <li><a href="logger.html" class="nav-link">Logger</a></li>
+              <li><a href="concurrency.html" class="nav-link">Concurrency</a></li>
+              <li><a href="background-tasks.html" class="nav-link">Background Tasks</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Advanced</h3>
+            <ul class="space-y-1">
+              <li><a href="websockets.html" class="nav-link">WebSockets</a></li>
+              <li><a href="swagger.html" class="nav-link">Swagger/OpenAPI</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Reference</h3>
+            <ul class="space-y-1">
+              <li><a href="api-reference.html" class="nav-link">API Reference</a></li>
+              <li><a href="examples.html" class="nav-link">Examples</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="lg:ml-[280px] min-h-screen p-6 lg:p-12 transition-all duration-300 relative z-10">
+    <div class="max-w-5xl mx-auto pt-16 lg:pt-0">
+        
+      <div class="space-y-12">
+
+        <section>
+            <h1 class="hero-title text-4xl md:text-5xl font-black tracking-tight mb-4">Swagger/OpenAPI Docs</h1>
+            <p class="text-lg text-gray-400 max-w-3xl leading-relaxed">Xyra can automatically generate interactive API documentation for your application using Swagger UI. This is a powerful feature for developing and testing your API.</p>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Enabling Swagger</h2>
+            <p class="text-gray-400 mb-6 text-lg">To enable Swagger, provide a <code>swagger_options</code> dictionary when creating the <code>App</code> instance. The <code>title</code> and <code>version</code> fields are required.</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python">from xyra import App
 
 swagger_options = {
     "title": "My Awesome API",
@@ -17,48 +99,181 @@ swagger_options = {
     "url": "/docs"  # The URL to access the Swagger UI
 }
 
-app = App(swagger_options=swagger_options)
-</code></pre>
+app = App(swagger_options=swagger_options)</code></pre>
+            </div>
+        </section>
 
-<h2 id="documenting-routes">Documenting Routes</h2>
-<p>Xyra generates API documentation from the docstrings of your route handler functions. The docstrings should be in YAML format.</p>
-<pre><code class="language-python">
-from xyra import App, Request, Response
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Documenting Routes</h2>
+            <p class="text-gray-400 mb-6 text-lg">Xyra automatically generates API documentation from your route handlers' docstrings. Use standard Python docstrings to provide summary, description, and parameter information.</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python">from xyra import App, Request, Response
 
 app = App(swagger_options={"title": "My API", "version": "1.0.0"})
 
 @app.get("/users")
 def get_users(req: Request, res: Response):
     """
-    summary: Get all users
-    description: Returns a list of all users in the system.
-    responses:
-      200:
-        description: A list of users.
+    Get all users in the system.
+
+    Returns a list of all registered users with their basic information.
     """
     res.json([{"id": 1, "name": "John Doe"}])
 
 @app.post("/users")
-def create_user(req: Request, res: Response):
+async def create_user(req: Request, res: Response):
     """
-    summary: Create a new user
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-    responses:
-      201:
-        description: User created successfully.
-    """
-    # Logic to create a user
-    res.status(201).json({"message": "User created"})
-</code></pre>
+    Create a new user.
 
-<h2 id="accessing-the-documentation">Accessing the Documentation</h2>
-<p>Once your application is running, you can access the Swagger UI at the URL you specified in <code>swagger_options</code> (e.g., <code>http://localhost:8000/docs</code>).</p>
-<p>The interactive documentation allows you to see your API endpoints, parameters, and response models, and even send test requests directly from your browser.</p>
+    Accepts user data in JSON format and creates a new user account.
+    """
+    user_data = await req.json()
+    res.status(201).json({"message": "User created", "user": user_data})</code></pre>
+            </div>
+            <p class="text-gray-400 mt-6 mb-6 text-lg">For more detailed documentation, you can include parameter information in your docstrings:</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python">@app.get("/users/{user_id}")
+def get_user(req: Request, res: Response, user_id: int):
+    """
+    Get a specific user by ID.
+
+    user_id (int): The unique identifier of the user to retrieve.
+    """
+    # Implementation here
+    pass</code></pre>
+            </div>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Path Parameters</h2>
+            <p class="text-gray-400 mb-6 text-lg">Path parameters in your routes are automatically detected and documented. Use curly braces in your route paths:</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python">@app.get("/users/{user_id}")
+def get_user(req: Request, res: Response, user_id: int):
+    """
+    Get user by ID.
+
+    user_id (int): The user identifier.
+    """
+    res.json({"id": user_id, "name": "User Name"})</code></pre>
+            </div>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Advanced Configuration</h2>
+            <p class="text-gray-400 mb-6 text-lg">You can customize the Swagger documentation with additional options in the <code>swagger_options</code> dictionary:</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python">swagger_options = {
+    "title": "My API",
+    "version": "1.0.0",
+    "description": "A comprehensive API for managing users and data",
+    "url": "/docs",
+    "contact": {
+        "name": "API Support",
+        "email": "support@example.com"
+    },
+    "license": {
+        "name": "MIT",
+        "url": "https://opensource.org/licenses/MIT"
+    }
+}
+
+app = App(swagger_options=swagger_options)</code></pre>
+            </div>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Accessing the Documentation</h2>
+            <p class="text-gray-400 mb-6 text-lg">Once your application is running, you can access the Swagger UI at the URL specified in <code>swagger_options</code> (e.g., <code>http://localhost:8000/docs</code>). This interactive page allows you to explore your API endpoints, view request/response schemas, and send test requests directly from the browser.</p>
+            <p class="text-gray-400 text-lg">The documentation is automatically generated from your route definitions, docstrings, and type annotations, providing an up-to-date reference for your API.</p>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Made with ❤️ for the Python community</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+  <script>
+    // Menu Toggle, Active Nav Link, and Copy Code Functionality
+    const menuBtn = document.getElementById('menuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    function toggleMenu() {
+      menuBtn.classList.toggle('active');
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+    }
+    menuBtn.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 1024) toggleMenu();
+      });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+      const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+      document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+          link.classList.add('active');
+        }
+      });
+    });
+    function copyCode(button) {
+      const codeContainer = button.closest('.code-container');
+      const codeBlock = codeContainer.querySelector('code');
+      const text = codeBlock.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const textSpan = button.querySelector('span');
+        if (textSpan) {
+            const originalText = textSpan.textContent;
+            textSpan.textContent = 'Copied!';
+            button.classList.add('copied');
+            setTimeout(() => {
+              textSpan.textContent = originalText;
+              button.classList.remove('copied');
+            }, 2000);
+        }
+      }).catch(err => {
+        console.error('Failed to copy code:', err);
+        const textSpan = button.querySelector('span');
+        if (textSpan) textSpan.textContent = 'Error';
+      });
+    }
+  </script>
+</body>
+</html>

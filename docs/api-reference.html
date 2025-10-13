@@ -1,74 +1,228 @@
----
-layout: default
-title: "API Reference"
----
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference - Xyra Framework</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
 
-<h1 id="api-reference">API Reference</h1>
-<p>This section provides a detailed reference for the Xyra framework's API.</p>
+<body class="text-gray-300 font-sans">
+  <div class="gradient-bg"></div>
 
-<h2 id="app-class">App Class</h2>
-<p>The <code>App</code> class is the main entry point of a Xyra application.</p>
-<pre><code class="language-python">
-class App:
-    def __init__(self, options=None, templates_directory: str = "templates", swagger_options: dict = None):
-        ...
-</code></pre>
-<ul>
-    <li><code>options</code>: Optional configuration for the underlying socketify app.</li>
-    <li><code>templates_directory</code>: The directory where your HTML templates are stored.</li>
-    <li><code>swagger_options</code>: A dictionary of options to configure Swagger/OpenAPI documentation.</li>
-</ul>
+  <!-- Menu Button -->
+  <button class="menu-btn" id="menuBtn" aria-label="Toggle Menu">
+    <div class="menu-icon"><span></span><span></span><span></span></div>
+  </button>
 
-<h3 id="app-methods">App Methods</h3>
-<ul>
-    <li><code>listen(port: int, host: str = "localhost", reload: bool = False, logger: bool = False)</code>: Starts the web server.</li>
-    <li><code>get(path: str, handler: callable = None)</code>: Decorator to register a GET route.</li>
-    <li><code>post(path: str, handler: callable = None)</code>: Decorator to register a POST route.</li>
-    <li><code>put(path: str, handler: callable = None)</code>: Decorator to register a PUT route.</li>
-    <li><code>delete(path: str, handler: callable = None)</code>: Decorator to register a DELETE route.</li>
-    <li><code>patch(path: str, handler: callable = None)</code>: Decorator to register a PATCH route.</li>
-    <li><code>options(path: str, handler: callable = None)</code>: Decorator to register an OPTIONS route.</li>
-    <li><code>head(path: str, handler: callable = None)</code>: Decorator to register a HEAD route.</li>
-    <li><code>websocket(path: str, handlers: dict = None)</code>: Decorator to register a WebSocket route. Can also be used as a method with a dictionary of handlers.</li>
-    <li><code>use(middleware: callable)</code>: Adds a middleware to the application.</li>
-    <li><code>static_files(path: str, directory: str)</code>: Serves static files from a directory.</li>
-</ul>
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
 
-<h2 id="request-class">Request Class</h2>
-<p>The <code>Request</code> class represents an incoming HTTP request.</p>
-<pre><code class="language-python">
-class Request:
-    ...
-</code></pre>
-<h3 id="request-properties">Request Properties</h3>
-<ul>
-    <li><code>params</code>: A dictionary of route parameters.</li>
-    <li><code>query</code>: A dictionary of query parameters.</li>
-    <li><code>headers</code>: A dictionary of request headers.</li>
-    <li><code>method</code>: The HTTP method of the request.</li>
-    <li><code>url</code>: The URL of the request.</li>
-    <li><code>body</code>: The raw request body as bytes.</li>
-    <li><code>app</code>: The application instance.</li>
-</ul>
-<h3 id="request-methods">Request Methods</h3>
-<ul>
-    <li><code>json()</code>: Asynchronously reads the request body as JSON.</li>
-    <li><code>form()</code>: Asynchronously reads form data from the request body.</li>
-</ul>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="p-6">
+      <div class="mb-10">
+        <a href="index.html" class="logo text-2xl font-bold transition-all hover:opacity-90">
+          Xyra Framework
+        </a>
+      </div>
+      <nav>
+        <ul class="space-y-1">
+          <li>
+            <h3 class="nav-heading">Introduction</h3>
+            <ul class="space-y-1">
+              <li><a href="getting-started.html" class="nav-link">Getting Started</a></li>
+              <li><a href="installation.html" class="nav-link">Installation</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Core Concepts</h3>
+            <ul class="space-y-1">
+              <li><a href="routing.html" class="nav-link">Routing</a></li>
+              <li><a href="request-response.html" class="nav-link">Request & Response</a></li>
+              <li><a href="middleware.html" class="nav-link">Middleware</a></li>
+              <li><a href="templating.html" class="nav-link">Templating</a></li>
+              <li><a href="static-files.html" class="nav-link">Static Files</a></li>
+              <li><a href="logger.html" class="nav-link">Logger</a></li>
+              <li><a href="concurrency.html" class="nav-link">Concurrency</a></li>
+              <li><a href="background-tasks.html" class="nav-link">Background Tasks</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Advanced</h3>
+            <ul class="space-y-1">
+              <li><a href="websockets.html" class="nav-link">WebSockets</a></li>
+              <li><a href="swagger.html" class="nav-link">Swagger/OpenAPI</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Reference</h3>
+            <ul class="space-y-1">
+              <li><a href="api-reference.html" class="nav-link">API Reference</a></li>
+              <li><a href="examples.html" class="nav-link">Examples</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
 
-<h2 id="response-class">Response Class</h2>
-<p>The <code>Response</code> class is used to create an HTTP response.</p>
-<pre><code class="language-python">
-class Response:
-    ...
-</code></pre>
-<h3 id="response-methods">Response Methods</h3>
-<ul>
-    <li><code>status(code: int)</code>: Sets the HTTP status code.</li>
-    <li><code>header(name: str, value: str)</code>: Sets a response header.</li>
-    <li><code>text(content: str)</code>: Sends a plain text response.</li>
-    <li><code>json(data: dict)</code>: Sends a JSON response.</li>
-    <li><code>html(content: str)</code>: Sends an HTML response.</li>
-    <li><code>render(template_name: str, **context)</code>: Renders an HTML template.</li>
-    <li><code>redirect(url: str, status_code: int = 302)</code>: Redirects the client to a different URL.</li>
-</ul>
+  <!-- Main Content -->
+  <main class="lg:ml-[280px] min-h-screen p-6 lg:p-12 transition-all duration-300 relative z-10">
+    <div class="max-w-5xl mx-auto pt-16 lg:pt-0">
+        
+      <div class="space-y-12">
+
+        <section>
+            <h1 class="hero-title text-4xl md:text-5xl font-black tracking-tight mb-4">API Reference</h1>
+            <p class="text-lg text-gray-400 max-w-3xl leading-relaxed">This section provides a detailed reference for the Xyra framework's main classes and methods.</p>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">The <code>App</code> Class</h2>
+            <p class="text-gray-400 mb-6 text-lg">The <code>App</code> class is the main entry point of every Xyra application.</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python">class App:
+    def __init__(self, templates_directory: str | None = None, static_directory: str | None = None, swagger_options: dict | None = None):
+        ...</code></pre>
+            </div>
+            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Initialization Parameters</h3>
+            <ul class="list-disc pl-6 space-y-2 text-gray-400 text-lg">
+                <li><code>templates_directory</code>: Path to the directory for HTML templates (enables Jinja2).</li>
+                <li><code>swagger_options</code>: A dictionary of options to configure Swagger/OpenAPI documentation.</li>
+            </ul>
+
+            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Key Methods</h3>
+            <ul class="list-disc pl-6 space-y-3 text-gray-400 text-lg">
+                <li><code>listen(port, host, logger)</code>: Starts the web server.</li>
+                <li><code>get(path, middleware)</code>: Decorator to register a GET route.</li>
+                <li><code>post(path, middleware)</code>: Decorator for POST routes.</li>
+                <li><code>put(path, middleware)</code>: Decorator for PUT routes.</li>
+                <li><code>delete(path, middleware)</code>: Decorator for DELETE routes.</li>
+                <li><code>patch(path, middleware)</code>: Decorator for PATCH routes.</li>
+                <li><code>use(middleware)</code>: Adds a global middleware to the application.</li>
+                <li><code>static_files(path, directory)</code>: Serves static files from a specific directory at a given path.</li>
+                <li><code>websocket(path, handlers)</code>: Registers a WebSocket route.</li>
+            </ul>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">The <code>Request</code> Class</h2>
+            <p class="text-gray-400 mb-6 text-lg">Represents an incoming HTTP request and is passed to every route handler.</p>
+            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Properties</h3>
+            <ul class="list-disc pl-6 space-y-2 text-gray-400 text-lg">
+                <li><code>params</code>: Dictionary of route parameters.</li>
+                <li><code>query</code>: Dictionary of URL query parameters.</li>
+                <li><code>headers</code>: Dictionary of request headers.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Async Methods</h3>
+            <ul class="list-disc pl-6 space-y-2 text-gray-400 text-lg">
+                <li><code>await json()</code>: Reads and parses the request body as JSON.</li>
+                <li><code>await form()</code>: Reads and parses the request body as form data.</li>
+                <li><code>await text()</code>: Reads the request body as a raw string.</li>
+            </ul>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">The <code>Response</code> Class</h2>
+            <p class="text-gray-400 mb-6 text-lg">Used to construct and send the HTTP response back to the client.</p>
+            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Methods</h3>
+            <ul class="list-disc pl-6 space-y-3 text-gray-400 text-lg">
+                <li><code>status(code)</code>: Sets the HTTP status code (e.g., <code>200</code>, <code>404</code>).</li>
+                <li><code>header(name, value)</code>: Sets a response header.</li>
+                <li><code>text(content)</code>: Sends a plain text response.</li>
+                <li><code>json(data)</code>: Sends a JSON response.</li>
+                <li><code>html(content)</code>: Sends an HTML response.</li>
+                <li><code>render(template_name, **context)</code>: Renders a Jinja2 HTML template.</li>
+                <li><code>redirect(url, status_code=302)</code>: Redirects the client to a different URL.</li>
+            </ul>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Concurrency Utilities</h2>
+            <p class="text-gray-400 mb-6 text-lg">Xyra provides utilities for handling concurrent operations.</p>
+            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Functions</h3>
+            <ul class="list-disc pl-6 space-y-2 text-gray-400 text-lg">
+                <li><code>to_thread(func)</code>: Decorator to run synchronous functions in a thread pool.</li>
+            </ul>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Background Tasks</h2>
+            <p class="text-gray-400 mb-6 text-lg">Utilities for running asynchronous tasks in the background.</p>
+            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Functions</h3>
+            <ul class="list-disc pl-6 space-y-2 text-gray-400 text-lg">
+                <li><code>create_background_task(func, *args, **kwargs)</code>: Creates and starts a background task.</li>
+            </ul>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Made with ❤️ for the Python community</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+  <script>
+   // Menu Toggle, Active Nav Link, and Copy Code Functionality
+    const menuBtn = document.getElementById('menuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    function toggleMenu() {
+      menuBtn.classList.toggle('active');
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+    }
+    menuBtn.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 1024) toggleMenu();
+      });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+      const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+      document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+          link.classList.add('active');
+        }
+      });
+    });
+    function copyCode(button) {
+      const codeContainer = button.closest('.code-container');
+      const codeBlock = codeContainer.querySelector('code');
+      const text = codeBlock.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const textSpan = button.querySelector('span');
+        if (textSpan) {
+            const originalText = textSpan.textContent;
+            textSpan.textContent = 'Copied!';
+            button.classList.add('copied');
+            setTimeout(() => {
+              textSpan.textContent = originalText;
+              button.classList.remove('copied');
+            }, 2000);
+        }
+      }).catch(err => {
+        console.error('Failed to copy code:', err);
+        const textSpan = button.querySelector('span');
+        if (textSpan) textSpan.textContent = 'Error';
+      });
+    }
+  </script>
+</body>
+</html>

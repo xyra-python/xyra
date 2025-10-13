@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation - Xyra Framework</title>
+  <title>Background Tasks - Xyra Framework</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="./assets/css/style.css">
@@ -76,89 +76,45 @@
       <div class="space-y-12">
 
         <section>
-            <h1 class="hero-title text-4xl md:text-5xl font-black tracking-tight mb-4">Installation</h1>
-            <p class="text-lg text-gray-400 max-w-3xl leading-relaxed">This page covers the different ways to install the Xyra framework and get your development environment ready.</p>
+            <h1 class="hero-title text-4xl md:text-5xl font-black tracking-tight mb-4">Background Tasks</h1>
+            <p class="text-lg text-gray-400 max-w-3xl leading-relaxed">Background tasks allow you to run asynchronous operations that don't block the response to the client, perfect for email sending, data processing, or other time-consuming tasks.</p>
         </section>
 
         <section class="content-card">
-            <h2 class="text-3xl font-bold text-white mb-6">Installing with Pip</h2>
-            <p class="text-gray-400 mb-6 text-lg">The recommended way to install Xyra is from PyPI using pip. This ensures you get the latest stable version.</p>
+            <h2 class="text-3xl font-bold text-white mb-6">Creating Background Tasks</h2>
+            <p class="text-gray-400 mb-6 text-lg">Use the <code>create_background_task</code> function to run tasks in the background after responding to the client.</p>
             <div class="code-container">
               <div class="code-header">
-                <span class="code-language lang-bash">Bash</span>
+                <span class="code-language lang-python">Python</span>
                 <button class="copy-btn" onclick="copyCode(this)">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                   <span>Copy</span>
                 </button>
               </div>
-              <pre><code class="language-bash">pip install xyra</code></pre>
-            </div>
-            <p class="text-gray-400 mt-6 text-lg">This command will automatically download and install Xyra along with all of its required dependencies.</p>
-        </section>
+              <pre><code class="language-python">from xyra import App, Request, Response
+from xyra.background import create_background_task
+import asyncio
 
-        <section class="content-card">
-            <h2 class="text-3xl font-bold text-white mb-6">Installing with Uv</h2>
-            <p class="text-gray-400 mb-6 text-lg">For faster package management, you can use Uv, a modern Python package installer written in Rust. First, install Uv if you haven't already:</p>
-            <div class="code-container">
-              <div class="code-header">
-                <span class="code-language lang-bash">Bash</span>
-                <button class="copy-btn" onclick="copyCode(this)">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                  <span>Copy</span>
-                </button>
-              </div>
-              <pre><code class="language-bash"># Install Uv
-curl -LsSf https://astral.sh/uv/install.sh | sh
+app = App()
 
-# Or using pip
-pip install uv</code></pre>
-            </div>
-            <p class="text-gray-400 mt-6 mb-6 text-lg">Then install Xyra using Uv:</p>
-            <div class="code-container">
-              <div class="code-header">
-                <span class="code-language lang-bash">Bash</span>
-                <button class="copy-btn" onclick="copyCode(this)">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                  <span>Copy</span>
-                </button>
-              </div>
-              <pre><code class="language-bash">uv add xyra</code></pre>
-            </div>
-            <p class="text-gray-400 mt-6 text-lg">Uv provides significantly faster installation speeds compared to pip, especially for packages with many dependencies.</p>
-        </section>
+async def send_email_async(email: str, message: str):
+    """Simulate sending an email asynchronously."""
+    await asyncio.sleep(2)  # Simulate network delay
+    print(f"Email sent to {email}: {message}")
 
-        <section class="content-card">
-            <h2 class="text-3xl font-bold text-white mb-6">Installing from Source</h2>
-            <p class="text-gray-400 mb-6 text-lg">If you want to get the latest development features or contribute to the project, you can install Xyra directly from the source code repository on GitHub.</p>
-            <div class="code-container">
-              <div class="code-header">
-                <span class="code-language lang-bash">Bash</span>
-                <button class="copy-btn" onclick="copyCode(this)">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                  <span>Copy</span>
-                </button>
-              </div>
-              <pre><code class="language-bash">git clone https://github.com/xyra-python/xyra.git
-cd xyra
-pip install -e .</code></pre>
+@app.post("/contact")
+async def contact_form(req: Request, res: Response):
+    data = await req.json()
+    email = data.get("email")
+    message = data.get("message")
+    
+    # Respond immediately
+    res.json({"status": "Message received, we'll get back to you soon!"})
+    
+    # Send email in background
+    create_background_task(send_email_async, email, message)</code></pre>
             </div>
-            <p class="text-gray-400 mt-6 text-lg">The <code>-e</code> flag installs the framework in "editable" mode, meaning any changes you make to the source code will be immediately effective in your environment.</p>
-        </section>
-
-        <section class="content-card">
-            <h2 class="text-3xl font-bold text-white mb-6">Verifying the Installation</h2>
-            <p class="text-gray-400 mb-6 text-lg">To confirm that Xyra was installed correctly, you can check its version using the command-line interface:</p>
-            <div class="code-container">
-              <div class="code-header">
-                <span class="code-language lang-bash">Bash</span>
-                <button class="copy-btn" onclick="copyCode(this)">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                  <span>Copy</span>
-                </button>
-              </div>
-              <pre><code class="language-bash">python -m xyra --version</code></pre>
-            </div>
-            <p class="text-gray-400 mt-6 text-lg">This should print the installed version number of the Xyra framework, for example: <code>Xyra version 1.0.0</code>.</p>
+            <p class="text-gray-400 mt-6 text-lg">The client receives an immediate response while the email is sent in the background, improving user experience and application responsiveness.</p>
         </section>
 
       </div>

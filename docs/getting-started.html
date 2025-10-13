@@ -1,83 +1,253 @@
----
-layout: default
-title: "Getting Started"
----
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting Started - Xyra Framework</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
 
-<h1 id="getting-started-with-xyra">Getting Started with Xyra</h1>
-<p>Welcome to Xyra! This section will help you create your first web application with the Xyra framework.</p>
+<body class="text-gray-300 font-sans">
+  <div class="gradient-bg"></div>
 
-<h2 id="prerequisites">Prerequisites</h2>
-<p>Before you begin, make sure you have:</p>
-<ul>
-    <li>Python 3.11 or higher</li>
-    <li>pip package manager</li>
-    <li>Basic knowledge of Python</li>
-</ul>
+  <!-- Menu Button -->
+  <button class="menu-btn" id="menuBtn" aria-label="Toggle Menu">
+    <div class="menu-icon"><span></span><span></span><span></span></div>
+  </button>
 
-<h2 id="installation">Installation</h2>
-<p>First, install Xyra using pip:</p>
-<pre><code class="language-bash">
-pip install xyra
-</code></pre>
-<p>Or install from source:</p>
-<pre><code class="language-bash">
-git clone https://github.com/xyra-python/xyra.git
-cd xyra
-pip install -e .
-</code></pre>
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
 
-<h2 id="your-first-application">Your First Application</h2>
-<p>Let's create a simple web application that displays "Hello, Xyra!".</p>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="p-6">
+      <div class="mb-10">
+        <a href="index.html" class="logo text-2xl font-bold transition-all hover:opacity-90">
+          Xyra Framework
+        </a>
+      </div>
+      <nav>
+        <ul class="space-y-1">
+          <li>
+            <h3 class="nav-heading">Introduction</h3>
+            <ul class="space-y-1">
+              <li><a href="getting-started.html" class="nav-link">Getting Started</a></li>
+              <li><a href="installation.html" class="nav-link">Installation</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Core Concepts</h3>
+            <ul class="space-y-1">
+              <li><a href="routing.html" class="nav-link">Routing</a></li>
+              <li><a href="request-response.html" class="nav-link">Request & Response</a></li>
+              <li><a href="middleware.html" class="nav-link">Middleware</a></li>
+              <li><a href="templating.html" class="nav-link">Templating</a></li>
+              <li><a href="static-files.html" class="nav-link">Static Files</a></li>
+              <li><a href="logger.html" class="nav-link">Logger</a></li>
+              <li><a href="concurrency.html" class="nav-link">Concurrency</a></li>
+              <li><a href="background-tasks.html" class="nav-link">Background Tasks</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Advanced</h3>
+            <ul class="space-y-1">
+              <li><a href="websockets.html" class="nav-link">WebSockets</a></li>
+              <li><a href="swagger.html" class="nav-link">Swagger/OpenAPI</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Reference</h3>
+            <ul class="space-y-1">
+              <li><a href="api-reference.html" class="nav-link">API Reference</a></li>
+              <li><a href="examples.html" class="nav-link">Examples</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
 
-<h3 id="1-create-the-application-file">1. Create the Application File</h3>
-<p>Create a new file named <code>app.py</code> and add the following code:</p>
-<pre><code class="language-python">
-from xyra import App, Request, Response
+  <!-- Main Content -->
+  <main class="lg:ml-[280px] min-h-screen p-6 lg:p-12 transition-all duration-300 relative z-10">
+    <div class="max-w-5xl mx-auto pt-16 lg:pt-0">
+        
+      <div class="space-y-12">
 
-# Initialize the application
+        <section>
+            <h1 class="hero-title text-4xl md:text-5xl font-black tracking-tight mb-4">Getting Started with Xyra</h1>
+            <p class="text-lg text-gray-400 max-w-3xl leading-relaxed">Welcome to Xyra! This guide will help you create your first web application with the Xyra framework in minutes.</p>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Prerequisites</h2>
+            <p class="text-gray-400 mb-4 text-lg">Before you begin, make sure you have:</p>
+            <ul class="list-disc pl-6 space-y-2 text-gray-400 text-lg">
+                <li>Python 3.11 or newer</li>
+                <li>The `pip` package manager</li>
+                <li>A basic knowledge of Python</li>
+            </ul>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Installation</h2>
+            <p class="text-gray-400 mb-6 text-lg">First, install Xyra using pip in your terminal.</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-bash">Bash</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-bash">pip install xyra</code></pre>
+            </div>
+            <p class="text-gray-400 mt-6 text-lg">For more details, see the <a href="installation.html" class="text-blue-400 hover:text-blue-300">Installation page</a>.</p>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Your First Application</h2>
+            <p class="text-gray-400 mb-8 text-lg">Let's create a simple web application that displays "Hello, Xyra!".</p>
+
+            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">1. Create the Application File</h3>
+            <p class="text-gray-400 mb-6 text-lg">Create a new file named <code>app.py</code> and add the following code:</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python">from xyra import App, Request, Response
+
 app = App()
 
-# Define a route for the home page
 @app.get("/")
 def home(req: Request, res: Response):
     res.json({"message": "Hello, Xyra!"})
 
-# Run the server
 if __name__ == "__main__":
-    app.listen(8000)
-</code></pre>
+    app.listen(8000)</code></pre>
+            </div>
 
-<h3 id="2-run-the-application">2. Run the Application</h3>
-<p>Run the application with the command:</p>
-<pre><code class="language-bash">
-python app.py
-</code></pre>
-<p>You should see output like:</p>
-<pre><code class="language-bash">
-🚀 Xyra server running on http://0.0.0.0:8000
-</code></pre>
+            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">2. Run the Application</h3>
+            <p class="text-gray-400 mb-6 text-lg">Run the application with the following command:</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-bash">Bash</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-bash">python app.py</code></pre>
+            </div>
+            <p class="text-gray-400 mt-6 mb-6 text-lg">You will see output like this:</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-bash">Output</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-bash">🚀 Xyra server running on http://0.0.0.0:8000</code></pre>
+            </div>
 
-<h3 id="3-access-the-application">3. Access the Application</h3>
-<p>Open your browser and visit <code>http://localhost:8000</code>. You will see a JSON response:</p>
-<pre><code class="language-json">
-{
+            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">3. Access the Application</h3>
+            <p class="text-gray-400 mb-6 text-lg">Open your browser and visit <code>http://localhost:8000</code>. You will see a JSON response:</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-json">JSON</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-json">{
   "message": "Hello, Xyra!"
-}
-</code></pre>
+}</code></pre>
+            </div>
+        </section>
 
-<h2 id="code-explanation">Code Explanation</h2>
-<ul>
-    <li><code>from xyra import App, Request, Response</code>: Import the main components from Xyra</li>
-    <li><code>app = App()</code>: Create an application instance</li>
-    <li><code>@app.get("/")</code>: Decorator to handle GET requests to the root path "/"</li>
-    <li><code>def home(req: Request, res: Response)</code>: Handler function that receives Request and Response objects</li>
-    <li><code>res.json({"message": "Hello, Xyra!"})</code>: Send a JSON response</li>
-    <li><code>app.listen(8000)</code>: Start the server on port 8000</li>
-</ul>
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Next Steps</h2>
+            <div class="doc-links">
+                <a href="routing.html" class="doc-link">
+                    <h3 class="text-lg font-semibold mb-2">🛣️ Learn Routing</h3>
+                    <p class="text-gray-400">Understand how to add more pages and endpoints.</p>
+                </a>
+                <a href="request-response.html" class="doc-link">
+                    <h3 class="text-lg font-semibold mb-2">🔄 Request & Response</h3>
+                    <p class="text-gray-400">Manage incoming data and send custom responses.</p>
+                </a>
+                <a href="templating.html" class="doc-link">
+                    <h3 class="text-lg font-semibold mb-2">📄 Use Templates</h3>
+                    <p class="text-gray-400">Easily render dynamic HTML pages.</p>
+                </a>
+            </div>
+        </section>
 
-<h2 id="next-steps">Next Steps</h2>
-<ul>
-    <li>Learn <a href="/routing.html">Routing</a> to add more endpoints</li>
-    <li>Explore <a href="/request-response.html">Request & Response</a> to understand request/response objects</li>
-    <li>Try <a href="/templating.html">Templating</a> for HTML rendering</li>
-</ul>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Made with ❤️ for the Python community</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+  <script>
+    // Menu Toggle, Active Nav Link, and Copy Code Functionality
+    const menuBtn = document.getElementById('menuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    function toggleMenu() {
+      menuBtn.classList.toggle('active');
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+    }
+    menuBtn.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 1024) toggleMenu();
+      });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+      const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+      document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+          link.classList.add('active');
+        }
+      });
+    });
+    function copyCode(button) {
+      const codeContainer = button.closest('.code-container');
+      const codeBlock = codeContainer.querySelector('code');
+      const text = codeBlock.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const textSpan = button.querySelector('span');
+        if (textSpan) {
+            const originalText = textSpan.textContent;
+            textSpan.textContent = 'Copied!';
+            button.classList.add('copied');
+            setTimeout(() => {
+              textSpan.textContent = originalText;
+              button.classList.remove('copied');
+            }, 2000);
+        }
+      }).catch(err => {
+        console.error('Failed to copy code:', err);
+        const textSpan = button.querySelector('span');
+        if (textSpan) textSpan.textContent = 'Error';
+      });
+    }
+  </script>
+</body>
+</html>

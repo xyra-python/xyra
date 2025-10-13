@@ -1,15 +1,95 @@
----
-layout: default
-title: "Routing"
----
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Routing - Xyra Framework</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
 
-<h1 id="routing">Routing</h1>
-<p>Routing in Xyra is simple and intuitive. You can use decorators to map HTTP methods and URL paths to your handler functions.</p>
+<body class="text-gray-300 font-sans">
+  <div class="gradient-bg"></div>
 
-<h2 id="basic-routing">Basic Routing</h2>
-<p>To create a route, use the decorator corresponding to the HTTP method you want to handle.</p>
-<pre><code class="language-python">
-from xyra import App, Request, Response
+  <!-- Menu Button -->
+  <button class="menu-btn" id="menuBtn" aria-label="Toggle Menu">
+    <div class="menu-icon"><span></span><span></span><span></span></div>
+  </button>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="p-6">
+      <div class="mb-10">
+        <a href="index.html" class="logo text-2xl font-bold transition-all hover:opacity-90">
+          Xyra Framework
+        </a>
+      </div>
+      <nav>
+        <ul class="space-y-1">
+          <li>
+            <h3 class="nav-heading">Introduction</h3>
+            <ul class="space-y-1">
+              <li><a href="getting-started.html" class="nav-link">Getting Started</a></li>
+              <li><a href="installation.html" class="nav-link">Installation</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Core Concepts</h3>
+            <ul class="space-y-1">
+              <li><a href="routing.html" class="nav-link">Routing</a></li>
+              <li><a href="request-response.html" class="nav-link">Request & Response</a></li>
+              <li><a href="middleware.html" class="nav-link">Middleware</a></li>
+              <li><a href="templating.html" class="nav-link">Templating</a></li>
+              <li><a href="static-files.html" class="nav-link">Static Files</a></li>
+              <li><a href="logger.html" class="nav-link">Logger</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Advanced</h3>
+            <ul class="space-y-1">
+              <li><a href="websockets.html" class="nav-link">WebSockets</a></li>
+              <li><a href="swagger.html" class="nav-link">Swagger/OpenAPI</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Reference</h3>
+            <ul class="space-y-1">
+              <li><a href="api-reference.html" class="nav-link">API Reference</a></li>
+              <li><a href="examples.html" class="nav-link">Examples</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="lg:ml-[280px] min-h-screen p-6 lg:p-12 transition-all duration-300 relative z-10">
+    <div class="max-w-5xl mx-auto pt-16 lg:pt-0">
+        
+      <div class="space-y-12">
+
+        <section>
+            <h1 class="hero-title text-4xl md:text-5xl font-black tracking-tight mb-4">Routing</h1>
+            <p class="text-lg text-gray-400 max-w-3xl leading-relaxed">Routing in Xyra is simple and intuitive. You can use decorators to map HTTP methods and URL paths to your handler functions.</p>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Basic Routing</h2>
+            <p class="text-gray-400 mb-6 text-lg">To create a route, use the decorator corresponding to the HTTP method you want to handle (e.g., <code>@app.get</code>, <code>@app.post</code>).</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python">from xyra import App, Request, Response
 
 app = App()
 
@@ -18,38 +98,124 @@ def home(req: Request, res: Response):
     res.text("Hello, World!")
 
 @app.post("/users")
-def create_user(req: Request, res: Response):
-    res.json({"message": "User created"})
-</code></pre>
+async def create_user(req: Request, res: Response):
+    # Assuming you get user data from the request body
+    user_data = await req.json()
+    res.status(201).json({"message": "User created", "data": user_data})</code></pre>
+            </div>
+        </section>
 
-<h2 id="route-parameters">Route Parameters</h2>
-<p>You can define dynamic parts in your routes using curly braces. These parameters will be available in the <code>request.params</code> dictionary.</p>
-<pre><code class="language-python">
-@app.get("/users/{user_id}")
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Route Parameters</h2>
+            <p class="text-gray-400 mb-6 text-lg">You can define dynamic parts in your routes using curly braces (e.g., <code>{user_id}</code>). These parameters will be available in the <code>req.params</code> dictionary.</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python">@app.get("/users/{user_id}")
 def get_user(req: Request, res: Response):
     user_id = req.params.get("user_id")
-    res.json({"user_id": user_id})
-</code></pre>
+    # In a real app, you would fetch user data from a database
+    res.json({"user_id": user_id, "name": f"User {user_id}"})</code></pre>
+            </div>
+        </section>
 
-<h2 id="query-parameters">Query Parameters</h2>
-<p>Query parameters from the URL are available in the <code>request.query</code> dictionary.</p>
-<pre><code class="language-python">
-# URL: /search?q=xyra&page=1
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Query Parameters</h2>
+            <p class="text-gray-400 mb-6 text-lg">Query parameters from the URL (e.g., <code>?q=xyra</code>) are available in the <code>req.query</code> dictionary.</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python"># Example URL: /search?q=xyra&page=1
 @app.get("/search")
 def search(req: Request, res: Response):
     query = req.query.get("q")
-    page = req.query.get("page", "1")
-    res.json({"query": query, "page": page})
-</code></pre>
+    page = req.query.get("page", default="1") # Use a default value
+    res.json({"searching_for": query, "page_number": page})</code></pre>
+            </div>
+        </section>
 
-<h2 id="supported-http-methods">Supported HTTP Methods</h2>
-<p>Xyra supports the following HTTP methods:</p>
-<ul>
-    <li><code>@app.get(path)</code></li>
-    <li><code>@app.post(path)</code></li>
-    <li><code>@app.put(path)</code></li>
-    <li><code>@app.delete(path)</code></li>
-    <li><code>@app.patch(path)</code></li>
-    <li><code>@app.options(path)</code></li>
-    <li><code>@app.head(path)</code></li>
-</ul>
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">Supported HTTP Methods</h2>
+            <p class="text-gray-400 mb-4 text-lg">Xyra provides decorators for all standard HTTP methods:</p>
+            <ul class="list-disc pl-6 space-y-3 text-gray-400 text-lg">
+                <li><code>@app.get(path)</code></li>
+                <li><code>@app.post(path)</code></li>
+                <li><code>@app.put(path)</code></li>
+                <li><code>@app.delete(path)</code></li>
+                <li><code>@app.patch(path)</code></li>
+                <li><code>@app.options(path)</code></li>
+                <li><code>@app.head(path)</code></li>
+            </ul>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Made with ❤️ for the Python community</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+  <script>
+    // Menu Toggle, Active Nav Link, and Copy Code Functionality
+    const menuBtn = document.getElementById('menuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    function toggleMenu() {
+      menuBtn.classList.toggle('active');
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+    }
+    menuBtn.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 1024) toggleMenu();
+      });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+      const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+      document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+          link.classList.add('active');
+        }
+      });
+    });
+    function copyCode(button) {
+      const codeContainer = button.closest('.code-container');
+      const codeBlock = codeContainer.querySelector('code');
+      const text = codeBlock.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const textSpan = button.querySelector('span');
+        if (textSpan) {
+            const originalText = textSpan.textContent;
+            textSpan.textContent = 'Copied!';
+            button.classList.add('copied');
+            setTimeout(() => {
+              textSpan.textContent = originalText;
+              button.classList.remove('copied');
+            }, 2000);
+        }
+      }).catch(err => {
+        console.error('Failed to copy code:', err);
+        const textSpan = button.querySelector('span');
+        if (textSpan) textSpan.textContent = 'Error';
+      });
+    }
+  </script>
+</body>
+</html>

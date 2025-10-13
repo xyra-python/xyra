@@ -1,70 +1,234 @@
----
-layout: default
-title: "Request & Response"
----
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Request & Response - Xyra Framework</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
 
-<h1 id="request-and-response">Request and Response</h1>
-<p>In Xyra, each route handler receives <code>Request</code> and <code>Response</code> objects to handle incoming data and send responses.</p>
+<body class="text-gray-300 font-sans">
+  <div class="gradient-bg"></div>
 
-<h2 id="the-request-object">The Request Object</h2>
-<p>The <code>Request</code> object provides information about the incoming HTTP request.</p>
+  <!-- Menu Button -->
+  <button class="menu-btn" id="menuBtn" aria-label="Toggle Menu">
+    <div class="menu-icon"><span></span><span></span><span></span></div>
+  </button>
 
-<h3 id="request-attributes">Request Attributes</h3>
-<ul>
-    <li><code>params</code>: A dictionary of route parameters.</li>
-    <li><code>query</code>: A dictionary of query parameters.</li>
-    <li><code>headers</code>: A dictionary of request headers.</li>
-    <li><code>method</code>: The HTTP method of the request.</li>
-    <li><code>url</code>: The URL of the request.</li>
-</ul>
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
 
-<h3 id="request-methods">Request Methods</h3>
-<ul>
-    <li><code>json()</code>: Asynchronously reads the request body as JSON.</li>
-    <li><code>form()</code>: Asynchronously reads form data from the request body.</li>
-</ul>
-<pre><code class="language-python">
-import asyncio
-from xyra import App, Request, Response
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="p-6">
+      <div class="mb-10">
+        <a href="index.html" class="logo text-2xl font-bold transition-all hover:opacity-90">
+          Xyra Framework
+        </a>
+      </div>
+      <nav>
+        <ul class="space-y-1">
+          <li>
+            <h3 class="nav-heading">Introduction</h3>
+            <ul class="space-y-1">
+              <li><a href="getting-started.html" class="nav-link">Getting Started</a></li>
+              <li><a href="installation.html" class="nav-link">Installation</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Core Concepts</h3>
+            <ul class="space-y-1">
+              <li><a href="routing.html" class="nav-link">Routing</a></li>
+              <li><a href="request-response.html" class="nav-link">Request & Response</a></li>
+              <li><a href="middleware.html" class="nav-link">Middleware</a></li>
+              <li><a href="templating.html" class="nav-link">Templating</a></li>
+              <li><a href="static-files.html" class="nav-link">Static Files</a></li>
+              <li><a href="logger.html" class="nav-link">Logger</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Advanced</h3>
+            <ul class="space-y-1">
+              <li><a href="websockets.html" class="nav-link">WebSockets</a></li>
+              <li><a href="swagger.html" class="nav-link">Swagger/OpenAPI</a></li>
+            </ul>
+          </li>
+          <li>
+            <h3 class="nav-heading">Reference</h3>
+            <ul class="space-y-1">
+              <li><a href="api-reference.html" class="nav-link">API Reference</a></li>
+              <li><a href="examples.html" class="nav-link">Examples</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
 
-app = App()
+  <!-- Main Content -->
+  <main class="lg:ml-[280px] min-h-screen p-6 lg:p-12 transition-all duration-300 relative z-10">
+    <div class="max-w-5xl mx-auto pt-16 lg:pt-0">
+        
+      <div class="space-y-12">
 
-@app.post("/submit")
-async def submit(req: Request, res: Response):
-    data = await req.json()
-    res.json({"received": data})
-</code></pre>
+        <section>
+            <h1 class="hero-title text-4xl md:text-5xl font-black tracking-tight mb-4">Request and Response</h1>
+            <p class="text-lg text-gray-400 max-w-3xl leading-relaxed">In Xyra, each route handler receives <code>Request</code> and <code>Response</code> objects, giving you full control over incoming data and outgoing responses.</p>
+        </section>
 
-<h2 id="the-response-object">The Response Object</h2>
-<p>The <code>Response</code> object is used to send a response back to the client.</p>
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">The Request Object</h2>
+            <p class="text-gray-400 mb-8 text-lg">The <code>Request</code> object provides a convenient API for accessing information about the incoming HTTP request.</p>
 
-<h3 id="sending-responses">Sending Responses</h3>
-<ul>
-    <li><code>res.text(content)</code>: Sends a plain text response.</li>
-    <li><code>res.json(data)</code>: Sends a JSON response.</li>
-    <li><code>res.html(content)</code>: Sends an HTML response.</li>
-    <li><code>res.render(template_name, **context)</code>: Renders an HTML template.</li>
-</ul>
-<pre><code class="language-python">
-@app.get("/")
-def home(req: Request, res: Response):
-    res.json({"message": "Hello, World!"})
-</code></pre>
+            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Request Properties</h3>
+            <ul class="list-disc pl-6 space-y-2 text-gray-400 text-lg">
+                <li><code>req.params</code>: A dictionary of route parameters (e.g., from <code>/users/{id}</code>).</li>
+                <li><code>req.query</code>: A dictionary of URL query parameters (e.g., from <code>/search?q=...</code>).</li>
+                <li><code>req.headers</code>: A dictionary of request headers.</li>
+                <li><code>req.method</code>: The HTTP method of the request (e.g., 'GET', 'POST').</li>
+                <li><code>req.url</code>: The full URL of the request.</li>
+            </ul>
 
-<h3 id="setting-status-and-headers">Setting Status and Headers</h3>
-<p>You can set the HTTP status code and response headers using the <code>status()</code> and <code>header()</code> methods.</p>
-<pre><code class="language-python">
-@app.post("/create")
-def create(req: Request, res: Response):
-    res.status(201)
-    res.header("X-Custom-Header", "MyValue")
-    res.json({"message": "Created"})
-</code></pre>
+            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Reading the Request Body</h3>
+            <p class="text-gray-400 mb-6 text-lg">For methods like <code>POST</code> or <code>PUT</code>, you can asynchronously read the request body.</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python">@app.post("/users")
+async def create_user(req: Request, res: Response):
+    # Asynchronously reads the request body as JSON
+    user_data = await req.json() 
+    
+    # You can also read form data
+    # form_data = await req.form()
 
-<h3 id="redirects">Redirects</h3>
-<p>To redirect the client to a different URL, use the <code>redirect()</code> method.</p>
-<pre><code class="language-python">
-@app.get("/old-path")
-def old_path(req: Request, res: Response):
-    res.redirect("/new-path")
-</code></pre>
+    res.status(201).json({"received": user_data})</code></pre>
+            </div>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-3xl font-bold text-white mb-6">The Response Object</h2>
+            <p class="text-gray-400 mb-8 text-lg">The <code>Response</code> object provides methods for sending a response back to the client.</p>
+
+            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Sending Responses</h3>
+            <p class="text-gray-400 mb-6 text-lg">Xyra offers several intuitive methods for sending different types of content.</p>
+            <ul class="list-disc pl-6 space-y-2 text-gray-400 text-lg mb-6">
+                <li><code>res.text(content)</code>: Sends a plain text response.</li>
+                <li><code>res.json(data)</code>: Sends a JSON response with the correct `Content-Type` header.</li>
+                <li><code>res.html(content)</code>: Sends an HTML response.</li>
+                <li><code>res.render(template_name, **context)</code>: Renders an HTML template (see Templating page).</li>
+            </ul>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python">@app.get("/api/health")
+def health_check(req: Request, res: Response):
+    res.json({"status": "ok"})</code></pre>
+            </div>
+
+            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Setting Status and Headers</h3>
+            <p class="text-gray-400 mb-6 text-lg">You can chain methods to fluently set the HTTP status code and response headers.</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python">@app.post("/create-item")
+def create_item(req: Request, res: Response):
+    # Method chaining for a clean API
+    res.status(201).header("X-Custom-Header", "MyValue").json({"message": "Created"})</code></pre>
+            </div>
+
+            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Redirects</h3>
+            <p class="text-gray-400 mb-6 text-lg">To redirect the client to a different URL, use the <code>redirect()</code> method.</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span class="code-language lang-python">Python</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre><code class="language-python">@app.get("/old-page")
+def old_page(req: Request, res: Response):
+    # This will send a 302 Found status code by default
+    res.redirect("/new-page")</code></pre>
+            </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Made with ❤️ for the Python community</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+  <script>
+    // Menu Toggle, Active Nav Link, and Copy Code Functionality
+    const menuBtn = document.getElementById('menuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    function toggleMenu() {
+      menuBtn.classList.toggle('active');
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+    }
+    menuBtn.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 1024) toggleMenu();
+      });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+      const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+      document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+          link.classList.add('active');
+        }
+      });
+    });
+    function copyCode(button) {
+      const codeContainer = button.closest('.code-container');
+      const codeBlock = codeContainer.querySelector('code');
+      const text = codeBlock.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const textSpan = button.querySelector('span');
+        if (textSpan) {
+            const originalText = textSpan.textContent;
+            textSpan.textContent = 'Copied!';
+            button.classList.add('copied');
+            setTimeout(() => {
+              textSpan.textContent = originalText;
+              button.classList.remove('copied');
+            }, 2000);
+        }
+      }).catch(err => {
+        console.error('Failed to copy code:', err);
+        const textSpan = button.querySelector('span');
+        if (textSpan) textSpan.textContent = 'Error';
+      });
+    }
+  </script>
+</body>
+</html>
