@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 
-from xyra.middleware import trusted_host_middleware, TrustedHostMiddleware
+from xyra.middleware import TrustedHostMiddleware, trusted_host_middleware
 
 
 # Trusted Host Tests

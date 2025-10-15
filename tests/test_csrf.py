@@ -1,4 +1,5 @@
 from unittest.mock import Mock
+
 from xyra.middleware import CSRFMiddleware, csrf
 
 
