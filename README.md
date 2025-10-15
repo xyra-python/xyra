@@ -51,6 +51,21 @@ def hello(req: Request, res: Response):
 if __name__ == "__main__":
     app.listen(8000)
 ```
+Or 
+
+```python
+# app.py
+from xyra import App
+
+app = App()
+
+@app.get("/")
+def hello(req, res):
+    res.json({"message": "Hello, Xyra!"})
+
+if __name__ == "__main__":
+    app.listen(8000)
+```
 
 Run the application:
 
@@ -62,11 +77,11 @@ Visit `http://localhost:8000` to see your app in action!
 
 ## 📖 Documentation
 
-- 📚 [Full Documentation](docs/README.md)
-- 🚀 [Getting Started Guide](docs/getting-started.md)
-- 🛣️ [Routing Guide](docs/routing.md)
-- 📝 [API Reference](docs/api-reference.md)
-- 💡 [Examples](docs/examples.md)
+- 📚 [Full Documentation](https://xyra-python.github.io)
+- 🚀 [Getting Started Guide](https://xyra-python.github.io/getting-started.html)
+- 🛣️ [Routing Guide](https://xyra-python.github.io/routing.html)
+- 📝 [API Reference](https://xyra-python.github.io/api-reference.html)
+- 💡 [Examples](https://github.com/xyra-python/xyra-example)
 
 ## 🎯 Example Applications
 
@@ -193,7 +208,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- 📖 [Documentation](docs/README.md)
+- 📖 [Documentation](https://xyra-python.github.io/xyra)
 - 🐛 [Issues](https://github.com/xyra-python/xyra/issues)
 - 💬 [Discussions](https://github.com/xyra-python/xyra/discussions)
 

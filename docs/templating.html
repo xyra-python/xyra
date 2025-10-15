@@ -46,6 +46,8 @@
               <li><a href="templating.html" class="nav-link">Templating</a></li>
               <li><a href="static-files.html" class="nav-link">Static Files</a></li>
               <li><a href="logger.html" class="nav-link">Logger</a></li>
+              <li><a href="concurrency.html" class="nav-link">Concurrency</a></li>
+              <li><a href="background-tasks.html" class="nav-link">Background Tasks</a></li>
             </ul>
           </li>
           <li>
@@ -117,7 +119,7 @@ def home(req: Request, res: Response):
     res.render("index.html", title="Home Page", message="Welcome to Xyra!")</code></pre>
             </div>
 
-            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Example Template</h3>
+          <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Example Template</h3>
             <p class="text-gray-400 mb-6 text-lg">Here’s an example of a Jinja2 template file located at <code>templates/index.html</code>:</p>
             <div class="code-container">
               <div class="code-header">
@@ -153,53 +155,6 @@ def home(req: Request, res: Response):
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
 
-  <script>
-    // Menu Toggle, Active Nav Link, and Copy Code Functionality
-    const menuBtn = document.getElementById('menuBtn');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    function toggleMenu() {
-      menuBtn.classList.toggle('active');
-      sidebar.classList.toggle('active');
-      overlay.classList.toggle('active');
-      document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
-    }
-    menuBtn.addEventListener('click', toggleMenu);
-    overlay.addEventListener('click', toggleMenu);
-    document.querySelectorAll('.nav-link').forEach(link => {
-      link.addEventListener('click', () => {
-        if (window.innerWidth < 1024) toggleMenu();
-      });
-    });
-    document.addEventListener('DOMContentLoaded', function () {
-      const currentPath = window.location.pathname.split('/').pop() || 'index.html';
-      document.querySelectorAll('.nav-link').forEach(link => {
-        if (link.getAttribute('href') === currentPath) {
-          link.classList.add('active');
-        }
-      });
-    });
-    function copyCode(button) {
-      const codeContainer = button.closest('.code-container');
-      const codeBlock = codeContainer.querySelector('code');
-      const text = codeBlock.textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        const textSpan = button.querySelector('span');
-        if (textSpan) {
-            const originalText = textSpan.textContent;
-            textSpan.textContent = 'Copied!';
-            button.classList.add('copied');
-            setTimeout(() => {
-              textSpan.textContent = originalText;
-              button.classList.remove('copied');
-            }, 2000);
-        }
-      }).catch(err => {
-        console.error('Failed to copy code:', err);
-        const textSpan = button.querySelector('span');
-        if (textSpan) textSpan.textContent = 'Error';
-      });
-    }
-  </script>
+  <script src="./assets/js/script.min.js"></script>
 </body>
 </html>
