@@ -64,8 +64,7 @@
               <li><a href="examples.html" class="nav-link">Examples</a></li>
             </ul>
           </li>
-        </ul>
-      </nav>
+        </ul>      </nav>
     </div>
   </aside>
 
@@ -95,74 +94,74 @@
     def __init__(self, templates_directory: str | None = None, static_directory: str | None = None, swagger_options: dict | None = None):
         ...</code></pre>
             </div>
-            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Initialization Parameters</h3>
+          <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Initialization Parameters</h3>
             <ul class="list-disc pl-6 space-y-2 text-gray-400 text-lg">
-                <li><code>templates_directory</code>: Path to the directory for HTML templates (enables Jinja2).</li>
-                <li><code>swagger_options</code>: A dictionary of options to configure Swagger/OpenAPI documentation.</li>
-            </ul>
+ <li><code>templates_directory</code>: Path to the directory for HTML templates (enables Jinja2).</li>
+ <li><code>swagger_options</code>: A dictionary of options to configure Swagger/OpenAPI documentation.</li>
+          </ul>
 
-            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Key Methods</h3>
+          <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Key Methods</h3>
             <ul class="list-disc pl-6 space-y-3 text-gray-400 text-lg">
-                <li><code>listen(port, host, logger)</code>: Starts the web server.</li>
-                <li><code>get(path, middleware)</code>: Decorator to register a GET route.</li>
-                <li><code>post(path, middleware)</code>: Decorator for POST routes.</li>
-                <li><code>put(path, middleware)</code>: Decorator for PUT routes.</li>
-                <li><code>delete(path, middleware)</code>: Decorator for DELETE routes.</li>
-                <li><code>patch(path, middleware)</code>: Decorator for PATCH routes.</li>
-                <li><code>use(middleware)</code>: Adds a global middleware to the application.</li>
-                <li><code>static_files(path, directory)</code>: Serves static files from a specific directory at a given path.</li>
-                <li><code>websocket(path, handlers)</code>: Registers a WebSocket route.</li>
-            </ul>
+ <li><code>listen(port, host, logger)</code>: Starts the web server.</li>
+ <li><code>get(path, middleware)</code>: Decorator to register a GET route.</li>
+ <li><code>post(path, middleware)</code>: Decorator for POST routes.</li>
+ <li><code>put(path, middleware)</code>: Decorator for PUT routes.</li>
+ <li><code>delete(path, middleware)</code>: Decorator for DELETE routes.</li>
+ <li><code>patch(path, middleware)</code>: Decorator for PATCH routes.</li>
+ <li><code>use(middleware)</code>: Adds a global middleware to the application.</li>
+ <li><code>static_files(path, directory)</code>: Serves static files from a specific directory at a given path.</li>
+ <li><code>websocket(path, handlers)</code>: Registers a WebSocket route.</li>
+          </ul>
         </section>
 
         <section class="content-card">
             <h2 class="text-3xl font-bold text-white mb-6">The <code>Request</code> Class</h2>
             <p class="text-gray-400 mb-6 text-lg">Represents an incoming HTTP request and is passed to every route handler.</p>
-            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Properties</h3>
+          <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Properties</h3>
             <ul class="list-disc pl-6 space-y-2 text-gray-400 text-lg">
-                <li><code>params</code>: Dictionary of route parameters.</li>
-                <li><code>query</code>: Dictionary of URL query parameters.</li>
-                <li><code>headers</code>: Dictionary of request headers.</li>
-            </ul>
-            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Async Methods</h3>
+ <li><code>params</code>: Dictionary of route parameters.</li>
+ <li><code>query</code>: Dictionary of URL query parameters.</li>
+ <li><code>headers</code>: Dictionary of request headers.</li>
+          </ul>
+          <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Async Methods</h3>
             <ul class="list-disc pl-6 space-y-2 text-gray-400 text-lg">
-                <li><code>await json()</code>: Reads and parses the request body as JSON.</li>
-                <li><code>await form()</code>: Reads and parses the request body as form data.</li>
-                <li><code>await text()</code>: Reads the request body as a raw string.</li>
-            </ul>
+ <li><code>await json()</code>: Reads and parses the request body as JSON.</li>
+ <li><code>await form()</code>: Reads and parses the request body as form data.</li>
+ <li><code>await text()</code>: Reads the request body as a raw string.</li>
+          </ul>
         </section>
 
         <section class="content-card">
             <h2 class="text-3xl font-bold text-white mb-6">The <code>Response</code> Class</h2>
             <p class="text-gray-400 mb-6 text-lg">Used to construct and send the HTTP response back to the client.</p>
-            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Methods</h3>
+          <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Methods</h3>
             <ul class="list-disc pl-6 space-y-3 text-gray-400 text-lg">
-                <li><code>status(code)</code>: Sets the HTTP status code (e.g., <code>200</code>, <code>404</code>).</li>
-                <li><code>header(name, value)</code>: Sets a response header.</li>
-                <li><code>text(content)</code>: Sends a plain text response.</li>
-                <li><code>json(data)</code>: Sends a JSON response.</li>
-                <li><code>html(content)</code>: Sends an HTML response.</li>
-                <li><code>render(template_name, **context)</code>: Renders a Jinja2 HTML template.</li>
-                <li><code>redirect(url, status_code=302)</code>: Redirects the client to a different URL.</li>
-            </ul>
+ <li><code>status(code)</code>: Sets the HTTP status code (e.g., <code>200</code>, <code>404</code>).</li>
+ <li><code>header(name, value)</code>: Sets a response header.</li>
+ <li><code>text(content)</code>: Sends a plain text response.</li>
+ <li><code>json(data)</code>: Sends a JSON response.</li>
+ <li><code>html(content)</code>: Sends an HTML response.</li>
+ <li><code>render(template_name, **context)</code>: Renders a Jinja2 HTML template.</li>
+ <li><code>redirect(url, status_code=302)</code>: Redirects the client to a different URL.</li>
+          </ul>
         </section>
 
         <section class="content-card">
             <h2 class="text-3xl font-bold text-white mb-6">Concurrency Utilities</h2>
             <p class="text-gray-400 mb-6 text-lg">Xyra provides utilities for handling concurrent operations.</p>
-            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Functions</h3>
+          <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Functions</h3>
             <ul class="list-disc pl-6 space-y-2 text-gray-400 text-lg">
-                <li><code>to_thread(func)</code>: Decorator to run synchronous functions in a thread pool.</li>
-            </ul>
+ <li><code>to_thread(func)</code>: Decorator to run synchronous functions in a thread pool.</li>
+          </ul>
         </section>
 
         <section class="content-card">
             <h2 class="text-3xl font-bold text-white mb-6">Background Tasks</h2>
             <p class="text-gray-400 mb-6 text-lg">Utilities for running asynchronous tasks in the background.</p>
-            <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Functions</h3>
+          <h3 class="text-2xl font-semibold text-white mt-8 mb-4">Functions</h3>
             <ul class="list-disc pl-6 space-y-2 text-gray-400 text-lg">
-                <li><code>create_background_task(func, *args, **kwargs)</code>: Creates and starts a background task.</li>
-            </ul>
+ <li><code>create_background_task(func, *args, **kwargs)</code>: Creates and starts a background task.</li>
+          </ul>
         </section>
 
       </div>
@@ -176,53 +175,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
 
-  <script>
-   // Menu Toggle, Active Nav Link, and Copy Code Functionality
-    const menuBtn = document.getElementById('menuBtn');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    function toggleMenu() {
-      menuBtn.classList.toggle('active');
-      sidebar.classList.toggle('active');
-      overlay.classList.toggle('active');
-      document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
-    }
-    menuBtn.addEventListener('click', toggleMenu);
-    overlay.addEventListener('click', toggleMenu);
-    document.querySelectorAll('.nav-link').forEach(link => {
-      link.addEventListener('click', () => {
-        if (window.innerWidth < 1024) toggleMenu();
-      });
-    });
-    document.addEventListener('DOMContentLoaded', function () {
-      const currentPath = window.location.pathname.split('/').pop() || 'index.html';
-      document.querySelectorAll('.nav-link').forEach(link => {
-        if (link.getAttribute('href') === currentPath) {
-          link.classList.add('active');
-        }
-      });
-    });
-    function copyCode(button) {
-      const codeContainer = button.closest('.code-container');
-      const codeBlock = codeContainer.querySelector('code');
-      const text = codeBlock.textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        const textSpan = button.querySelector('span');
-        if (textSpan) {
-            const originalText = textSpan.textContent;
-            textSpan.textContent = 'Copied!';
-            button.classList.add('copied');
-            setTimeout(() => {
-              textSpan.textContent = originalText;
-              button.classList.remove('copied');
-            }, 2000);
-        }
-      }).catch(err => {
-        console.error('Failed to copy code:', err);
-        const textSpan = button.querySelector('span');
-        if (textSpan) textSpan.textContent = 'Error';
-      });
-    }
-  </script>
+  <script src="./assets/js/script.min.js"></script>
 </body>
 </html>
