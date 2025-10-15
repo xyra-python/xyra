@@ -84,7 +84,7 @@ def test_templating_datetime_filter():
     from datetime import datetime
 
     templating = Templating()
-    dt = datetime(2023, 2, 2, 12, 0, 0)
+    dt = datetime(2025, 2, 2, 12, 0, 0)
     result = templating.render_string("{{ dt | datetime }}", dt=dt)
     assert result == "2025-02-02 12:00:00"
 
