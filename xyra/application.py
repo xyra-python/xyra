@@ -1,5 +1,4 @@
 import asyncio
-import logging
 import os
 import socket
 import time
@@ -266,7 +265,7 @@ class App:
                     req_logger = get_logger("xyra")
                     req_logger.error(f"Error in async handler: {str(e)}")
                     req_logger.error(traceback.format_exc())
-                    
+
                     # Send proper error response
                     try:
                         res.write_status("500")
@@ -307,7 +306,7 @@ class App:
                     req_logger = get_logger("xyra")
                     req_logger.error(f"Error in sync handler: {str(e)}")
                     req_logger.error(traceback.format_exc())
-                    
+
                     # Send proper error response
                     try:
                         res.write_status("500")

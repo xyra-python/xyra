@@ -1,5 +1,5 @@
-import time
 import threading
+import time
 from collections import defaultdict
 
 from ..request import Request
@@ -51,7 +51,7 @@ class RateLimiter:
         """Get remaining requests allowed for the key."""
         current_time = time.time()
         self._cleanup_old_requests(key, current_time)
-        
+
         with self._lock:
             return max(0, self.requests - len(self._requests[key]))
 
