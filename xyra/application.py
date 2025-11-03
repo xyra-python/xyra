@@ -1,7 +1,9 @@
 import asyncio
+import logging
 import os
 import socket
 import time
+import traceback
 from collections.abc import Callable
 from typing import Any, Union, overload
 
@@ -260,8 +262,18 @@ class App:
                                 f"{request.method} {request.url} {response.status_code} {duration}ms"
                             )
                 except Exception as e:
-                    print(f"Error in async handler: {e}")
-                    res.end('{"error": "Internal Server Error"}')
+                    # Log the full traceback for debugging
+                    req_logger = get_logger("xyra")
+                    req_logger.error(f"Error in async handler: {str(e)}")
+                    req_logger.error(traceback.format_exc())
+                    
+                    # Send proper error response
+                    try:
+                        res.write_status("500")
+                        res.end('{"error": "Internal Server Error"}')
+                    except Exception:
+                        # If we can't even send the error response, just close
+                        pass
                     return
 
             return async_final_handler
@@ -291,8 +303,18 @@ class App:
                                 f"{request.method} {request.url} {response.status_code} {duration}ms"
                             )
                 except Exception as e:
-                    print(f"Error in sync handler: {e}")
-                    res.end('{"error": "Internal Server Error"}')
+                    # Log the full traceback for debugging
+                    req_logger = get_logger("xyra")
+                    req_logger.error(f"Error in sync handler: {str(e)}")
+                    req_logger.error(traceback.format_exc())
+                    
+                    # Send proper error response
+                    try:
+                        res.write_status("500")
+                        res.end('{"error": "Internal Server Error"}')
+                    except Exception:
+                        # If we can't even send the error response, just close
+                        pass
 
             return sync_final_handler
 

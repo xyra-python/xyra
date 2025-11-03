@@ -1,10 +1,5 @@
-"""
-Rate Limiter Middleware for Xyra Framework
-
-This middleware limits the number of requests per client within a time window.
-"""
-
 import time
+import threading
 from collections import defaultdict
 
 from ..request import Request
@@ -25,11 +20,13 @@ class RateLimiter:
         self.requests = requests
         self.window = window
         self._requests: dict[str, list[float]] = defaultdict(list)
+        self._lock = threading.RLock()  # Thread-safe lock
 
     def _cleanup_old_requests(self, key: str, current_time: float):
         """Remove requests outside the current window."""
-        cutoff = current_time - self.window
-        self._requests[key] = [t for t in self._requests[key] if t > cutoff]
+        with self._lock:
+            cutoff = current_time - self.window
+            self._requests[key] = [t for t in self._requests[key] if t > cutoff]
 
     def is_allowed(self, key: str) -> bool:
         """
@@ -44,24 +41,28 @@ class RateLimiter:
         current_time = time.time()
         self._cleanup_old_requests(key, current_time)
 
-        if len(self._requests[key]) < self.requests:
-            self._requests[key].append(current_time)
-            return True
-        return False
+        with self._lock:
+            if len(self._requests[key]) < self.requests:
+                self._requests[key].append(current_time)
+                return True
+            return False
 
     def get_remaining_requests(self, key: str) -> int:
         """Get remaining requests allowed for the key."""
         current_time = time.time()
         self._cleanup_old_requests(key, current_time)
-        return max(0, self.requests - len(self._requests[key]))
+        
+        with self._lock:
+            return max(0, self.requests - len(self._requests[key]))
 
     def get_reset_time(self, key: str) -> float:
         """Get time until reset (next window)."""
-        if not self._requests[key]:
-            return 0
-        current_time = time.time()
-        oldest_request = min(self._requests[key])
-        return max(0, self.window - (current_time - oldest_request))
+        with self._lock:
+            if not self._requests[key]:
+                return 0
+            current_time = time.time()
+            oldest_request = min(self._requests[key])
+            return max(0, self.window - (current_time - oldest_request))
 
 
 class RateLimitMiddleware:
