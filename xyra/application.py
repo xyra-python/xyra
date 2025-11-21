@@ -3,7 +3,9 @@ import logging
 import os
 import socket
 import time
+import threading
 import traceback
+import inspect
 from collections.abc import Callable
 from typing import Any, Union, overload
 
@@ -56,6 +58,7 @@ class App:
         self.templates = Templating(templates_directory)
         self.swagger_options = swagger_options
         self._swagger_cache: dict[str, Any] | None = None
+        self._swagger_lock = threading.Lock()
         self.log_requests = True  # Will be set in run_server
 
     def route(
@@ -236,87 +239,107 @@ class App:
         middlewares: list[Callable],
         parsed_path: str,
     ):
-        if asyncio.iscoroutinefunction(route_handler):
+        # Determine if the handler is async
+        is_async_handler = asyncio.iscoroutinefunction(route_handler)
 
-            async def async_final_handler(res, req):
-                start_time = time.time()
+        # Pre-compute middleware metadata to avoid runtime reflection (Optimization)
+        middleware_chain = []
+        for middleware in middlewares:
+            handler_to_inspect = middleware
+            if not inspect.isfunction(middleware) and hasattr(middleware, "__call__"):
+                handler_to_inspect = middleware.__call__
+
+            sig = inspect.signature(handler_to_inspect)
+            params = list(sig.parameters.keys())
+            is_coroutine = asyncio.iscoroutinefunction(handler_to_inspect)
+            wants_call_next = "call_next" in params or "next" in params
+
+            middleware_chain.append({
+                "func": middleware,
+                "is_coroutine": is_coroutine,
+                "wants_call_next": wants_call_next
+            })
+
+        async def async_final_handler(res, req):
+            start_time = time.time()
+            try:
+                # Optimized parameter extraction
+                params = {
+                    param_name: req.get_parameter(i)
+                    for i, param_name in enumerate(param_names)
+                    if req.get_parameter(i) is not None
+                }
+                request = Request(req, res, params)
+                response = Response(res, self.templates)
+
+                # Middleware Execution Chain
+                async def execute_chain(index: int):
+                    if index < len(middleware_chain):
+                        mw_info = middleware_chain[index]
+                        middleware = mw_info["func"]
+                        is_coroutine = mw_info["is_coroutine"]
+                        wants_call_next = mw_info["wants_call_next"]
+
+                        # Helper to continue to next middleware
+                        async def call_next(req_obj=None):
+                            # Allow middleware to modify request object if passed
+                            # though in this design request is mutable anyway
+                            await execute_chain(index + 1)
+                            return response
+
+                        if wants_call_next:
+                             # Supports onion architecture (FastAPI style or Express style with next)
+                            if is_coroutine:
+                                await middleware(request, call_next)
+                            else:
+                                # Wrap sync middleware
+                                middleware(request, call_next)
+                        else:
+                            # Legacy/Simple pattern (req, res) -> None (Linear)
+                            if is_coroutine:
+                                await middleware(request, response)
+                            else:
+                                middleware(request, response)
+
+                            # If response not ended, automatically call next
+                            if not response._ended:
+                                await execute_chain(index + 1)
+
+                    else:
+                        # End of middleware chain, call route handler
+                        if is_async_handler:
+                            await route_handler(request, response)
+                        else:
+                            route_handler(request, response)
+
+                await execute_chain(0)
+
+                # Log request if enabled (only for non-2xx status codes or slow requests)
+                if self.log_requests:
+                    duration = int((time.time() - start_time) * 1000)
+                    # Only log errors, redirects, or slow requests (>100ms)
+                    if response.status_code >= 400 or duration > 100:
+                        req_logger = get_logger("xyra")
+                        req_logger.info(
+                            f"{request.method} {request.url} {response.status_code} {duration}ms"
+                        )
+            except Exception as e:
+                # Log the full traceback for debugging
+                req_logger = get_logger("xyra")
+                req_logger.error(f"Error in async handler: {str(e)}")
+                req_logger.error(traceback.format_exc())
+
+                # Send proper error response
                 try:
-                    # Optimized parameter extraction
-                    params = {
-                        param_name: req.get_parameter(i)
-                        for i, param_name in enumerate(param_names)
-                        if req.get_parameter(i) is not None
-                    }
-                    request = Request(req, res, params)
-                    response = Response(res, self.templates)
-
-                    await route_handler(request, response)
-
-                    # Log request if enabled (only for non-2xx status codes or slow requests)
-                    if self.log_requests:
-                        duration = int((time.time() - start_time) * 1000)
-                        # Only log errors, redirects, or slow requests (>100ms)
-                        if response.status_code >= 400 or duration > 100:
-                            req_logger = get_logger("xyra")
-                            req_logger.info(
-                                f"{request.method} {request.url} {response.status_code} {duration}ms"
-                            )
-                except Exception as e:
-                    # Log the full traceback for debugging
-                    req_logger = get_logger("xyra")
-                    req_logger.error(f"Error in async handler: {str(e)}")
-                    req_logger.error(traceback.format_exc())
-                    
-                    # Send proper error response
-                    try:
+                    if not response._ended:
                         res.write_status("500")
                         res.end('{"error": "Internal Server Error"}')
-                    except Exception:
-                        # If we can't even send the error response, just close
-                        pass
-                    return
+                except Exception:
+                    # If we can't even send the error response, just close
+                    pass
+                return
 
-            return async_final_handler
-        else:
-
-            def sync_final_handler(res, req):
-                try:
-                    start_time = time.time()
-                    # Optimized parameter extraction
-                    params = {
-                        param_name: req.get_parameter(i)
-                        for i, param_name in enumerate(param_names)
-                        if req.get_parameter(i) is not None
-                    }
-                    request = Request(req, res, params)
-                    response = Response(res, self.templates)
-
-                    route_handler(request, response)
-
-                    # Log request if enabled (only for non-2xx status codes or slow requests)
-                    if self.log_requests:
-                        duration = int((time.time() - start_time) * 1000)
-                        # Only log errors, redirects, or slow requests (>100ms)
-                        if response.status_code >= 400 or duration > 100:
-                            req_logger = get_logger("xyra")
-                            req_logger.info(
-                                f"{request.method} {request.url} {response.status_code} {duration}ms"
-                            )
-                except Exception as e:
-                    # Log the full traceback for debugging
-                    req_logger = get_logger("xyra")
-                    req_logger.error(f"Error in sync handler: {str(e)}")
-                    req_logger.error(traceback.format_exc())
-                    
-                    # Send proper error response
-                    try:
-                        res.write_status("500")
-                        res.end('{"error": "Internal Server Error"}')
-                    except Exception:
-                        # If we can't even send the error response, just close
-                        pass
-
-            return sync_final_handler
+        return async_final_handler
 
     def _register_routes(self):
         """Register all routes with the underlying socketify app."""
@@ -392,7 +415,9 @@ class App:
                 raise ValueError("Swagger options are not configured")
             try:
                 if self._swagger_cache is None:
-                    self._swagger_cache = generate_swagger(self, **self.swagger_options)
+                    with self._swagger_lock:
+                        if self._swagger_cache is None:
+                            self._swagger_cache = generate_swagger(self, **self.swagger_options)
                 res.json(self._swagger_cache)
             except Exception as e:
                 res.status(500).json(
