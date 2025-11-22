@@ -1,9 +1,9 @@
 
 import asyncio
 import unittest
+
 from xyra.application import App
-from xyra.request import Request
-from xyra.response import Response
+
 
 # Mocking socketify internals
 class MockSocketifyRequest:

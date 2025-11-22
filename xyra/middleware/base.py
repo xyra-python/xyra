@@ -1,6 +1,8 @@
-from typing import Callable, Awaitable
+from collections.abc import Awaitable, Callable
+
 from ..request import Request
 from ..response import Response
+
 
 class BaseHTTPMiddleware:
     """

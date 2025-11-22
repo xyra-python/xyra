@@ -3,6 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+
 def get_changed_files():
     """
     Get the list of changed files between the current HEAD and the target branch.

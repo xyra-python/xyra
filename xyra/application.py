@@ -1,11 +1,10 @@
 import asyncio
-import logging
+import inspect
 import os
 import socket
-import time
 import threading
+import time
 import traceback
-import inspect
 from collections.abc import Callable
 from typing import Any, Union, overload
 
@@ -242,11 +241,10 @@ class App:
         # Determine if the handler is async
         is_async_handler = asyncio.iscoroutinefunction(route_handler)
 
-        # Pre-compute middleware metadata to avoid runtime reflection (Optimization)
         middleware_chain = []
         for middleware in middlewares:
             handler_to_inspect = middleware
-            if not inspect.isfunction(middleware) and hasattr(middleware, "__call__"):
+            if not inspect.isfunction(middleware) and callable(middleware):
                 handler_to_inspect = middleware.__call__
 
             sig = inspect.signature(handler_to_inspect)

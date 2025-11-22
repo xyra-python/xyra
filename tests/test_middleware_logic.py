@@ -1,11 +1,9 @@
 
 import asyncio
-import threading
 import unittest
+
 from xyra.application import App
-from xyra.request import Request
-from xyra.response import Response
-from xyra.middleware.base import BaseHTTPMiddleware
+
 
 # Mock socketify objects
 class MockSocketifyRequest:
