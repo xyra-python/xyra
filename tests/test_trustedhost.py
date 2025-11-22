@@ -17,7 +17,7 @@ def test_trusted_host_function():
 def test_trusted_host_allowed():
     middleware = TrustedHostMiddleware(["example.com", "trusted.org"])
     request = Mock()
-    request.headers = {"Host": "example.com"}
+    request.headers = {"host": "example.com"}
     response = Mock()
     response._ended = False
 
@@ -32,7 +32,7 @@ def test_trusted_host_allowed():
 def test_trusted_host_not_allowed():
     middleware = TrustedHostMiddleware(["example.com"])
     request = Mock()
-    request.headers = {"Host": "malicious.com"}
+    request.headers = {"host": "malicious.com"}
     response = Mock()
     response._ended = False
 
@@ -48,7 +48,7 @@ def test_trusted_host_not_allowed():
 def test_trusted_host_with_port():
     middleware = TrustedHostMiddleware(["example.com"])
     request = Mock()
-    request.headers = {"Host": "example.com:8080"}
+    request.headers = {"host": "example.com:8080"}
     response = Mock()
     response._ended = False
 
@@ -82,7 +82,7 @@ def test_trusted_host_multiple_hosts():
         ["example.com", "trusted.org", "api.example.com"]
     )
     request = Mock()
-    request.headers = {"Host": "api.example.com"}
+    request.headers = {"host": "api.example.com"}
     response = Mock()
     response._ended = False
 

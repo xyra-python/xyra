@@ -23,9 +23,25 @@ class TrustedHostMiddleware:
 
     def __call__(self, req: Request, res: Response):
         """Validate the request's Host header."""
-        host = req.headers.get("Host", "").split(":")[0]  # Remove port
+        # Headers keys are lowercase in Xyra Request
+        host = req.headers.get("host", "").split(":")[0]  # Remove port
 
-        if host not in self.allowed_hosts:
+        is_allowed = False
+        for allowed in self.allowed_hosts:
+            if allowed == "*":
+                is_allowed = True
+                break
+            if allowed.startswith("*."):
+                # Wildcard subdomain
+                domain = allowed[2:]
+                if host == domain or host.endswith("." + domain):
+                    is_allowed = True
+                    break
+            if allowed == host:
+                is_allowed = True
+                break
+
+        if not is_allowed:
             # Return 400 Bad Request for untrusted host
             res.status(400)
             res.json({"error": "Bad Request", "message": "Untrusted host"})
