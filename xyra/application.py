@@ -241,9 +241,11 @@ class App:
         # Determine if the handler is async
         is_async_handler = asyncio.iscoroutinefunction(route_handler)
 
+        # Pre-compute middleware metadata to avoid runtime reflection (Optimization)
         middleware_chain = []
         for middleware in middlewares:
             handler_to_inspect = middleware
+            # FIX RUFF B004: Use callable() instead of hasattr(..., "__call__")
             if not inspect.isfunction(middleware) and callable(middleware):
                 handler_to_inspect = middleware.__call__
 
@@ -333,8 +335,9 @@ class App:
                         res.write_status("500")
                         res.end('{"error": "Internal Server Error"}')
                 except Exception:
-                    # If we can't even send the error response, just close
-                    pass
+                    # FIX BANDIT B110: Avoid silent pass. Log the failure to debug.
+                    # If we can't even send the error response, just close.
+                    req_logger.debug("Failed to send 500 error response (connection likely closed)")
                 return
 
         return async_final_handler
