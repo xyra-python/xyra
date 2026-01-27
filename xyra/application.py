@@ -1,5 +1,6 @@
 import asyncio
 import inspect
+import json
 import os
 import socket
 import threading
@@ -447,7 +448,7 @@ class App:
             <script>
             window.onload = function() {{
                 const ui = SwaggerUIBundle({{
-                    url: "{swagger_json_path}",
+                    url: {json.dumps(swagger_json_path)},
                     dom_id: '#swagger-ui',
                     deepLinking: true,
                     presets: [
