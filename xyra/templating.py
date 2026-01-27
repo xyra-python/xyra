@@ -83,18 +83,22 @@ class Templating:
             Exception: If there's an error rendering the template
         """
         # Simple caching for performance (disabled in development with auto_reload)
+        cache_key = None
         if self._cache_enabled and not self.auto_reload:
-            cache_key = f"{template_name}:{hash(frozenset(context.items()))}"
-            if cache_key in self._render_cache:
-                return self._render_cache[cache_key]
+            try:
+                cache_key = f"{template_name}:{hash(frozenset(context.items()))}"
+                if cache_key in self._render_cache:
+                    return self._render_cache[cache_key]
+            except TypeError:
+                # Context contains unhashable types (e.g. lists), skip caching
+                pass
 
         try:
             template = self.env.get_template(template_name)
             result = template.render(**context)
 
-            # Cache the result
-            if self._cache_enabled and not self.auto_reload:
-                cache_key = f"{template_name}:{hash(frozenset(context.items()))}"
+            # Cache the result if we have a valid cache key
+            if cache_key and self._cache_enabled and not self.auto_reload:
                 self._render_cache[cache_key] = result
 
             return result
@@ -123,18 +127,22 @@ class Templating:
             Exception: If there's an error rendering the template
         """
         # Simple caching for performance (disabled in development with auto_reload)
+        cache_key = None
         if self._cache_enabled and not self.auto_reload:
-            cache_key = f"{template_name}:{hash(frozenset(context.items()))}"
-            if cache_key in self._render_cache:
-                return self._render_cache[cache_key]
+            try:
+                cache_key = f"{template_name}:{hash(frozenset(context.items()))}"
+                if cache_key in self._render_cache:
+                    return self._render_cache[cache_key]
+            except TypeError:
+                # Context contains unhashable types (e.g. lists), skip caching
+                pass
 
         try:
             template = self.env.get_template(template_name)
             result = await template.render_async(**context)
 
-            # Cache the result
-            if self._cache_enabled and not self.auto_reload:
-                cache_key = f"{template_name}:{hash(frozenset(context.items()))}"
+            # Cache the result if we have a valid cache key
+            if cache_key and self._cache_enabled and not self.auto_reload:
                 self._render_cache[cache_key] = result
 
             return result
