@@ -46,9 +46,15 @@ class CorsMiddleware:
 
     def _is_origin_allowed(self, origin: str) -> bool:
         """Check if the origin is allowed."""
-        if "*" in self.allowed_origins:
+        # Exact match always takes precedence
+        if origin in self.allowed_origins:
             return True
-        return origin in self.allowed_origins
+
+        # Wildcard match is only safe if credentials are NOT allowed
+        if "*" in self.allowed_origins and not self.allow_credentials:
+            return True
+
+        return False
 
     def __call__(self, request: Request, response: Response):
         """Handle CORS for the request."""
