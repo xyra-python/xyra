@@ -24,6 +24,17 @@ class Request:
         _query_cache: Cached query string.
     """
 
+    __slots__ = (
+        "_req",
+        "_res",
+        "params",
+        "_headers_cache",
+        "_query_params_cache",
+        "_url_cache",
+        "_query_cache",
+        "__dict__",
+    )
+
     def __init__(
         self,
         req: SocketifyRequest,
@@ -95,8 +106,9 @@ class Request:
         """
         if self._headers_cache is None:
             headers = {}
+            # PERF: avoid creating intermediate dicts and lambda overhead
             self._req.for_each_header(
-                lambda key, value: headers.update({key.lower(): value})
+                lambda key, value: headers.__setitem__(key.lower(), value)
             )
             self._headers_cache = headers
         return self._headers_cache
@@ -118,8 +130,10 @@ class Request:
         """
         if self._query_cache is None:
             url = self.url
-            if "?" in url:
-                self._query_cache = url.split("?", 1)[1]
+            # PERF: partition is slightly faster than split for this case
+            _, sep, query = url.partition("?")
+            if sep:
+                self._query_cache = query
             else:
                 self._query_cache = ""
         return self._query_cache
