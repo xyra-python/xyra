@@ -24,6 +24,8 @@ class Response:
         _ended: Flag indicating if response has been sent.
     """
 
+    __slots__ = ("_res", "headers", "status_code", "templating", "_ended")
+
     def __init__(self, res: SocketifyResponse, templating=None):
         """
         Initialize the Response object.
