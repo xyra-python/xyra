@@ -109,9 +109,8 @@ class Response:
                 res.json({"message": "Hello, Xyra!"})
         """
         self.header("Content-Type", "application/json")
+        # PERF: json_lib (orjson) returns bytes, send them directly to avoid decode/encode overhead
         json_data = json_lib.dumps(data)
-        if isinstance(json_data, bytes):
-            json_data = json_data.decode("utf-8")
         self.send(json_data)
 
     def html(self, html: str) -> None:
