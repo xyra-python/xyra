@@ -20,6 +20,7 @@ class SecurityHeadersMiddleware:
         hsts_include_subdomains: bool = True,
         hsts_preload: bool = False,
         content_security_policy: str | dict | None = None,
+        permissions_policy: str | dict | None = None,
         frame_options: str = "SAMEORIGIN",
         xss_protection: str = "1; mode=block",
         content_type_options: str = "nosniff",
@@ -29,6 +30,7 @@ class SecurityHeadersMiddleware:
         self.hsts_include_subdomains = hsts_include_subdomains
         self.hsts_preload = hsts_preload
         self.content_security_policy = content_security_policy
+        self.permissions_policy = permissions_policy
         self.frame_options = frame_options
         self.xss_protection = xss_protection
         self.content_type_options = content_type_options
@@ -59,6 +61,25 @@ class SecurityHeadersMiddleware:
             else:
                 response.header("Content-Security-Policy", str(self.content_security_policy))
 
+        # Permissions-Policy
+        if self.permissions_policy:
+            if isinstance(self.permissions_policy, dict):
+                policy_parts = []
+                for feature, value in self.permissions_policy.items():
+                    if isinstance(value, list):
+                        # If list, format as (value1 value2) or similar?
+                        # Standard is: geolocation=(self "https://example.com")
+                        # But simpler implementation might just expect strings
+                        # Let's assume list means list of origins
+                        sources_str = " ".join(value)
+                        policy_parts.append(f"{feature}=({sources_str})")
+                    else:
+                        policy_parts.append(f"{feature}={value}")
+                pp_value = ", ".join(policy_parts)
+                response.header("Permissions-Policy", pp_value)
+            else:
+                response.header("Permissions-Policy", str(self.permissions_policy))
+
         # Other Headers
         if self.frame_options:
             response.header("X-Frame-Options", self.frame_options)
@@ -78,6 +99,7 @@ def security_headers(
     hsts_include_subdomains: bool = True,
     hsts_preload: bool = False,
     content_security_policy: str | dict | None = None,
+    permissions_policy: str | dict | None = None,
     frame_options: str = "SAMEORIGIN",
     xss_protection: str = "1; mode=block",
     content_type_options: str = "nosniff",
@@ -91,6 +113,7 @@ def security_headers(
         hsts_include_subdomains=hsts_include_subdomains,
         hsts_preload=hsts_preload,
         content_security_policy=content_security_policy,
+        permissions_policy=permissions_policy,
         frame_options=frame_options,
         xss_protection=xss_protection,
         content_type_options=content_type_options,

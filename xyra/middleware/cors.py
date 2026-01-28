@@ -50,8 +50,8 @@ class CorsMiddleware:
         if origin in self.allowed_origins:
             return True
 
-        # Wildcard match is only safe if credentials are NOT allowed
-        if "*" in self.allowed_origins and not self.allow_credentials:
+        # Wildcard match
+        if "*" in self.allowed_origins:
             return True
 
         return False
