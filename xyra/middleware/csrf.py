@@ -1,4 +1,5 @@
 import secrets
+from http.cookies import SimpleCookie
 
 from ..request import Request
 from ..response import Response
@@ -34,12 +35,14 @@ class CSRFMiddleware:
         cookie_header = request.get_header("cookie")
         if not cookie_header:
             return None
-        cookies = {}
-        for item in cookie_header.split(";"):
-            if "=" in item:
-                key, value = item.strip().split("=", 1)
-                cookies[key] = value
-        return cookies.get(name)
+        try:
+            cookies = SimpleCookie()
+            cookies.load(cookie_header)
+            if name in cookies:
+                return cookies[name].value
+        except Exception:
+            pass
+        return None
 
     def _get_token_from_request(self, request: Request) -> str | None:
         """Extract CSRF token from request header."""

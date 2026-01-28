@@ -241,3 +241,11 @@ def test_request_api_stability():
     ]
     for attr in expected_attributes:
         assert hasattr(Request, attr), f"Request is missing attribute: {attr}"
+
+def test_request_parse_json_invalid():
+    """Test synchronous JSON string parsing with invalid JSON."""
+    req = Mock()
+    res = Mock()
+    request = Request(req, res)
+    with pytest.raises(ValueError, match="Invalid JSON"):
+        request.parse_json('{"key": "value"')

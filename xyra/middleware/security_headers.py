@@ -24,6 +24,7 @@ class SecurityHeadersMiddleware:
         xss_protection: str = "1; mode=block",
         content_type_options: str = "nosniff",
         referrer_policy: str = "strict-origin-when-cross-origin",
+        permissions_policy: dict[str, str | list[str]] | str | None = None,
     ):
         self.hsts_seconds = hsts_seconds
         self.hsts_include_subdomains = hsts_include_subdomains
@@ -33,6 +34,7 @@ class SecurityHeadersMiddleware:
         self.xss_protection = xss_protection
         self.content_type_options = content_type_options
         self.referrer_policy = referrer_policy
+        self.permissions_policy = permissions_policy
 
     def __call__(self, request: Request, response: Response):
         # HSTS
@@ -72,6 +74,20 @@ class SecurityHeadersMiddleware:
         if self.referrer_policy:
             response.header("Referrer-Policy", self.referrer_policy)
 
+        # Permissions-Policy
+        if self.permissions_policy:
+            if isinstance(self.permissions_policy, dict):
+                policy_parts = []
+                for feature, allowlist in self.permissions_policy.items():
+                    if isinstance(allowlist, list):
+                        allowlist_str = " ".join(allowlist)
+                    else:
+                        allowlist_str = str(allowlist)
+                    policy_parts.append(f"{feature}=({allowlist_str})")
+                response.header("Permissions-Policy", ", ".join(policy_parts))
+            else:
+                response.header("Permissions-Policy", str(self.permissions_policy))
+
 
 def security_headers(
     hsts_seconds: int = 0,
@@ -82,6 +98,7 @@ def security_headers(
     xss_protection: str = "1; mode=block",
     content_type_options: str = "nosniff",
     referrer_policy: str = "strict-origin-when-cross-origin",
+    permissions_policy: dict[str, str | list[str]] | str | None = None,
 ):
     """
     Create a SecurityHeaders middleware function.
@@ -95,4 +112,5 @@ def security_headers(
         xss_protection=xss_protection,
         content_type_options=content_type_options,
         referrer_policy=referrer_policy,
+        permissions_policy=permissions_policy,
     )

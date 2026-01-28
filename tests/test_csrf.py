@@ -237,3 +237,22 @@ def test_csrf_middleware_empty_cookie():
     response.status.assert_called_once_with(403)
     response.json.assert_called_once_with({"error": "CSRF token missing"})
     assert response._ended is True
+
+
+def test_csrf_middleware_quoted_cookie():
+    """Test parsing CSRF token from quoted cookie value."""
+    middleware = CSRFMiddleware()
+    request = Mock()
+    request.method = "POST"
+    # Cookie value is quoted: "test_token"
+    # SimpleCookie should strip the quotes.
+    request.get_header.side_effect = lambda name: {
+        "cookie": 'csrf_token="test_token"',
+        "X-CSRF-Token": "test_token",
+    }.get(name)
+    response = Mock()
+    response._ended = False
+    middleware(request, response)
+    # Should not call status for valid token
+    response.status.assert_not_called()
+    assert response._ended is False

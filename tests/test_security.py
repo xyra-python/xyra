@@ -137,3 +137,45 @@ def test_swagger_xss_protection():
     assert f"url: {expected}" in html_content
     # Check that it does NOT contain the raw injection
     assert f'url: "{dangerous_path}"' not in html_content
+
+def test_security_headers_permissions_policy_dict():
+    """Test Permissions-Policy with dict."""
+    policy = {
+        "geolocation": ["self", "https://example.com"],
+        "camera": [],  # Empty list -> ()
+        "microphone": "self",
+    }
+    middleware = SecurityHeadersMiddleware(permissions_policy=policy)
+    req = MockRequest()
+    res = MockResponse()
+
+    middleware(req, res)
+
+    header = res._headers.get("Permissions-Policy")
+    assert header is not None
+    # Order might vary due to dict, but typically insertion order preserved in recent Python
+    assert "geolocation=(self https://example.com)" in header
+    assert "camera=()" in header
+    assert "microphone=(self)" in header
+
+def test_security_headers_permissions_policy_str():
+    """Test Permissions-Policy with string."""
+    policy_str = "geolocation=(self), camera=()"
+    middleware = SecurityHeadersMiddleware(permissions_policy=policy_str)
+    req = MockRequest()
+    res = MockResponse()
+
+    middleware(req, res)
+
+    header = res._headers.get("Permissions-Policy")
+    assert header == policy_str
+
+def test_security_headers_permissions_policy_none():
+    """Test Permissions-Policy defaults to None."""
+    middleware = SecurityHeadersMiddleware()
+    req = MockRequest()
+    res = MockResponse()
+
+    middleware(req, res)
+
+    assert "Permissions-Policy" not in res._headers
