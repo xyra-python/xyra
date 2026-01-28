@@ -1,5 +1,11 @@
+import sys
 from typing import Any
 from urllib.parse import parse_qs, parse_qsl
+
+if sys.implementation.name == "pypy":
+    import ujson as json_lib
+else:
+    import orjson as json_lib
 
 from socketify import (
     Request as SocketifyRequest,
@@ -229,10 +235,8 @@ class Request:
             data = req.parse_json(json_str)
             print(data["name"])  # "John"
         """
-        import orjson
-
         try:
-            return orjson.loads(json_string)
+            return json_lib.loads(json_string)
         except Exception as e:
             raise ValueError(f"Invalid JSON: {e}") from e
 

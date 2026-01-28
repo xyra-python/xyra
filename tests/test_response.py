@@ -69,9 +69,14 @@ def test_response_json(mock_socketify_response):
     response = Response(mock_socketify_response)
     data = {"key": "value"}
     response.json(data)
-    import orjson
+    import sys
 
-    expected_json = orjson.dumps(data).decode("utf-8")
+    if sys.implementation.name == "pypy":
+        import ujson as json_lib
+    else:
+        import orjson as json_lib
+
+    expected_json = json_lib.dumps(data)
     mock_socketify_response.end.assert_called_once_with(expected_json)
     assert response.headers["Content-Type"] == "application/json"
 
@@ -117,9 +122,14 @@ def test_response_custom_serialization():
 
     user = User("John", 25)
     response.json(user.dict())
-    import orjson
+    import sys
 
-    expected = orjson.dumps(user.dict()).decode("utf-8")
+    if sys.implementation.name == "pypy":
+        import ujson as json_lib
+    else:
+        import orjson as json_lib
+
+    expected = json_lib.dumps(user.dict())
     res.end.assert_called_with(expected)
 
 
