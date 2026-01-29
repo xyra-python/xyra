@@ -1,4 +1,7 @@
+import hmac
+import hashlib
 import secrets
+from http.cookies import SimpleCookie
 
 from ..request import Request
 from ..response import Response
@@ -25,21 +28,51 @@ class CSRFMiddleware:
         self.http_only = http_only
         self.same_site = same_site
 
+    def _sign_token(self, token: str) -> str:
+        """Sign a token using HMAC."""
+        signature = hmac.new(
+            self.secret_key.encode(), token.encode(), hashlib.sha256
+        ).hexdigest()
+        return f"{token}.{signature}"
+
+    def _verify_signed_token(self, signed_token: str) -> str | None:
+        """Verify a signed token and return the original token if valid."""
+        if not signed_token or "." not in signed_token:
+            return None
+
+        try:
+            token, signature = signed_token.rsplit(".", 1)
+            expected_signature = hmac.new(
+                self.secret_key.encode(), token.encode(), hashlib.sha256
+            ).hexdigest()
+
+            if hmac.compare_digest(signature, expected_signature):
+                return token
+            return None
+        except Exception:
+            return None
+
     def _generate_token(self) -> str:
-        """Generate a new CSRF token."""
-        return secrets.token_urlsafe(32)
+        """Generate a new signed CSRF token."""
+        token = secrets.token_urlsafe(32)
+        return self._sign_token(token)
 
     def _get_cookie(self, request: Request, name: str) -> str | None:
-        """Extract cookie value from request headers."""
+        """Extract cookie value from request headers using SimpleCookie."""
         cookie_header = request.get_header("cookie")
         if not cookie_header:
             return None
-        cookies = {}
-        for item in cookie_header.split(";"):
-            if "=" in item:
-                key, value = item.strip().split("=", 1)
-                cookies[key] = value
-        return cookies.get(name)
+
+        try:
+            # SimpleCookie handles complex parsing (quotes, etc.)
+            cookie = SimpleCookie()
+            cookie.load(cookie_header)
+            if name in cookie:
+                return cookie[name].value
+        except Exception:
+            pass
+
+        return None
 
     def _get_token_from_request(self, request: Request) -> str | None:
         """Extract CSRF token from request header."""
@@ -47,32 +80,40 @@ class CSRFMiddleware:
 
     def __call__(self, request: Request, response: Response):
         """Handle CSRF protection for the request."""
+        # Always try to get the existing token from cookie
+        signed_cookie_token = self._get_cookie(request, self.cookie_name)
+
+        # If valid, use it. If invalid or missing, generate new one.
+        if signed_cookie_token:
+            # Verify signature to prevent cookie injection
+            raw_token = self._verify_signed_token(signed_cookie_token)
+            if not raw_token:
+                # Invalid signature, treat as missing/invalid
+                signed_cookie_token = None
+
+        if not signed_cookie_token:
+            signed_cookie_token = self._generate_token()
+            response.set_cookie(
+                self.cookie_name,
+                signed_cookie_token,
+                secure=self.secure,
+                http_only=self.http_only,
+                same_site=self.same_site,
+            )
+
+        # Attach the signed token to the request so it can be used in templates/views
+        request.csrf_token = signed_cookie_token
+
         # Skip CSRF check for exempt methods
         if request.method in self.exempt_methods:
-            # Set CSRF token cookie if not present
-            if not self._get_cookie(request, self.cookie_name):
-                token = self._generate_token()
-                response.set_cookie(
-                    self.cookie_name,
-                    token,
-                    secure=self.secure,
-                    http_only=self.http_only,
-                    same_site=self.same_site,
-                )
             return
 
-        # Get expected token from cookie
-        expected_token = self._get_cookie(request, self.cookie_name)
-        if not expected_token:
-            response.status(403)
-            response.json({"error": "CSRF token missing"})
-            response._ended = True
-            return
-
-        # Get token from request
+        # For unsafe methods, verify the header matches the cookie
+        # Both should be the signed token
         request_token = self._get_token_from_request(request)
+
         if not request_token or not secrets.compare_digest(
-            request_token, expected_token
+            request_token, signed_cookie_token
         ):
             response.status(403)
             response.json({"error": "CSRF token invalid"})
