@@ -131,6 +131,7 @@ def test_swagger_endpoint():
     mock_req.get_method.return_value = "GET"
     mock_req.get_url.return_value = "http://localhost:8000/docs"
     mock_req.for_each_header = Mock(side_effect=lambda func: None)
+    mock_req.get_header = Mock(return_value=None)
 
     mock_res = Mock()
     response = Response(mock_res)

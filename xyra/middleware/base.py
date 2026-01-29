@@ -28,4 +28,4 @@ class BaseHTTPMiddleware:
         """
         Entry point for the middleware execution engine.
         """
-        await self.dispatch(request, call_next)
+        return await self.dispatch(request, call_next)

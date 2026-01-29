@@ -27,11 +27,11 @@ async def test_file_upload_basic():
     mock_req = Mock()
     mock_req.get_method.return_value = "POST"
     mock_req.get_url.return_value = "http://localhost:8000/upload"
+    headers = {"content-type": "application/x-www-form-urlencoded"}
     mock_req.for_each_header = Mock(
-        side_effect=lambda func: func(
-            "content-type", "application/x-www-form-urlencoded"
-        )
+        side_effect=lambda func: [func(k, v) for k, v in headers.items()]
     )
+    mock_req.get_header = Mock(side_effect=lambda k: headers.get(k.lower()))
 
     mock_res = Mock()
     mock_res.get_data = AsyncMock(return_value=b"name=value&file=data")
@@ -71,12 +71,14 @@ async def test_file_upload_with_validation():
     mock_req = Mock()
     mock_req.get_method.return_value = "POST"
     mock_req.get_url.return_value = "http://localhost:8000/upload/validated"
+    headers = {
+        "content-type": "application/x-www-form-urlencoded",
+        "content-length": "512",
+    }
     mock_req.for_each_header = Mock(
-        side_effect=lambda func: [
-            func("content-type", "application/x-www-form-urlencoded"),
-            func("content-length", "512"),
-        ]
+        side_effect=lambda func: [func(k, v) for k, v in headers.items()]
     )
+    mock_req.get_header = Mock(side_effect=lambda k: headers.get(k.lower()))
 
     mock_res = Mock()
     request = Request(mock_req, mock_res)
@@ -102,11 +104,11 @@ async def test_file_upload_multiple_files():
     mock_req = Mock()
     mock_req.get_method.return_value = "POST"
     mock_req.get_url.return_value = "http://localhost:8000/upload/multiple"
+    headers = {"content-type": "application/x-www-form-urlencoded"}
     mock_req.for_each_header = Mock(
-        side_effect=lambda func: func(
-            "content-type", "application/x-www-form-urlencoded"
-        )
+        side_effect=lambda func: [func(k, v) for k, v in headers.items()]
     )
+    mock_req.get_header = Mock(side_effect=lambda k: headers.get(k.lower()))
 
     mock_res = Mock()
     mock_res.get_data = AsyncMock(return_value=b"file1=data1&file2=data2")
@@ -203,9 +205,11 @@ async def test_file_upload_mime_type_validation():
     mock_req = Mock()
     mock_req.get_method.return_value = "POST"
     mock_req.get_url.return_value = "http://localhost:8000/upload/mime"
+    headers = {"content-type": "image/jpeg"}
     mock_req.for_each_header = Mock(
-        side_effect=lambda func: func("content-type", "image/jpeg")
+        side_effect=lambda func: [func(k, v) for k, v in headers.items()]
     )
+    mock_req.get_header = Mock(side_effect=lambda k: headers.get(k.lower()))
 
     mock_res = Mock()
     request = Request(mock_req, mock_res)
@@ -244,12 +248,14 @@ async def test_file_upload_progress():
     mock_req = Mock()
     mock_req.get_method.return_value = "POST"
     mock_req.get_url.return_value = "http://localhost:8000/upload/progress"
+    headers = {
+        "content-type": "application/x-www-form-urlencoded",
+        "content-length": "1024",
+    }
     mock_req.for_each_header = Mock(
-        side_effect=lambda func: [
-            func("content-type", "application/x-www-form-urlencoded"),
-            func("content-length", "1024"),
-        ]
+        side_effect=lambda func: [func(k, v) for k, v in headers.items()]
     )
+    mock_req.get_header = Mock(side_effect=lambda k: headers.get(k.lower()))
 
     mock_res = Mock()
     request = Request(mock_req, mock_res)

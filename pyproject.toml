@@ -45,7 +45,8 @@ dev = [
     "mypy",
     "black",
     "isort",
-    "bandit"
+    "bandit",
+    "pytest-cov"
 ]
 docs = [
     "mkdocs",
