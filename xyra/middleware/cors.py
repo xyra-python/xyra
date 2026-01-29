@@ -1,3 +1,4 @@
+from ..logger import get_logger
 from ..request import Request
 from ..response import Response
 
@@ -44,6 +45,14 @@ class CorsMiddleware:
         self.allow_credentials = allow_credentials
         self.max_age = max_age
 
+        if self.allow_credentials and "*" in self.allowed_origins:
+            logger = get_logger("xyra")
+            logger.warning(
+                "🚨 Security Warning: CORS configured with allow_credentials=True and allowed_origins=['*']. "
+                "Wildcard origin is ignored when credentials are allowed. "
+                "Please specify exact origins."
+            )
+
     def _is_origin_allowed(self, origin: str) -> bool:
         """Check if the origin is allowed."""
         # Exact match always takes precedence
@@ -51,7 +60,8 @@ class CorsMiddleware:
             return True
 
         # Wildcard match
-        if "*" in self.allowed_origins:
+        # If credentials are allowed, wildcard CANNOT be used to reflect origin blindly
+        if "*" in self.allowed_origins and not self.allow_credentials:
             return True
 
         return False
