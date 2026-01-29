@@ -70,7 +70,8 @@ class CSRFMiddleware:
             if name in cookie:
                 return cookie[name].value
         except Exception:
-            pass
+            # Malformed cookie header, treat as no cookie
+            return None
 
         return None
 
