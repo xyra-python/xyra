@@ -22,8 +22,8 @@ def test_permissions_policy_header():
     assert "geolocation=(self https://example.com)" in value
     assert "camera=()" in value
 
-def test_cors_wildcard_with_credentials_reflects_origin():
-    """Test that using * with credentials reflects the origin."""
+def test_cors_wildcard_with_credentials_does_not_reflect_origin():
+    """Test that using * with credentials DOES NOT reflect the origin (secure behavior)."""
     middleware = CorsMiddleware(
         allowed_origins=["*"],
         allow_credentials=True
@@ -36,8 +36,14 @@ def test_cors_wildcard_with_credentials_reflects_origin():
 
     middleware(request, response)
 
-    # Should reflect origin
-    response.header.assert_any_call("Access-Control-Allow-Origin", "https://evil.com")
+    # Should NOT reflect origin because * + credentials is insecure
+    # We iterate over calls to ensure Access-Control-Allow-Origin was NOT called with the origin
+    for call_args in response.header.call_args_list:
+        name, value = call_args[0]
+        if name == "Access-Control-Allow-Origin":
+            assert value != "https://evil.com", "Should not reflect origin when wildcard is used with credentials"
+
+    # Credentials might still be set true globally, but without Origin, browser blocks it
     response.header.assert_any_call("Access-Control-Allow-Credentials", "true")
 
 def test_json_parsing_raises_exception():
