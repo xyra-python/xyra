@@ -135,13 +135,8 @@ class Request:
                 res.json({"raw_query": raw_query})
         """
         if self._query_cache is None:
-            url = self.url
-            # PERF: partition is slightly faster than split for this case
-            _, sep, query = url.partition("?")
-            if sep:
-                self._query_cache = query
-            else:
-                self._query_cache = ""
+            # PERF: use socketify's direct accessor instead of parsing URL
+            self._query_cache = self._req.get_query()
         return self._query_cache
 
     @property
@@ -193,7 +188,13 @@ class Request:
                 else:
                     res.ok().json({"token": token})
         """
-        return self.headers.get(name.lower(), default)
+        # PERF: if headers are already cached, use the dictionary lookup
+        if self._headers_cache is not None:
+            return self._headers_cache.get(name.lower(), default)
+
+        # PERF: otherwise use direct socketify access to avoid building the whole dict
+        value = self._req.get_header(name.lower())
+        return value if value else default
 
     async def text(self) -> str:
         """

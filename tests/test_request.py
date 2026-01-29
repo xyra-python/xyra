@@ -10,9 +10,16 @@ def mock_socketify_request():
     req = Mock()
     req.get_method.return_value = "GET"
     req.get_url.return_value = "http://example.com/path?key=value"
+    req.get_query.return_value = "key=value"
     req.for_each_header = Mock(
         side_effect=lambda func: func("Content-Type", "application/json")
     )
+    # Mock get_header to behave somewhat realistically
+    def get_header(key):
+        headers = {"content-type": "application/json"}
+        return headers.get(key.lower())
+
+    req.get_header = Mock(side_effect=get_header)
     req.get_parameter.return_value = "param_value"
     req.text = AsyncMock(return_value='{"key": "value"}')
     return req
@@ -153,9 +160,7 @@ async def test_request_body_validation():
     res = Mock()
     res.get_data = AsyncMock(return_value=b'{"name": "John", "age": 25}')
     res.get_json = AsyncMock(return_value={"name": "John", "age": 25})
-    req.for_each_header = Mock(
-        side_effect=lambda func: func("content-type", "application/json")
-    )
+    req.get_header.return_value = "application/json"
     request = Request(req, res)
 
     # Simulate Pydantic-like validation
@@ -175,9 +180,7 @@ async def test_request_body_validation_error():
     req = Mock()
     res = Mock()
     res.get_json = AsyncMock(return_value={"name": 123, "age": "invalid"})
-    req.for_each_header = Mock(
-        side_effect=lambda func: func("content-type", "application/json")
-    )
+    req.get_header.return_value = "application/json"
     request = Request(req, res)
 
     data = await request.json()
@@ -199,7 +202,7 @@ def test_request_content_type(mock_socketify_request, mock_socketify_response):
 def test_request_content_length():
     req = Mock()
     res = Mock()
-    req.for_each_header = Mock(side_effect=lambda func: func("content-length", "123"))
+    req.get_header.return_value = "123"
     request = Request(req, res)
     assert request.content_length == 123
 
@@ -212,11 +215,7 @@ def test_request_is_json(mock_socketify_request, mock_socketify_response):
 def test_request_is_form():
     req = Mock()
     res = Mock()
-    req.for_each_header = Mock(
-        side_effect=lambda func: func(
-            "content-type", "application/x-www-form-urlencoded"
-        )
-    )
+    req.get_header.return_value = "application/x-www-form-urlencoded"
     request = Request(req, res)
     assert request.is_form() is True
 
