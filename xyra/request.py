@@ -1,3 +1,4 @@
+import socket
 import sys
 from typing import Any
 from urllib.parse import parse_qs, parse_qsl
@@ -55,6 +56,7 @@ class Request:
         self._query_params_cache: dict[str, list] | None = None
         self._url_cache: str | None = None
         self._query_cache: str | None = None
+        self._remote_addr_cache: str | None = None
 
     @property
     def method(self) -> str:
@@ -96,6 +98,31 @@ class Request:
                 raise ValueError("Request URL is None")
             self._url_cache = url
         return self._url_cache
+
+    @property
+    def remote_addr(self) -> str:
+        """
+        Get the remote address (IP) of the client.
+
+        Returns:
+            IP address as a string (e.g., "127.0.0.1" or "::1").
+        """
+        if self._remote_addr_cache is None:
+            try:
+                addr_bytes = self._res.get_remote_address_bytes()
+                if len(addr_bytes) == 4:
+                    self._remote_addr_cache = socket.inet_ntop(
+                        socket.AF_INET, addr_bytes
+                    )
+                elif len(addr_bytes) == 16:
+                    self._remote_addr_cache = socket.inet_ntop(
+                        socket.AF_INET6, addr_bytes
+                    )
+                else:
+                    self._remote_addr_cache = "unknown"
+            except Exception:
+                self._remote_addr_cache = "unknown"
+        return self._remote_addr_cache
 
     @property
     def headers(self) -> dict[str, str]:
