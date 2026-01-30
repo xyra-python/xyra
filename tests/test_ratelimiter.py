@@ -69,9 +69,10 @@ def test_rate_limiter_function():
 
 def test_rate_limit_middleware_allowed():
     limiter = RateLimiter(requests=10, window=60)
+    # Use remote_addr for this test (default behavior)
     middleware = RateLimitMiddleware(limiter)
     request = Mock()
-    request.get_header.side_effect = lambda h: {"X-Forwarded-For": "127.0.0.1"}.get(h)
+    request.remote_addr = "127.0.0.1"
     response = _setup_response_mock()
 
     middleware(request, response)
@@ -87,7 +88,7 @@ def test_rate_limit_middleware_exceeded():
     limiter = RateLimiter(requests=1, window=60)
     middleware = RateLimitMiddleware(limiter)
     request = Mock()
-    request.get_header.side_effect = lambda h: {"X-Forwarded-For": "127.0.0.1"}.get(h)
+    request.remote_addr = "127.0.0.1"
     response = _setup_response_mock()
 
     # First request should be allowed
@@ -127,7 +128,9 @@ def test_rate_limit_middleware_custom_key_func():
 
 def test_rate_limit_middleware_default_key_func():
     limiter = RateLimiter(requests=5, window=60)
-    middleware = RateLimitMiddleware(limiter)
+
+    # Test trust_proxy=True
+    middleware = RateLimitMiddleware(limiter, trust_proxy=True)
     request = Mock()
     request.get_header.side_effect = lambda h: {
         "X-Forwarded-For": "192.168.1.1",
@@ -137,7 +140,18 @@ def test_rate_limit_middleware_default_key_func():
     key = middleware.key_func(request)
     assert key == "192.168.1.1"
 
-    # Test fallback
-    request.get_header.side_effect = lambda h: None
-    key = middleware.key_func(request)
-    assert key == "127.0.0.1"
+    # Test trust_proxy=False (Default)
+    middleware_secure = RateLimitMiddleware(limiter) # trust_proxy=False
+    request_secure = Mock()
+    # Headers exist but should be ignored
+    request_secure.get_header.side_effect = lambda h: "192.168.1.1"
+    request_secure.remote_addr = "10.0.0.1"
+
+    key = middleware_secure.key_func(request_secure)
+    assert key == "10.0.0.1"
+
+    # Test fallback to unknown
+    request_unknown = Mock()
+    request_unknown.remote_addr = None
+    key = middleware_secure.key_func(request_unknown)
+    assert key == "unknown"

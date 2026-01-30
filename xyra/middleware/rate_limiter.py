@@ -68,26 +68,40 @@ class RateLimiter:
 class RateLimitMiddleware:
     """Middleware for rate limiting requests."""
 
-    def __init__(self, limiter: RateLimiter, key_func=None):
+    def __init__(
+        self, limiter: RateLimiter, key_func=None, trust_proxy: bool = False
+    ):
         """
         Initialize rate limit middleware.
 
         Args:
             limiter: RateLimiter instance
             key_func: Function to extract key from request (default: client IP)
+            trust_proxy: Whether to trust proxy headers (X-Forwarded-For, X-Real-IP)
         """
         self.limiter = limiter
         self.key_func = key_func or self._default_key_func
+        self.trust_proxy = trust_proxy
 
     def _default_key_func(self, request: Request) -> str:
-        """Default key function using client IP."""
-        # Try to get real IP from headers
-        ip = (
-            request.get_header("X-Forwarded-For")
-            or request.get_header("X-Real-IP")
-            or "127.0.0.1"
-        )  # fallback for local development
-        return ip.split(",")[0].strip()
+        """
+        Default key function using client IP.
+
+        SECURITY:
+        By default (trust_proxy=False), we use the direct connection IP (remote_addr)
+        to prevent IP spoofing via headers like X-Forwarded-For.
+        If the app is behind a trusted proxy, set trust_proxy=True.
+        """
+        if self.trust_proxy:
+            # Try to get real IP from headers if trust_proxy is enabled
+            ip = request.get_header("X-Forwarded-For") or request.get_header(
+                "X-Real-IP"
+            )
+            if ip:
+                return ip.split(",")[0].strip()
+
+        # Fallback to direct connection IP
+        return request.remote_addr or "unknown"
 
     def __call__(self, request: Request, response: Response):
         """Apply rate limiting."""
@@ -121,7 +135,12 @@ class RateLimitMiddleware:
         # Continue to next middleware/handler (no action needed)
 
 
-def rate_limiter(requests: int = 100, window: int = 60, key_func=None):
+def rate_limiter(
+    requests: int = 100,
+    window: int = 60,
+    key_func=None,
+    trust_proxy: bool = False,
+):
     """
     Create a rate limiter middleware.
 
@@ -129,9 +148,10 @@ def rate_limiter(requests: int = 100, window: int = 60, key_func=None):
         requests: Maximum requests per window
         window: Time window in seconds
         key_func: Function to extract key from request
+        trust_proxy: Whether to trust proxy headers
 
     Returns:
         RateLimitMiddleware instance
     """
     limiter = RateLimiter(requests=requests, window=window)
-    return RateLimitMiddleware(limiter, key_func)
+    return RateLimitMiddleware(limiter, key_func, trust_proxy=trust_proxy)
