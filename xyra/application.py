@@ -232,6 +232,71 @@ class App:
         """Serve static files from a directory."""
         return self._app.static(path, directory)
 
+    def _build_middleware_stack(
+        self,
+        middleware_chain: list[dict[str, Any]],
+        route_handler: Callable,
+        is_async_handler: bool,
+    ) -> Callable:
+        # Base handler
+        async def run_route_handler(req, res):
+            if is_async_handler:
+                await route_handler(req, res)
+            else:
+                route_handler(req, res)
+            return res
+
+        next_call = run_route_handler
+
+        for mw_info in reversed(middleware_chain):
+            middleware = mw_info["func"]
+            is_coroutine = mw_info["is_coroutine"]
+            wants_call_next = mw_info["wants_call_next"]
+
+            # Capture for closure
+            current_next = next_call
+
+            if wants_call_next:
+                if is_coroutine:
+
+                    async def layer(req, res, _mw=middleware, _next=current_next):
+                        async def call_next(req_obj=None):
+                            return await _next(req, res)
+
+                        await _mw(req, call_next)
+                        return res
+
+                else:
+
+                    async def layer(req, res, _mw=middleware, _next=current_next):
+                        async def call_next(req_obj=None):
+                            return await _next(req, res)
+
+                        _mw(req, call_next)
+                        return res
+
+            else:
+                # Legacy
+                if is_coroutine:
+
+                    async def layer(req, res, _mw=middleware, _next=current_next):
+                        await _mw(req, res)
+                        if not res._ended:
+                            await _next(req, res)
+                        return res
+
+                else:
+
+                    async def layer(req, res, _mw=middleware, _next=current_next):
+                        _mw(req, res)
+                        if not res._ended:
+                            await _next(req, res)
+                        return res
+
+            next_call = layer
+
+        return next_call
+
     def _create_final_handler(
         self,
         route_handler: Callable,
@@ -261,59 +326,26 @@ class App:
                 "wants_call_next": wants_call_next
             })
 
+        # Build the middleware stack once
+        middleware_stack_entry = self._build_middleware_stack(
+            middleware_chain, route_handler, is_async_handler
+        )
+
         async def async_final_handler(res, req):
             start_time = time.time()
             try:
                 # Optimized parameter extraction
-                params = {
-                    param_name: req.get_parameter(i)
-                    for i, param_name in enumerate(param_names)
-                    if req.get_parameter(i) is not None
-                }
+                params = {}
+                for i, param_name in enumerate(param_names):
+                    val = req.get_parameter(i)
+                    if val is not None:
+                        params[param_name] = val
+
                 request = Request(req, res, params)
                 response = Response(res, self.templates)
 
-                # Middleware Execution Chain
-                async def execute_chain(index: int):
-                    if index < len(middleware_chain):
-                        mw_info = middleware_chain[index]
-                        middleware = mw_info["func"]
-                        is_coroutine = mw_info["is_coroutine"]
-                        wants_call_next = mw_info["wants_call_next"]
-
-                        # Helper to continue to next middleware
-                        async def call_next(req_obj=None):
-                            # Allow middleware to modify request object if passed
-                            # though in this design request is mutable anyway
-                            await execute_chain(index + 1)
-                            return response
-
-                        if wants_call_next:
-                             # Supports onion architecture (FastAPI style or Express style with next)
-                            if is_coroutine:
-                                await middleware(request, call_next)
-                            else:
-                                # Wrap sync middleware
-                                middleware(request, call_next)
-                        else:
-                            # Legacy/Simple pattern (req, res) -> None (Linear)
-                            if is_coroutine:
-                                await middleware(request, response)
-                            else:
-                                middleware(request, response)
-
-                            # If response not ended, automatically call next
-                            if not response._ended:
-                                await execute_chain(index + 1)
-
-                    else:
-                        # End of middleware chain, call route handler
-                        if is_async_handler:
-                            await route_handler(request, response)
-                        else:
-                            route_handler(request, response)
-
-                await execute_chain(0)
+                # Execute middleware stack
+                await middleware_stack_entry(request, response)
 
                 # Log request if enabled (only for non-2xx status codes or slow requests)
                 if self.log_requests:
