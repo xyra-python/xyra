@@ -23,21 +23,41 @@ class HTTPSRedirectMiddleware:
 
     def __call__(self, req: Request, res: Response):
         """Redirect HTTP requests to HTTPS."""
-        # Check if request is HTTP
-        if req.headers.get(
-            "X-Forwarded-Proto", ""
-        ).lower() == "http" or not req.url.startswith("https://"):
-            # Build HTTPS URL
-            https_url = req.url.replace("http://", "https://", 1)
+        # Check X-Forwarded-Proto (standard for load balancers)
+        # Headers keys are lowercase in Xyra Request
+        forwarded_proto = req.headers.get("x-forwarded-proto", "http").lower()
 
-            # Redirect to HTTPS
-            res.status(self.redirect_status_code)
-            res.header("Location", https_url)
-            res.send("")
+        # If we are already https, do nothing
+        if forwarded_proto == "https":
+            return
+
+        # If no host header, we can't redirect reliably
+        host = req.headers.get("host")
+        if not host:
+            # If we can't determine host, we can't redirect safely.
+            res.status(400)
+            res.send("Bad Request: Missing Host header")
             res._ended = True
             return
 
-        # Continue to next middleware
+        # Construct HTTPS URL
+        # req.url in Xyra/socketify is just the path (e.g. /foo/bar)
+        path = req.url
+        query = req.query
+
+        if query:
+            full_path = f"{path}?{query}"
+        else:
+            full_path = path
+
+        https_url = f"https://{host}{full_path}"
+
+        # Redirect to HTTPS
+        res.status(self.redirect_status_code)
+        res.header("Location", https_url)
+        res.send("")
+        res._ended = True
+        return
 
 
 def https_redirect_middleware(
