@@ -15,6 +15,8 @@ from socketify import (
     Response as SocketifyResponse,
 )
 
+from .logger import get_logger
+
 
 class Request:
     """
@@ -288,14 +290,12 @@ class Request:
             parsed_pairs = parse_qsl(text_content, keep_blank_values=True)
             form_data = dict(parsed_pairs)
             return form_data
-        except Exception:
-            # Fallback to simple parsing if parse_qsl fails
-            form_data = {}
-            for pair in text_content.split("&"):
-                if "=" in pair:
-                    key, value = pair.split("=", 1)
-                    form_data[key] = value
-            return form_data
+        except Exception as e:
+            # Secure handling: If parse_qsl fails, return empty dict and log error.
+            # Do NOT fallback to simple split which bypasses URL decoding.
+            logger = get_logger("xyra")
+            logger.warning(f"Failed to parse form data: {e}. Returning empty dict.")
+            return {}
 
     @property
     def content_type(self) -> str | None:
