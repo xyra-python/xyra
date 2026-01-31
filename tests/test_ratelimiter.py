@@ -1,4 +1,5 @@
 from unittest.mock import Mock
+from collections import deque
 
 from xyra.middleware import RateLimiter, RateLimitMiddleware, rate_limiter
 
@@ -33,7 +34,7 @@ def test_rate_limiter_allowed():
 
 def test_rate_limiter_cleanup():
     limiter = RateLimiter(requests=1, window=1)
-    limiter._requests["127.0.0.1"] = [0]  # Old timestamp
+    limiter._requests["127.0.0.1"] = deque([0])  # Old timestamp
     assert limiter.is_allowed("127.0.0.1") is True  # Should cleanup old requests
 
 

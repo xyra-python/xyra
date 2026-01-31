@@ -1,5 +1,6 @@
 import threading
 import time
+from collections import deque
 
 from xyra.middleware.rate_limiter import RateLimiter
 
@@ -94,10 +95,10 @@ def test_ratelimiter_cleanup_thread_safety():
 
     # Manually add old timestamps
     with limiter._lock:
-        limiter._requests[client_key] = [
+        limiter._requests[client_key] = deque([
             current_time - 10,
             current_time - 5,
-        ]  # Old timestamps
+        ])  # Old timestamps
 
     # Concurrently check if allowed and trigger cleanup
     results = []
