@@ -1,6 +1,6 @@
 import threading
 import time
-from collections import defaultdict
+from collections import defaultdict, deque
 
 from ..request import Request
 from ..response import Response
@@ -19,14 +19,16 @@ class RateLimiter:
         """
         self.requests = requests
         self.window = window
-        self._requests: dict[str, list[float]] = defaultdict(list)
+        self._requests: dict[str, deque[float]] = defaultdict(deque)
         self._lock = threading.RLock()  # Thread-safe lock
 
     def _cleanup_old_requests(self, key: str, current_time: float):
         """Remove requests outside the current window."""
         with self._lock:
             cutoff = current_time - self.window
-            self._requests[key] = [t for t in self._requests[key] if t > cutoff]
+            timestamps = self._requests[key]
+            while timestamps and timestamps[0] <= cutoff:
+                timestamps.popleft()
 
     def is_allowed(self, key: str) -> bool:
         """
@@ -61,7 +63,8 @@ class RateLimiter:
             if not self._requests[key]:
                 return 0
             current_time = time.time()
-            oldest_request = min(self._requests[key])
+            # PERF: Requests are ordered by time, so the first element is always the oldest
+            oldest_request = self._requests[key][0]
             return max(0, self.window - (current_time - oldest_request))
 
 
