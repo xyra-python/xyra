@@ -51,7 +51,7 @@ def test_https_redirect_http_request_with_query():
 
 
 def test_https_redirect_https_request():
-    middleware = HTTPSRedirectMiddleware()
+    middleware = HTTPSRedirectMiddleware(trust_proxy=True)
     request = Mock()
     request.url = "/path"
     request.query = ""
@@ -66,6 +66,25 @@ def test_https_redirect_https_request():
     response.header.assert_not_called()
     response.send.assert_not_called()
     assert response._ended is False
+
+
+def test_https_redirect_bypass_attempt_untrusted():
+    # trust_proxy=False (default) should ignore x-forwarded-proto and redirect
+    middleware = HTTPSRedirectMiddleware(trust_proxy=False)
+    request = Mock()
+    request.url = "/path"
+    request.query = ""
+    request.headers = {"host": "example.com", "x-forwarded-proto": "https"}
+    response = Mock()
+    response._ended = False
+
+    middleware(request, response)
+
+    # Should redirect despite header because proxy is not trusted
+    response.status.assert_called_once_with(301)
+    response.header.assert_called_with("Location", "https://example.com/path")
+    response.send.assert_called_once_with("")
+    assert response._ended is True
 
 
 def test_https_redirect_missing_host():
