@@ -12,20 +12,24 @@ from ..response import Response
 class HTTPSRedirectMiddleware:
     """Middleware for redirecting HTTP requests to HTTPS."""
 
-    def __init__(self, redirect_status_code: int = 301):
+    def __init__(self, redirect_status_code: int = 301, trust_proxy: bool = False):
         """
         Initialize HTTPS redirect middleware.
 
         Args:
             redirect_status_code: HTTP status code for redirect (301 or 302)
+            trust_proxy: Whether to trust proxy headers (X-Forwarded-Proto)
         """
         self.redirect_status_code = redirect_status_code
+        self.trust_proxy = trust_proxy
 
     def __call__(self, req: Request, res: Response):
         """Redirect HTTP requests to HTTPS."""
         # Check X-Forwarded-Proto (standard for load balancers)
         # Headers keys are lowercase in Xyra Request
-        forwarded_proto = req.headers.get("x-forwarded-proto", "http").lower()
+        forwarded_proto = "http"
+        if self.trust_proxy:
+            forwarded_proto = req.headers.get("x-forwarded-proto", "http").lower()
 
         # If we are already https, do nothing
         if forwarded_proto == "https":
@@ -62,6 +66,7 @@ class HTTPSRedirectMiddleware:
 
 def https_redirect_middleware(
     redirect_status_code: int = 301,
+    trust_proxy: bool = False,
 ) -> HTTPSRedirectMiddleware:
     """Create an HTTPS redirect middleware instance."""
-    return HTTPSRedirectMiddleware(redirect_status_code)
+    return HTTPSRedirectMiddleware(redirect_status_code, trust_proxy=trust_proxy)
