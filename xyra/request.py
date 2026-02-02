@@ -140,12 +140,17 @@ class Request:
                 res.json(req.headers)
         """
         if self._headers_cache is None:
-            headers = {}
-            # PERF: avoid creating intermediate dicts and lambda overhead
-            self._req.for_each_header(
-                lambda key, value: headers.__setitem__(key.lower(), value)
-            )
-            self._headers_cache = headers
+            # PERF: use socketify's direct accessor if available (faster C++ implementation)
+            # This returns a dict with lowercase keys, matching our requirement.
+            if hasattr(self._req, "get_headers"):
+                self._headers_cache = self._req.get_headers()
+            else:
+                headers = {}
+                # PERF: avoid creating intermediate dicts and lambda overhead
+                self._req.for_each_header(
+                    lambda key, value: headers.__setitem__(key.lower(), value)
+                )
+                self._headers_cache = headers
         return self._headers_cache
 
     @property
@@ -185,11 +190,16 @@ class Request:
                 res.json({"query": query, "page": page})
         """
         if self._query_params_cache is None:
-            query_string = self.query
-            if not query_string:
-                self._query_params_cache = {}
+            # PERF: use socketify's direct accessor if available (faster C++ implementation)
+            # This returns a dict with lists of values, matching parse_qs behavior.
+            if hasattr(self._req, "get_queries"):
+                self._query_params_cache = self._req.get_queries()
             else:
-                self._query_params_cache = parse_qs(query_string)
+                query_string = self.query
+                if not query_string:
+                    self._query_params_cache = {}
+                else:
+                    self._query_params_cache = parse_qs(query_string)
         return self._query_params_cache
 
     def get_parameter(self, index: int) -> str | None:
