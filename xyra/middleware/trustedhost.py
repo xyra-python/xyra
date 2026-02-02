@@ -24,7 +24,15 @@ class TrustedHostMiddleware:
     def __call__(self, req: Request, res: Response):
         """Validate the request's Host header."""
         # Headers keys are lowercase in Xyra Request
-        host = req.headers.get("host", "").split(":")[0]  # Remove port
+        host = req.headers.get("host", "")
+
+        # Handle IPv6 addresses (e.g., [::1]:8080)
+        if host.startswith("["):
+            index = host.find("]")
+            if index != -1:
+                host = host[: index + 1]
+        else:
+            host = host.split(":")[0]  # Remove port for IPv4/Hostname
 
         is_allowed = False
         for allowed in self.allowed_hosts:
