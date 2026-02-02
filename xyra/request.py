@@ -1,7 +1,7 @@
 import socket
 import sys
 from typing import Any
-from urllib.parse import parse_qs, parse_qsl
+from urllib.parse import parse_qsl
 
 if sys.implementation.name == "pypy":
     import ujson as json_lib
@@ -140,12 +140,9 @@ class Request:
                 res.json(req.headers)
         """
         if self._headers_cache is None:
-            headers = {}
-            # PERF: avoid creating intermediate dicts and lambda overhead
-            self._req.for_each_header(
-                lambda key, value: headers.__setitem__(key.lower(), value)
-            )
-            self._headers_cache = headers
+            # PERF: use socketify's direct accessor (C++ optimized)
+            # It returns a dictionary with lowercase keys.
+            self._headers_cache = self._req.get_headers()
         return self._headers_cache
 
     @property
@@ -185,11 +182,8 @@ class Request:
                 res.json({"query": query, "page": page})
         """
         if self._query_params_cache is None:
-            query_string = self.query
-            if not query_string:
-                self._query_params_cache = {}
-            else:
-                self._query_params_cache = parse_qs(query_string)
+            # PERF: use socketify's direct accessor (C++ optimized)
+            self._query_params_cache = self._req.get_queries()
         return self._query_params_cache
 
     def get_parameter(self, index: int) -> str | None:

@@ -11,6 +11,8 @@ def mock_socketify_request():
     req.get_method.return_value = "GET"
     req.get_url.return_value = "http://example.com/path?key=value"
     req.get_query.return_value = "key=value"
+    req.get_queries.return_value = {"key": ["value"]}
+    req.get_headers.return_value = {"content-type": "application/json"}
     req.for_each_header = Mock(
         side_effect=lambda func: func("Content-Type", "application/json")
     )
