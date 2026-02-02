@@ -134,3 +134,67 @@ def test_https_redirect_no_headers_assumes_http():
     response.status.assert_called_once_with(301)
     response.header.assert_called_with("Location", "https://example.com/path")
     assert response._ended is True
+
+def test_https_redirect_allowed_hosts_success():
+    middleware = HTTPSRedirectMiddleware(allowed_hosts=["example.com"])
+    request = Mock()
+    request.url = "/path"
+    request.query = ""
+    request.headers = {"host": "example.com", "x-forwarded-proto": "http"}
+    response = Mock()
+    response._ended = False
+
+    middleware(request, response)
+
+    response.status.assert_called_once_with(301)
+    response.header.assert_called_with("Location", "https://example.com/path")
+    assert response._ended is True
+
+
+def test_https_redirect_allowed_hosts_failure():
+    middleware = HTTPSRedirectMiddleware(allowed_hosts=["example.com"])
+    request = Mock()
+    request.url = "/path"
+    request.query = ""
+    request.headers = {"host": "evil.com", "x-forwarded-proto": "http"}
+    response = Mock()
+    response._ended = False
+
+    middleware(request, response)
+
+    response.status.assert_called_once_with(400)
+    response.send.assert_called_once_with("Bad Request: Untrusted Host")
+    assert response._ended is True
+
+
+def test_https_redirect_invalid_host_chars():
+    middleware = HTTPSRedirectMiddleware()
+    request = Mock()
+    request.url = "/path"
+    request.query = ""
+    # Host header injection attempt
+    request.headers = {"host": "example.com/evil", "x-forwarded-proto": "http"}
+    response = Mock()
+    response._ended = False
+
+    middleware(request, response)
+
+    response.status.assert_called_once_with(400)
+    response.send.assert_called_once_with("Bad Request: Invalid Host header")
+    assert response._ended is True
+
+
+def test_https_redirect_wildcard_host():
+    middleware = HTTPSRedirectMiddleware(allowed_hosts=["*.example.com"])
+    request = Mock()
+    request.url = "/path"
+    request.query = ""
+    request.headers = {"host": "sub.example.com", "x-forwarded-proto": "http"}
+    response = Mock()
+    response._ended = False
+
+    middleware(request, response)
+
+    response.status.assert_called_once_with(301)
+    response.header.assert_called_with("Location", "https://sub.example.com/path")
+    assert response._ended is True
