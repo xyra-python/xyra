@@ -92,3 +92,35 @@ def test_trusted_host_multiple_hosts():
     response.status.assert_not_called()
     response.json.assert_not_called()
     assert response._ended is False
+
+
+def test_trusted_host_ipv6_literal():
+    """Test that IPv6 literals are handled correctly."""
+    # Allow local IPv6
+    middleware = TrustedHostMiddleware(["[::1]"])
+    request = Mock()
+    # Host header with port
+    request.headers = {"host": "[::1]:8080"}
+    response = Mock()
+    response._ended = False
+
+    middleware(request, response)
+
+    # Should allow and continue
+    response.status.assert_not_called()
+    response.json.assert_not_called()
+    assert response._ended is False
+
+
+def test_trusted_host_ipv6_wildcard():
+    """Test that IPv6 literals work with wildcard."""
+    middleware = TrustedHostMiddleware(["*"])
+    request = Mock()
+    request.headers = {"host": "[::1]:8080"}
+    response = Mock()
+    response._ended = False
+
+    middleware(request, response)
+
+    response.status.assert_not_called()
+    assert response._ended is False
