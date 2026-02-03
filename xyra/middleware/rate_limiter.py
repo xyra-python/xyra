@@ -72,7 +72,11 @@ class RateLimitMiddleware:
     """Middleware for rate limiting requests."""
 
     def __init__(
-        self, limiter: RateLimiter, key_func=None, trust_proxy: bool = False
+        self,
+        limiter: RateLimiter,
+        key_func=None,
+        trust_proxy: bool = False,
+        trusted_proxy_count: int = 1,
     ):
         """
         Initialize rate limit middleware.
@@ -81,10 +85,13 @@ class RateLimitMiddleware:
             limiter: RateLimiter instance
             key_func: Function to extract key from request (default: client IP)
             trust_proxy: Whether to trust proxy headers (X-Forwarded-For, X-Real-IP)
+            trusted_proxy_count: Number of trusted proxies in front of the app (default: 1).
+                                 Used to select the correct IP from X-Forwarded-For.
         """
         self.limiter = limiter
         self.key_func = key_func or self._default_key_func
         self.trust_proxy = trust_proxy
+        self.trusted_proxy_count = trusted_proxy_count
 
     def _default_key_func(self, request: Request) -> str:
         """
@@ -97,11 +104,22 @@ class RateLimitMiddleware:
         """
         if self.trust_proxy:
             # Try to get real IP from headers if trust_proxy is enabled
-            ip = request.get_header("X-Forwarded-For") or request.get_header(
-                "X-Real-IP"
-            )
-            if ip:
-                return ip.split(",")[0].strip()
+            # Priority 1: X-Forwarded-For (standard chain)
+            xff = request.get_header("X-Forwarded-For")
+            if xff:
+                # Split by comma and strip whitespace
+                ips = [ip.strip() for ip in xff.split(",")]
+                # Select the IP based on the trusted proxy count (from the right)
+                # If count is 1, we take the last IP (-1)
+                # If count is 2, we take the second to last (-2)
+                if ips:
+                    idx = -min(len(ips), self.trusted_proxy_count)
+                    return ips[idx]
+
+            # Priority 2: X-Real-IP (often set by single proxy)
+            x_real_ip = request.get_header("X-Real-IP")
+            if x_real_ip:
+                return x_real_ip.strip()
 
         # Fallback to direct connection IP
         return request.remote_addr or "unknown"
@@ -143,6 +161,7 @@ def rate_limiter(
     window: int = 60,
     key_func=None,
     trust_proxy: bool = False,
+    trusted_proxy_count: int = 1,
 ):
     """
     Create a rate limiter middleware.
@@ -152,9 +171,12 @@ def rate_limiter(
         window: Time window in seconds
         key_func: Function to extract key from request
         trust_proxy: Whether to trust proxy headers
+        trusted_proxy_count: Number of trusted proxies
 
     Returns:
         RateLimitMiddleware instance
     """
     limiter = RateLimiter(requests=requests, window=window)
-    return RateLimitMiddleware(limiter, key_func, trust_proxy=trust_proxy)
+    return RateLimitMiddleware(
+        limiter, key_func, trust_proxy=trust_proxy, trusted_proxy_count=trusted_proxy_count
+    )
