@@ -46,7 +46,7 @@ def test_response_header(mock_socketify_response):
 def test_response_send_string(mock_socketify_response):
     response = Response(mock_socketify_response)
     response.send("Hello World")
-    mock_socketify_response.write_status.assert_called_once_with("200")
+    mock_socketify_response.write_status.assert_called_once_with(200)
     # Headers are written via _write_headers
     mock_socketify_response.end.assert_called_once_with("Hello World")
     assert response._ended is True

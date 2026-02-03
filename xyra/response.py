@@ -94,7 +94,8 @@ class Response:
             return
 
         # Write status code
-        self._res.write_status(str(self.status_code))
+        # PERF: socketify accepts int directly, avoiding string conversion
+        self._res.write_status(self.status_code)
         # Write headers
         self._write_headers()
 

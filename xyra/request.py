@@ -41,6 +41,7 @@ class Request:
         "_query_params_cache",
         "_url_cache",
         "_query_cache",
+        "_remote_addr_cache",
         "__dict__",
     )
 
@@ -140,17 +141,9 @@ class Request:
                 res.json(req.headers)
         """
         if self._headers_cache is None:
-            # PERF: use socketify's direct accessor if available (faster C++ implementation)
+            # PERF: use socketify's direct accessor (faster C++ implementation)
             # This returns a dict with lowercase keys, matching our requirement.
-            if hasattr(self._req, "get_headers"):
-                self._headers_cache = self._req.get_headers()
-            else:
-                headers = {}
-                # PERF: avoid creating intermediate dicts and lambda overhead
-                self._req.for_each_header(
-                    lambda key, value: headers.__setitem__(key.lower(), value)
-                )
-                self._headers_cache = headers
+            self._headers_cache = self._req.get_headers()
         return self._headers_cache
 
     @property
@@ -190,16 +183,9 @@ class Request:
                 res.json({"query": query, "page": page})
         """
         if self._query_params_cache is None:
-            # PERF: use socketify's direct accessor if available (faster C++ implementation)
+            # PERF: use socketify's direct accessor (faster C++ implementation)
             # This returns a dict with lists of values, matching parse_qs behavior.
-            if hasattr(self._req, "get_queries"):
-                self._query_params_cache = self._req.get_queries()
-            else:
-                query_string = self.query
-                if not query_string:
-                    self._query_params_cache = {}
-                else:
-                    self._query_params_cache = parse_qs(query_string)
+            self._query_params_cache = self._req.get_queries()
         return self._query_params_cache
 
     def get_parameter(self, index: int) -> str | None:

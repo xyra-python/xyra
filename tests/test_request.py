@@ -247,28 +247,3 @@ def test_request_api_stability():
         assert hasattr(Request, attr), f"Request is missing attribute: {attr}"
 
 
-def test_request_headers_fallback():
-    """Test fallback when get_headers is not available."""
-    # Use spec to ensure get_headers is not available (hasattr returns False)
-    req = Mock(spec=["for_each_header"])
-
-    req.for_each_header = Mock(
-        side_effect=lambda func: func("Content-Type", "application/json")
-    )
-    res = Mock()
-    request = Request(req, res)
-
-    assert request.headers == {"content-type": "application/json"}
-    req.for_each_header.assert_called_once()
-
-
-def test_request_query_params_fallback():
-    """Test fallback when get_queries is not available."""
-    # Use spec to ensure get_queries is not available
-    req = Mock(spec=["get_query"])
-    req.get_query.return_value = "key=value"
-
-    res = Mock()
-    request = Request(req, res)
-
-    assert request.query_params == {"key": ["value"]}
