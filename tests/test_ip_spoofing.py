@@ -61,9 +61,49 @@ class TestIpSpoofing(unittest.TestCase):
         key = middleware._default_key_func(self.request)
         self.assertEqual(key, "5.6.7.8")
 
+    def test_rate_limiter_spoofing_attempt(self):
+        # Setup: Real IP is 1.2.3.4 (not used when proxy trusted)
+        # Proxy IP is 10.0.0.1
+        # Attacker injects "8.8.8.8" into X-Forwarded-For
+        # Proxy appends real client IP "1.2.3.4"
+        self.mock_res.get_remote_address_bytes.return_value = socket.inet_pton(socket.AF_INET, "10.0.0.1")
+        self.request._remote_addr_cache = None
+
+        headers = {"x-forwarded-for": "8.8.8.8, 1.2.3.4"}
+        self.request.get_header = lambda name, default=None: headers.get(name.lower(), default)
+
+        limiter = RateLimiter()
+        # Default trusted_proxy_count=1
+        middleware = RateLimitMiddleware(limiter, trust_proxy=True)
+
+        # Should use the LAST IP (1.2.3.4), ignoring the spoofed "8.8.8.8"
+        key = middleware._default_key_func(self.request)
+        self.assertEqual(key, "1.2.3.4")
+
+    def test_rate_limiter_multi_proxy(self):
+        # Setup: Chain is Client (1.2.3.4) -> Proxy1 (10.0.0.1) -> Proxy2 (10.0.0.2)
+        # Header: "1.2.3.4, 10.0.0.1" (as seen by Proxy2/App)
+        self.mock_res.get_remote_address_bytes.return_value = socket.inet_pton(socket.AF_INET, "10.0.0.2")
+        self.request._remote_addr_cache = None
+
+        headers = {"x-forwarded-for": "1.2.3.4, 10.0.0.1"}
+        self.request.get_header = lambda name, default=None: headers.get(name.lower(), default)
+
+        limiter = RateLimiter()
+        # Trust 2 proxies
+        middleware = RateLimitMiddleware(limiter, trust_proxy=True, trusted_proxy_count=2)
+
+        # Should take the 2nd from right (1.2.3.4)
+        key = middleware._default_key_func(self.request)
+        self.assertEqual(key, "1.2.3.4")
+
     def test_rate_limiter_helper_function(self):
         mw = rate_limiter(trust_proxy=True)
         self.assertTrue(mw.trust_proxy)
+        self.assertEqual(mw.trusted_proxy_count, 1)
+
+        mw = rate_limiter(trust_proxy=True, trusted_proxy_count=2)
+        self.assertEqual(mw.trusted_proxy_count, 2)
 
         mw = rate_limiter(trust_proxy=False)
         self.assertFalse(mw.trust_proxy)

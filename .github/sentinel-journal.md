@@ -9,3 +9,8 @@
 **Vulnerability pattern:** `Response.header` blindly accepted keys/values containing `\r\n`, allowing response splitting.
 **Learned constraint:** Explicitly reject `\r` and `\n` in header setters.
 **Prevention:** Added validation in `Response.header`.
+
+## 2025-05-23 – IP Spoofing in Rate Limit Middleware via X-Forwarded-For
+**Vulnerability pattern:** `trust_proxy=True` trusted the left-most IP in `X-Forwarded-For` (`split(",")[0]`), which is attacker-controlled when proxies append.
+**Learned constraint:** Always pick the IP from the right side (n-th from right) when parsing `X-Forwarded-For` behind proxies that append headers.
+**Prevention:** Introduced `trusted_proxy_count` to safely select the correct client IP.
