@@ -148,8 +148,13 @@ def test_response_error_handling():
 def test_response_set_cookie(mock_socketify_response):
     response = Response(mock_socketify_response)
     result = response.set_cookie("session", "abc123", max_age=3600, secure=True)
-    expected_cookie = "session=abc123; Max-Age=3600; Path=/; Secure; HttpOnly"
-    assert response.headers["Set-Cookie"] == expected_cookie
+    cookie = response.headers["Set-Cookie"]
+    assert "session=abc123" in cookie
+    # SimpleCookie attribute order varies. Check for attributes presence.
+    assert "Max-Age=3600" in cookie or "max-age=3600" in cookie
+    assert "Path=/" in cookie or "path=/" in cookie
+    assert "Secure" in cookie or "secure" in cookie
+    assert "HttpOnly" in cookie or "httponly" in cookie
     assert result is response
 
 
