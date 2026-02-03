@@ -1,4 +1,5 @@
 import sys
+from http.cookies import SimpleCookie
 from typing import Any
 
 if sys.implementation.name == "pypy":
@@ -70,6 +71,9 @@ class Response:
 
     def header(self, key: str, value: str) -> "Response":
         """Set a response header."""
+        # SECURITY: Prevent Header Injection (CRLF)
+        if "\n" in key or "\r" in key or "\n" in value or "\r" in value:
+            raise ValueError("Header injection detected")
         self.headers[key] = value
         return self
 
@@ -163,30 +167,32 @@ class Response:
                 res.json({"message": "hello world"})
                 res.set_cookie("session_id", "abc123", max_age=3600, secure=True)
         """
-        cookie_parts = [f"{name}={value}"]
+        cookie: SimpleCookie = SimpleCookie()
+        cookie[name] = value
 
         if max_age is not None:
-            cookie_parts.append(f"Max-Age={max_age}")
+            cookie[name]["max-age"] = max_age
 
         if expires:
-            cookie_parts.append(f"Expires={expires}")
+            cookie[name]["expires"] = expires
 
         if path:
-            cookie_parts.append(f"Path={path}")
+            cookie[name]["path"] = path
 
         if domain:
-            cookie_parts.append(f"Domain={domain}")
+            cookie[name]["domain"] = domain
 
         if secure:
-            cookie_parts.append("Secure")
+            cookie[name]["secure"] = True
 
         if http_only:
-            cookie_parts.append("HttpOnly")
+            cookie[name]["httponly"] = True
 
         if same_site:
-            cookie_parts.append(f"SameSite={same_site}")
+            cookie[name]["samesite"] = same_site
 
-        cookie_string = "; ".join(cookie_parts)
+        # Get the cookie string without the "Set-Cookie: " prefix
+        cookie_string = cookie.output(header="").strip()
         self.header("Set-Cookie", cookie_string)
         return self
 
