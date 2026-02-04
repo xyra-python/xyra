@@ -291,15 +291,33 @@ class Request:
                 name = form_data.get("name")
                 res.json({"submitted": True, "name": name})
         """
-        text_content = await self.text()
+        try:
+            text_content = await self.text()
+        except UnicodeDecodeError:
+            logger = get_logger("xyra")
+            logger.warning(
+                "Failed to decode form data: Invalid UTF-8. Returning empty dict."
+            )
+            return {}
+
         if not text_content:
             return {}
 
         # Optimized form parsing using urllib.parse.parse_qsl for proper URL decoding
         try:
-            parsed_pairs = parse_qsl(text_content, keep_blank_values=True)
+            # SECURITY: Limit max_num_fields to 1000 to prevent DoS via Hash Collision / CPU Exhaustion
+            parsed_pairs = parse_qsl(
+                text_content, keep_blank_values=True, max_num_fields=1000
+            )
             form_data = dict(parsed_pairs)
             return form_data
+        except ValueError as e:
+            # SECURITY: Handle DoS attempt
+            logger = get_logger("xyra")
+            logger.warning(
+                f"Form data exceeded max fields limit: {e}. Returning empty dict."
+            )
+            return {}
         except Exception as e:
             # Secure handling: If parse_qsl fails, return empty dict and log error.
             # Do NOT fallback to simple split which bypasses URL decoding.
