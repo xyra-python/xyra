@@ -161,8 +161,13 @@ def test_response_set_cookie(mock_socketify_response):
 def test_response_clear_cookie(mock_socketify_response):
     response = Response(mock_socketify_response)
     result = response.clear_cookie("session", path="/app")
-    expected_cookie = "session=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/app"
-    assert response.headers["Set-Cookie"] == expected_cookie
+    cookie = response.headers["Set-Cookie"]
+    # Verify cookie clearing attributes
+    assert 'session=""' in cookie or 'session=;' in cookie
+    assert "Expires=Thu, 01 Jan 1970 00:00:00 GMT" in cookie or "expires=Thu, 01 Jan 1970 00:00:00 GMT" in cookie
+    assert "Path=/app" in cookie
+    # set_cookie adds Max-Age=0 and HttpOnly by default which is good practice for clearing
+    assert "Max-Age=0" in cookie or "max-age=0" in cookie
     assert result is response
 
 

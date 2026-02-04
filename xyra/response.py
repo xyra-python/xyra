@@ -69,6 +69,11 @@ class Response:
         self.status_code = code
         return self
 
+    def _validate_cookie_attribute(self, name: str, value: str | None) -> None:
+        """Validate cookie attribute to prevent injection."""
+        if value and (";" in value or "\r" in value or "\n" in value):
+            raise ValueError(f"Invalid character in cookie attribute {name}")
+
     def header(self, key: str, value: str) -> "Response":
         """Set a response header."""
         # SECURITY: Prevent Header Injection (CRLF)
@@ -167,6 +172,11 @@ class Response:
                 res.json({"message": "hello world"})
                 res.set_cookie("session_id", "abc123", max_age=3600, secure=True)
         """
+        # SECURITY: Prevent Attribute Injection
+        self._validate_cookie_attribute("path", path)
+        self._validate_cookie_attribute("domain", domain)
+        self._validate_cookie_attribute("same_site", same_site)
+
         cookie: SimpleCookie = SimpleCookie()
         cookie[name] = value
 
@@ -206,17 +216,15 @@ class Response:
                 res.json({"message": "hello world"})
                 res.clear_cookie("session_id", path="/")
         """
-        cookie_parts = [f"{name}=", "Expires=Thu, 01 Jan 1970 00:00:00 GMT"]
-
-        if path:
-            cookie_parts.append(f"Path={path}")
-
-        if domain:
-            cookie_parts.append(f"Domain={domain}")
-
-        cookie_string = "; ".join(cookie_parts)
-        self.header("Set-Cookie", cookie_string)
-        return self
+        # Delegate to set_cookie to ensure validation and consistent behavior
+        return self.set_cookie(
+            name,
+            "",
+            max_age=0,
+            expires="Thu, 01 Jan 1970 00:00:00 GMT",
+            path=path,
+            domain=domain,
+        )
 
     def cors(
         self,
