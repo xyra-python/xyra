@@ -158,7 +158,7 @@ class Response:
         domain: str | None = None,
         secure: bool = False,
         http_only: bool = True,
-        same_site: str | None = None,
+        same_site: str | None = "Lax",
     ) -> "Response":
         """Set a cookie.
         usage:
