@@ -52,7 +52,7 @@ class Response:
             raise RuntimeError("Templating is not configured.")
 
         html = self.templating.render(template_name, **kwargs)
-        self.header("Content-Type", "text/html; charset=utf-8")
+        self._header_fast("Content-Type", "text/html; charset=utf-8")
         self.send(html)
 
     def status(self, code: int) -> "Response":
@@ -67,6 +67,11 @@ class Response:
                 res.status(201).json(users)
         """
         self.status_code = code
+        return self
+
+    def _header_fast(self, key: str, value: str) -> "Response":
+        """Set a response header without validation (internal use only)."""
+        self.headers[key] = value
         return self
 
     def header(self, key: str, value: str) -> "Response":
@@ -112,7 +117,8 @@ class Response:
             def hello(req: Request, res: Response):
                 res.json({"message": "Hello, Xyra!"})
         """
-        self.header("Content-Type", "application/json")
+        # PERF: Use fast header setting as the key and value are trusted
+        self._header_fast("Content-Type", "application/json")
         # PERF: json_lib (orjson) returns bytes, send them directly to avoid decode/encode overhead
         json_data = json_lib.dumps(data)
         self.send(json_data)
@@ -124,7 +130,8 @@ class Response:
             def hello(req: Request, res: Response):
                 res.html("<h1>Hello Xyra!</h1>")
         """
-        self.header("Content-Type", "text/html; charset=utf-8")
+        # PERF: Use fast header setting as the key and value are trusted
+        self._header_fast("Content-Type", "text/html; charset=utf-8")
         self.send(html)
 
     def text(self, text: str) -> None:
@@ -134,7 +141,8 @@ class Response:
             def hello(req: Request, res: Response):
                 res.text("Hello Xyra!")
         """
-        self.header("Content-Type", "text/plain; charset=utf-8")
+        # PERF: Use fast header setting as the key and value are trusted
+        self._header_fast("Content-Type", "text/plain; charset=utf-8")
         self.send(text)
 
     def redirect(self, url: str, status_code: int = 302) -> None:
@@ -241,7 +249,8 @@ class Response:
         self.header("Access-Control-Allow-Headers", headers)
 
         if credentials:
-            self.header("Access-Control-Allow-Credentials", "true")
+            # PERF: Use fast header setting as the key and value are trusted
+            self._header_fast("Access-Control-Allow-Credentials", "true")
 
         return self
 
@@ -252,7 +261,8 @@ class Response:
             async def cache(req: Request, res: Response):
                 res.cache(max_age=86400)
         """
-        self.header("Cache-Control", f"public, max-age={max_age}")
+        # PERF: Use fast header setting as the key is trusted and value is numeric/safe
+        self._header_fast("Cache-Control", f"public, max-age={int(max_age)}")
         return self
 
     def no_cache(self) -> "Response":
@@ -263,9 +273,10 @@ class Response:
              async def nocache(req: Request, res: Response):
                  res.no_cache().json(data_users)
         """
-        self.header("Cache-Control", "no-cache, no-store, must-revalidate")
-        self.header("Pragma", "no-cache")
-        self.header("Expires", "0")
+        # PERF: Use fast header setting as keys and values are trusted
+        self._header_fast("Cache-Control", "no-cache, no-store, must-revalidate")
+        self._header_fast("Pragma", "no-cache")
+        self._header_fast("Expires", "0")
         return self
 
     async def get_data(self) -> bytes:
