@@ -1,8 +1,8 @@
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-# from socketify import OpCode
 
+# from socketify import OpCode
 from xyra import App
 from xyra.request import Request
 from xyra.response import Response

@@ -1,9 +1,10 @@
 
+from unittest.mock import AsyncMock, Mock
+
 import pytest
-import time
-from unittest.mock import Mock, AsyncMock
+
 from xyra.request import Request
-from xyra.response import Response
+
 
 @pytest.mark.asyncio
 async def test_form_parsing_dos_protection():

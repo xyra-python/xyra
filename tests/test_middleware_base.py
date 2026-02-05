@@ -1,8 +1,11 @@
-import pytest
 from unittest.mock import Mock
+
+import pytest
+
 from xyra.middleware.base import BaseHTTPMiddleware
 from xyra.request import Request
 from xyra.response import Response
+
 
 @pytest.mark.asyncio
 async def test_base_middleware_dispatch_not_implemented():

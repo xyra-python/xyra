@@ -1,8 +1,8 @@
 from unittest.mock import Mock
 
 import pytest
-# from socketify import OpCode
 
+# from socketify import OpCode
 from xyra.websockets import WebSocket
 
 

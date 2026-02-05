@@ -1,7 +1,8 @@
 
-import pytest
 from unittest.mock import Mock
+
 from xyra.response import Response
+
 
 def test_response_set_cookie_default_samesite_lax():
     """Test that set_cookie defaults to SameSite=Lax."""

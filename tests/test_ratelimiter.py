@@ -1,5 +1,5 @@
-from unittest.mock import Mock
 from collections import deque
+from unittest.mock import Mock
 
 from xyra.middleware import RateLimiter, RateLimitMiddleware, rate_limiter
 

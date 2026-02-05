@@ -1,6 +1,8 @@
 
 import pytest
+
 from xyra import Response
+
 
 class MockSocketifyResponse:
     def __init__(self):

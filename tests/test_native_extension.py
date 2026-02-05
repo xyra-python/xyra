@@ -1,5 +1,6 @@
+
 from xyra import libxyra
-import pytest
+
 
 def test_libxyra_app_creation():
     app = libxyra.App()

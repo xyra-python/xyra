@@ -40,6 +40,6 @@ jobs:
     - name: Run tests
       run: python3 scripts/smart_test.py
     - name: Run ruff check
-      run: uv run ruff check --fix .
+      run: uv run ruff check --fix . --exclude xyra/uWebSockets
     - name: Run Bandit Check
       run: uv run bandit -r ./xyra -x .venv/

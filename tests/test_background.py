@@ -53,7 +53,7 @@ async def test_background_task_in_route_handler():
         data = await req.json()
         email = data.get("email")
         # Simulate adding background task
-        task = create_background_task(send_email, email)
+        create_background_task(send_email, email)
         # In FastAPI, background tasks are added to response
         # In our framework, create_background_task already schedules it
         res.json({"message": "Email will be sent"})

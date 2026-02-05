@@ -1,7 +1,10 @@
 
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
+
 from xyra.request import Request
+
 
 @pytest.mark.asyncio
 async def test_request_form_fallback_security():

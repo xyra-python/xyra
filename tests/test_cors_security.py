@@ -1,7 +1,8 @@
 
-import pytest
 import logging
+
 from xyra.middleware.cors import CorsMiddleware
+
 
 class MockRequest:
     def __init__(self, headers):

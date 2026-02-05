@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <atomic>
+#include <mutex>
 
 namespace py = pybind11;
 
@@ -26,9 +27,6 @@ public:
             if (p.length() > 0) params.push_back(std::string(p));
             else if (i > 100) break; // sanity check
             else if (i == 0 && p.length() == 0) {
-                // Check if there are ANY parameters at all by checking next index?
-                // Actually uWS getParameter(i) returns empty if out of bounds.
-                // But path could be /foo and first param is index 0.
                 if (req->getParameter(1).length() == 0) break;
                 params.push_back("");
             }
@@ -61,7 +59,7 @@ private:
 
 class Response {
 public:
-    Response(uWS::HttpResponse<false> *res) : res(res) {
+    Response(uWS::HttpResponse<false> *res, uWS::Loop *loop) : res(res), loop(loop) {
         aborted = std::make_shared<std::atomic<bool>>(false);
         res->onAborted([a = aborted]() {
             *a = true;
@@ -69,13 +67,24 @@ public:
     }
 
     void write_status(std::string status) {
-        if (!*aborted) res->writeStatus(status);
+        if (*aborted) return;
+        loop->defer([this, status]() {
+            if (!*aborted) res->writeStatus(status);
+        });
     }
+
     void write_header(std::string key, std::string value) {
-        if (!*aborted) res->writeHeader(key, value);
+        if (*aborted) return;
+        loop->defer([this, key, value]() {
+            if (!*aborted) res->writeHeader(key, value);
+        });
     }
+
     void end(std::string data) {
-        if (!*aborted) res->end(data);
+        if (*aborted) return;
+        loop->defer([this, data]() {
+            if (!*aborted) res->end(data);
+        });
     }
 
     void on_data(py::function callback) {
@@ -88,7 +97,6 @@ public:
     }
 
     void on_aborted(py::function callback) {
-        // We already have an internal onAborted, so we wrap the user callback
         res->onAborted([callback, a = aborted]() {
             *a = true;
             py::gil_scoped_acquire acquire;
@@ -104,6 +112,7 @@ public:
 
 private:
     uWS::HttpResponse<false> *res;
+    uWS::Loop *loop;
     std::shared_ptr<std::atomic<bool>> aborted;
 };
 
@@ -158,56 +167,56 @@ PYBIND11_MODULE(libxyra, m) {
         .def("get", [](uWS::App &app, std::string pattern, py::function handler) {
             app.get(pattern, [handler](auto *res, auto *req) {
                 py::gil_scoped_acquire acquire;
-                handler(Response(res), Request(req));
+                handler(Response(res, uWS::Loop::get()), Request(req));
             });
             return &app;
         })
         .def("post", [](uWS::App &app, std::string pattern, py::function handler) {
             app.post(pattern, [handler](auto *res, auto *req) {
                 py::gil_scoped_acquire acquire;
-                handler(Response(res), Request(req));
+                handler(Response(res, uWS::Loop::get()), Request(req));
             });
             return &app;
         })
         .def("put", [](uWS::App &app, std::string pattern, py::function handler) {
             app.put(pattern, [handler](auto *res, auto *req) {
                 py::gil_scoped_acquire acquire;
-                handler(Response(res), Request(req));
+                handler(Response(res, uWS::Loop::get()), Request(req));
             });
             return &app;
         })
         .def("del", [](uWS::App &app, std::string pattern, py::function handler) {
             app.del(pattern, [handler](auto *res, auto *req) {
                 py::gil_scoped_acquire acquire;
-                handler(Response(res), Request(req));
+                handler(Response(res, uWS::Loop::get()), Request(req));
             });
             return &app;
         })
         .def("patch", [](uWS::App &app, std::string pattern, py::function handler) {
             app.patch(pattern, [handler](auto *res, auto *req) {
                 py::gil_scoped_acquire acquire;
-                handler(Response(res), Request(req));
+                handler(Response(res, uWS::Loop::get()), Request(req));
             });
             return &app;
         })
         .def("options", [](uWS::App &app, std::string pattern, py::function handler) {
             app.options(pattern, [handler](auto *res, auto *req) {
                 py::gil_scoped_acquire acquire;
-                handler(Response(res), Request(req));
+                handler(Response(res, uWS::Loop::get()), Request(req));
             });
             return &app;
         })
         .def("head", [](uWS::App &app, std::string pattern, py::function handler) {
             app.head(pattern, [handler](auto *res, auto *req) {
                 py::gil_scoped_acquire acquire;
-                handler(Response(res), Request(req));
+                handler(Response(res, uWS::Loop::get()), Request(req));
             });
             return &app;
         })
         .def("any", [](uWS::App &app, std::string pattern, py::function handler) {
             app.any(pattern, [handler](auto *res, auto *req) {
                 py::gil_scoped_acquire acquire;
-                handler(Response(res), Request(req));
+                handler(Response(res, uWS::Loop::get()), Request(req));
             });
             return &app;
         })

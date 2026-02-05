@@ -1,9 +1,12 @@
 
-import pytest
 from unittest.mock import Mock
-from xyra.middleware.security_headers import SecurityHeadersMiddleware
+
+import pytest
+
 from xyra.middleware.cors import CorsMiddleware
+from xyra.middleware.security_headers import SecurityHeadersMiddleware
 from xyra.request import Request
+
 
 def test_permissions_policy_header():
     """Test that Permissions-Policy header is correctly set."""

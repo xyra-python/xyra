@@ -275,13 +275,22 @@ class Response:
         chunks = []
 
         def on_data(chunk, is_last):
-            chunks.append(chunk)
-            if is_last:
-                if not future.done():
-                    future.set_result(b"".join(chunks))
+            def resolve():
+                chunks.append(chunk)
+                if is_last:
+                    if not future.done():
+                        future.set_result(b"".join(chunks))
+
+            loop.call_soon_threadsafe(resolve)
+
+        def on_abort():
+            loop.call_soon_threadsafe(
+                lambda: future.done()
+                or future.set_exception(RuntimeError("Connection aborted"))
+            )
 
         self._res.on_data(on_data)
-        self._res.on_aborted(lambda: future.done() or future.set_exception(RuntimeError("Connection aborted")))
+        self._res.on_aborted(on_abort)
 
         return await future
 

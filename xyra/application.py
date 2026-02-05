@@ -10,7 +10,6 @@ from collections.abc import Callable
 from typing import Any, Union, overload
 
 from . import libxyra
-
 from .logger import get_logger, setup_logging
 from .request import Request
 from .response import Response
