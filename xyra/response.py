@@ -9,6 +9,9 @@ else:
 
 import asyncio
 
+# Security: Limit maximum request body size to 10MB to prevent DoS
+MAX_BODY_SIZE = 10 * 1024 * 1024
+
 
 class Response:
     """
@@ -273,13 +276,28 @@ class Response:
         loop = asyncio.get_running_loop()
         future = loop.create_future()
         chunks = []
+        current_size = [0]
 
         def on_data(chunk, is_last):
             def resolve():
+                if future.done():
+                    return
+
+                chunk_len = len(chunk)
+                # Check limit before appending
+                if current_size[0] + chunk_len > MAX_BODY_SIZE:
+                    future.set_exception(
+                        ValueError(
+                            f"Request body too large (max {MAX_BODY_SIZE} bytes)"
+                        )
+                    )
+                    return
+
+                current_size[0] += chunk_len
                 chunks.append(chunk)
+
                 if is_last:
-                    if not future.done():
-                        future.set_result(b"".join(chunks))
+                    future.set_result(b"".join(chunks))
 
             loop.call_soon_threadsafe(resolve)
 
