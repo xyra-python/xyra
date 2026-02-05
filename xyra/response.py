@@ -7,7 +7,7 @@ if sys.implementation.name == "pypy":
 else:
     import orjson as json_lib
 
-from socketify import Response as SocketifyResponse
+import asyncio
 
 
 class Response:
@@ -18,7 +18,7 @@ class Response:
     including setting status codes, headers, sending data, and rendering templates.
 
     Attributes:
-        _res: The underlying socketify response object.
+        _res: The underlying native response object.
         headers: Dictionary of response headers.
         status_code: HTTP status code (default: 200).
         templating: Templating engine instance.
@@ -27,12 +27,12 @@ class Response:
 
     __slots__ = ("_res", "headers", "status_code", "templating", "_ended")
 
-    def __init__(self, res: SocketifyResponse, templating=None):
+    def __init__(self, res: Any, templating=None):
         """
         Initialize the Response object.
 
         Args:
-            res: The underlying socketify response instance.
+            res: The underlying native response instance.
             templating: Optional templating engine for rendering templates.
         """
         self._res = res
@@ -267,3 +267,24 @@ class Response:
         self.header("Pragma", "no-cache")
         self.header("Expires", "0")
         return self
+
+    async def get_data(self) -> bytes:
+        """Get the request body data (async)."""
+        loop = asyncio.get_running_loop()
+        future = loop.create_future()
+        chunks = []
+
+        def on_data(chunk, is_last):
+            chunks.append(chunk)
+            if is_last:
+                if not future.done():
+                    future.set_result(b"".join(chunks))
+
+        self._res.on_data(on_data)
+        self._res.on_aborted(lambda: future.done() or future.set_exception(RuntimeError("Connection aborted")))
+
+        return await future
+
+    def get_remote_address_bytes(self) -> bytes:
+        """Get the remote address as bytes."""
+        return self._res.get_remote_address_bytes()

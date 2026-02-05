@@ -17,6 +17,11 @@ jobs:
     - uses: actions/checkout@v6
       with:
         fetch-depth: 0
+        submodules: recursive
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake zlib1g-dev
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v6
       with:
@@ -25,6 +30,13 @@ jobs:
       uses: astral-sh/setup-uv@v7
     - name: Install dependencies
       run: uv sync --extra dev
+    - name: Build native extension
+      run: |
+        mkdir -p xyra/native/build
+        cd xyra/native/build
+        cmake -Dpybind11_DIR=$(uv run python3 -c "import pybind11; print(pybind11.get_cmake_dir())") -DPYTHON_EXECUTABLE=$(which python3) ..
+        make
+        cp libxyra.so ../../
     - name: Run tests
       run: python3 scripts/smart_test.py
     - name: Run ruff check

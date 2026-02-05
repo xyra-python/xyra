@@ -10,18 +10,18 @@ class Param:
 def parse_path(path: str) -> tuple[str, list[str]]:
     """
     Parses a path and extracts parameters.
-    Returns a socketify-compatible path and a list of parameter names in order.
+    Returns a native-compatible path and a list of parameter names in order.
     """
     param_names = []
-    socketify_path = ""
+    native_path = ""
     segments = [s for s in path.split("/") if s]  # Filter empty segments
     for segment in segments:
         if segment.startswith("{") and segment.endswith("}"):
             param_name = segment[1:-1]
             param_names.append(param_name)
-            socketify_path += f"/:{param_name}"
+            native_path += f"/:{param_name}"
         else:
-            socketify_path += f"/{segment}"
-    if not socketify_path:
-        socketify_path = "/"
-    return socketify_path, param_names
+            native_path += f"/{segment}"
+    if not native_path:
+        native_path = "/"
+    return native_path, param_names

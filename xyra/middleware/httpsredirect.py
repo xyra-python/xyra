@@ -84,7 +84,7 @@ class HTTPSRedirectMiddleware:
                 return
 
         # Construct HTTPS URL
-        # req.url in Xyra/socketify is just the path (e.g. /foo/bar)
+        # req.url in Xyra/native is just the path (e.g. /foo/bar)
         path = req.url
         query = req.query
 

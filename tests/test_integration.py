@@ -1,7 +1,7 @@
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from socketify import OpCode
+# from socketify import OpCode
 
 from xyra import App
 from xyra.request import Request
@@ -84,8 +84,7 @@ async def test_request_response_flow():
     mock_req.for_each_header = Mock(side_effect=lambda func: None)
 
     mock_res = Mock()
-    mock_res.get_data = AsyncMock(return_value=b"{}")
-    mock_res.get_json = AsyncMock(return_value={})
+    mock_res.get_data = AsyncMock(return_value=b'{"message": "success"}')
 
     # Create Request and Response objects
     request = Request(mock_req, mock_res)
@@ -131,7 +130,7 @@ def test_websocket_integration():
 
     # Test sending message
     ws.send_text("Hello")
-    mock_ws.send.assert_called_with("Hello", OpCode.TEXT)
+    mock_ws.send.assert_called_with("Hello", False)
 
     # Test subscribing
     ws.subscribe("chat")

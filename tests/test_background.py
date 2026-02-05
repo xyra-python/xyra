@@ -55,8 +55,7 @@ async def test_background_task_in_route_handler():
         # Simulate adding background task
         task = create_background_task(send_email, email)
         # In FastAPI, background tasks are added to response
-        # Here we simulate by awaiting it
-        asyncio.create_task(task)
+        # In our framework, create_background_task already schedules it
         res.json({"message": "Email will be sent"})
 
     # Mock request
@@ -69,7 +68,6 @@ async def test_background_task_in_route_handler():
 
     mock_res = Mock()
     mock_res.get_data = AsyncMock(return_value=b'{"email": "user@example.com"}')
-    mock_res.get_json = AsyncMock(return_value={"email": "user@example.com"})
 
     request = Request(mock_req, mock_res)
     response = Response(mock_res)

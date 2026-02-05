@@ -1,32 +1,35 @@
-from socketify import OpCode
-from socketify import WebSocket as SocketifyWebSocket
+from typing import Any
 
 
 class WebSocket:
-    def __init__(self, ws: SocketifyWebSocket):
+    def __init__(self, ws: Any):
         self._ws = ws
 
-    def send(self, message: str | bytes, opcode: OpCode = OpCode.TEXT) -> None:
+    def send(self, message: str | bytes, is_binary: bool = False) -> None:
         """Send a message to the WebSocket client."""
-        self._ws.send(message, opcode)
+        self._ws.send(message, is_binary)
 
     def send_text(self, message: str) -> None:
         """Send a text message to the WebSocket client."""
-        self.send(message, OpCode.TEXT)
+        self.send(message, False)
 
     def send_binary(self, message: bytes) -> None:
         """Send binary data to the WebSocket client."""
-        self.send(message, OpCode.BINARY)
+        self.send(message, True)
+
+    def close(self, code: int = 1000, message: str | None = None) -> None:
+        """Close the WebSocket connection."""
+        self._ws.close()
 
     def publish(
         self,
         topic: str,
-        message: str | bytes,
-        opcode: OpCode = OpCode.TEXT,
+        message: str,
+        is_binary: bool = False,
         compress: bool = False,
     ) -> None:
         """Publish a message to a topic."""
-        self._ws.publish(topic, message, opcode, compress)
+        self._ws.publish(topic, message, is_binary, compress)
 
     def subscribe(self, topic: str) -> None:
         """Subscribe to a topic."""
@@ -36,20 +39,20 @@ class WebSocket:
         """Unsubscribe from a topic."""
         self._ws.unsubscribe(topic)
 
-    def close(self, code: int = 1000, message: str | None = None) -> None:
-        """Close the WebSocket connection."""
-        self._ws.close()
-
     @property
     def closed(self) -> bool:
         """Check if the WebSocket is closed."""
-        return self._ws.get_remote_address() is None
+        try:
+            return self._ws.get_remote_address_bytes() is None
+        except Exception:
+            return True
 
     def get_remote_address(self) -> str | None:
         """Get the remote address of the WebSocket connection."""
-        addr = self._ws.get_remote_address()
-        return str(addr) if addr else None
-
-    def get_buffered_amount(self) -> int:
-        """Get the amount of buffered data."""
-        return self._ws.get_buffered_amount()
+        try:
+            addr = self._ws.get_remote_address_bytes()
+            if isinstance(addr, bytes):
+                return addr.decode()
+            return str(addr) if addr else None
+        except Exception:
+            return None
