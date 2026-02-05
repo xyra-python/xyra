@@ -167,6 +167,13 @@ class Response:
                 res.json({"message": "hello world"})
                 res.set_cookie("session_id", "abc123", max_age=3600, secure=True)
         """
+        # SECURITY: Validate path and domain to prevent attribute injection
+        if path and (";" in path or "\r" in path or "\n" in path):
+            raise ValueError("Invalid character in cookie path")
+
+        if domain and (";" in domain or "\r" in domain or "\n" in domain):
+            raise ValueError("Invalid character in cookie domain")
+
         cookie: SimpleCookie = SimpleCookie()
         cookie[name] = value
 
@@ -206,17 +213,14 @@ class Response:
                 res.json({"message": "hello world"})
                 res.clear_cookie("session_id", path="/")
         """
-        cookie_parts = [f"{name}=", "Expires=Thu, 01 Jan 1970 00:00:00 GMT"]
-
-        if path:
-            cookie_parts.append(f"Path={path}")
-
-        if domain:
-            cookie_parts.append(f"Domain={domain}")
-
-        cookie_string = "; ".join(cookie_parts)
-        self.header("Set-Cookie", cookie_string)
-        return self
+        # SECURITY: Delegate to set_cookie for validation and formatting
+        return self.set_cookie(
+            name,
+            "",
+            expires="Thu, 01 Jan 1970 00:00:00 GMT",
+            path=path,
+            domain=domain,
+        )
 
     def cors(
         self,
