@@ -1,7 +1,9 @@
 
+
 import pytest
-import os
+
 from xyra.templating import Templating
+
 
 @pytest.fixture
 def templating_engine(tmp_path):

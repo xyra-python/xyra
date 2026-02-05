@@ -1,9 +1,10 @@
 
-import pytest
 import json
-from xyra import App, Request, Response
+
+from xyra import App
 from xyra.middleware.cors import CorsMiddleware
 from xyra.middleware.security_headers import SecurityHeadersMiddleware
+
 
 # Mock classes
 class MockRequest:

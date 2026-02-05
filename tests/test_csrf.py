@@ -1,7 +1,7 @@
-from unittest.mock import Mock
-import hmac
 import hashlib
+import hmac
 import secrets
+from unittest.mock import Mock
 
 from xyra.middleware import CSRFMiddleware, csrf
 

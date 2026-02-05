@@ -24,12 +24,12 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Application Frameworks",
 ]
 dependencies = [
-    "socketify",
     "jinja2",
     "multidict",
     "watchfiles",
     "orjson>=3.11.3; python_implementation != 'PyPy'",
     "ujson; python_implementation == 'PyPy'",
+    "pybind11>=3.0.1",
 ]
 
 [project.optional-dependencies]
@@ -129,11 +129,12 @@ strict_equality = true
 exclude = ["benchmark"]
 
 [[tool.mypy.overrides]]
-module = ["socketify.*"]
+module = ["xyra.libxyra.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+norecursedirs = ["xyra/uWebSockets"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]

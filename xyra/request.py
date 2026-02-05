@@ -8,13 +8,6 @@ if sys.implementation.name == "pypy":
 else:
     import orjson as json_lib
 
-from socketify import (
-    Request as SocketifyRequest,
-)
-from socketify import (
-    Response as SocketifyResponse,
-)
-
 from .logger import get_logger
 
 
@@ -24,8 +17,8 @@ class Request:
     This class provides a convenient interface for accessing HTTP request data,
     including headers, query parameters, URL, body parsing, and route parameters.
     Attributes:
-        _req: The underlying socketify request object.
-        _res: The underlying socketify response object.
+        _req: The underlying native request object.
+        _res: The underlying native response object.
         params: Dictionary of route parameters (e.g., {id: "123"}).
         _headers_cache: Cached headers dictionary.
         _query_params_cache: Cached query parameters dictionary.
@@ -42,12 +35,13 @@ class Request:
         "_url_cache",
         "_query_cache",
         "__dict__",
+        "_remote_addr_cache",
     )
 
     def __init__(
         self,
-        req: SocketifyRequest,
-        res: "SocketifyResponse",
+        req: Any,
+        res: Any,
         params: dict[str, str] | None = None,
     ):
         self._req = req
@@ -112,7 +106,9 @@ class Request:
         if self._remote_addr_cache is None:
             try:
                 addr_bytes = self._res.get_remote_address_bytes()
-                if len(addr_bytes) == 4:
+                if not addr_bytes:
+                    self._remote_addr_cache = "unknown"
+                elif len(addr_bytes) == 4:
                     self._remote_addr_cache = socket.inet_ntop(
                         socket.AF_INET, addr_bytes
                     )
@@ -140,7 +136,7 @@ class Request:
                 res.json(req.headers)
         """
         if self._headers_cache is None:
-            # PERF: use socketify's direct accessor if available (faster C++ implementation)
+            # PERF: use native's direct accessor if available (faster C++ implementation)
             # This returns a dict with lowercase keys, matching our requirement.
             if hasattr(self._req, "get_headers"):
                 self._headers_cache = self._req.get_headers()
@@ -169,7 +165,7 @@ class Request:
                 res.json({"raw_query": raw_query})
         """
         if self._query_cache is None:
-            # PERF: use socketify's direct accessor instead of parsing URL
+            # PERF: use native's direct accessor instead of parsing URL
             self._query_cache = self._req.get_query()
         return self._query_cache
 
@@ -190,7 +186,7 @@ class Request:
                 res.json({"query": query, "page": page})
         """
         if self._query_params_cache is None:
-            # PERF: use socketify's direct accessor if available (faster C++ implementation)
+            # PERF: use native's direct accessor if available (faster C++ implementation)
             # This returns a dict with lists of values, matching parse_qs behavior.
             if hasattr(self._req, "get_queries"):
                 self._query_params_cache = self._req.get_queries()
@@ -231,7 +227,7 @@ class Request:
         if self._headers_cache is not None:
             return self._headers_cache.get(name.lower(), default)
 
-        # PERF: otherwise use direct socketify access to avoid building the whole dict
+        # PERF: otherwise use direct native access to avoid building the whole dict
         value = self._req.get_header(name.lower())
         return value if value else default
 
@@ -264,7 +260,10 @@ class Request:
                 # Process data...
                 res.json({"received": data})
         """
-        return await self._res.get_json()
+        body = await self.text()
+        if not body:
+            return {}
+        return self.parse_json(body)
 
     def parse_json(self, json_string: str) -> Any:
         """

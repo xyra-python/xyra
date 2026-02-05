@@ -1,8 +1,8 @@
 from unittest.mock import Mock
 
 import pytest
-from socketify import OpCode
 
+# from socketify import OpCode
 from xyra.websockets import WebSocket
 
 
@@ -14,7 +14,7 @@ def mock_socketify_ws():
     ws.subscribe = Mock()
     ws.unsubscribe = Mock()
     ws.close = Mock()
-    ws.get_remote_address = Mock(return_value="127.0.0.1:12345")
+    ws.get_remote_address_bytes = Mock(return_value=b"127.0.0.1:12345")
     return ws
 
 
@@ -25,28 +25,28 @@ def test_websocket_init(mock_socketify_ws):
 
 def test_websocket_send_text(mock_socketify_ws):
     ws = WebSocket(mock_socketify_ws)
-    ws.send("Hello", OpCode.TEXT)
-    mock_socketify_ws.send.assert_called_once_with("Hello", OpCode.TEXT)
+    ws.send("Hello", False)
+    mock_socketify_ws.send.assert_called_once_with("Hello", False)
 
 
 def test_websocket_send_text_method(mock_socketify_ws):
     ws = WebSocket(mock_socketify_ws)
     ws.send_text("Hello")
-    mock_socketify_ws.send.assert_called_once_with("Hello", OpCode.TEXT)
+    mock_socketify_ws.send.assert_called_once_with("Hello", False)
 
 
 def test_websocket_send_binary(mock_socketify_ws):
     ws = WebSocket(mock_socketify_ws)
     data = b"binary data"
     ws.send_binary(data)
-    mock_socketify_ws.send.assert_called_once_with(data, OpCode.BINARY)
+    mock_socketify_ws.send.assert_called_once_with(data, True)
 
 
 def test_websocket_publish(mock_socketify_ws):
     ws = WebSocket(mock_socketify_ws)
-    ws.publish("topic", "message", OpCode.TEXT, compress=True)
+    ws.publish("topic", "message", False, compress=True)
     mock_socketify_ws.publish.assert_called_once_with(
-        "topic", "message", OpCode.TEXT, True
+        "topic", "message", False, True
     )
 
 
@@ -74,7 +74,7 @@ def test_websocket_closed(mock_socketify_ws):
     assert ws.closed is False
 
     # Mock as disconnected
-    mock_socketify_ws.get_remote_address.return_value = None
+    mock_socketify_ws.get_remote_address_bytes.return_value = None
     assert ws.closed is True
 
 
@@ -82,7 +82,7 @@ def test_websocket_get_remote_address(mock_socketify_ws):
     ws = WebSocket(mock_socketify_ws)
     address = ws.get_remote_address()
     assert address == "127.0.0.1:12345"
-    mock_socketify_ws.get_remote_address.assert_called_once()
+    mock_socketify_ws.get_remote_address_bytes.assert_called_once()
 
 
 def test_websocket_api_stability():
@@ -156,9 +156,9 @@ def test_websocket_message_handling():
         received_messages.append((message, opcode))
 
     # Simulate message handling
-    on_message("Hello", OpCode.TEXT)
-    assert received_messages == [("Hello", OpCode.TEXT)]
+    on_message("Hello", False)
+    assert received_messages == [("Hello", False)]
 
     # Test binary message
-    on_message(b"binary", OpCode.BINARY)
-    assert received_messages[1] == (b"binary", OpCode.BINARY)
+    on_message(b"binary", True)
+    assert received_messages[1] == (b"binary", True)

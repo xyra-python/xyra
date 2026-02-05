@@ -1,5 +1,6 @@
 from xyra.routing import Router
 
+
 def test_router_methods():
     router = Router()
 

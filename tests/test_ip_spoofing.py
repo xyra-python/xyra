@@ -1,10 +1,11 @@
 
+import socket
 import unittest
 from unittest.mock import MagicMock
-import socket
 
-from xyra.request import Request
 from xyra.middleware.rate_limiter import RateLimiter, RateLimitMiddleware, rate_limiter
+from xyra.request import Request
+
 
 class TestIpSpoofing(unittest.TestCase):
     def setUp(self):

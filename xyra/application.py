@@ -9,8 +9,7 @@ import traceback
 from collections.abc import Callable
 from typing import Any, Union, overload
 
-import socketify
-
+from . import libxyra
 from .logger import get_logger, setup_logging
 from .request import Request
 from .response import Response
@@ -29,7 +28,7 @@ class App:
     documentation generation.
 
     Attributes:
-        _app: The underlying socketify application instance.
+        _app: The underlying native application instance.
         _router: Router instance for managing HTTP routes.
 
         _middlewares: list of middleware functions.
@@ -47,11 +46,11 @@ class App:
         Initialize the Xyra application.
 
         Args:
-            options: Optional configuration for the underlying socketify app.
+            options: Optional configuration for the underlying native app.
             templates_directory: Directory path for Jinja2 templates.
             swagger_options: dictionary with Swagger configuration options.
         """
-        self._app = socketify.App(options)
+        self._app = libxyra.App()
         self._router = Router()
 
         self._middlewares: list[Callable] = []
@@ -186,20 +185,9 @@ class App:
             return self
 
     def _register_websocket(self, path: str, handlers: dict[str, Callable]):
-        """Register WebSocket route with socketify."""
-        # Map Xyra event handlers to socketify callbacks
+        """Register WebSocket route with native App."""
+        # Map Xyra event handlers to native callbacks
         ws_config = {}
-
-        # Copy compression and other config if provided
-        for key in [
-            "compression",
-            "max_payload_length",
-            "idle_timeout",
-            "max_backpressure",
-            "max_lifetime",
-        ]:
-            if key in handlers:
-                ws_config[key] = handlers[key]
 
         # Map event handlers
         if "open" in handlers:
@@ -215,22 +203,45 @@ class App:
                 WebSocket(ws), code, message
             )
 
-        if "drain" in handlers:
-            ws_config["drain"] = lambda ws: handlers["drain"](WebSocket(ws))
-
-        if "subscription" in handlers:
-            ws_config["subscription"] = (
-                lambda ws, topic, subscriptions, subscriptions_before: handlers[
-                    "subscription"
-                ](WebSocket(ws), topic, subscriptions, subscriptions_before)
-            )
-
-        # Register with socketify
+        # Register with native App
         self._app.ws(path, ws_config)
 
     def static_files(self, path: str, directory: str):
         """Serve static files from a directory."""
-        return self._app.static(path, directory)
+        if not path.endswith("/"):
+            path += "/"
+        if not path.startswith("/"):
+            path = "/" + path
+
+        import os
+
+        async def static_handler(req: Request, res: Response):
+            file_path = req.params.get("filename")
+            if not file_path:
+                res.status(404).text("Not Found")
+                return
+
+            full_path = os.path.join(directory, file_path)
+            if os.path.exists(full_path) and os.path.isfile(full_path):
+                with open(full_path, "rb") as f:
+                    content = f.read()
+                # Simple extension to content-type mapping
+                ext = os.path.splitext(full_path)[1].lower()
+                content_types = {
+                    ".html": "text/html",
+                    ".js": "application/javascript",
+                    ".css": "text/css",
+                    ".png": "image/png",
+                    ".jpg": "image/jpeg",
+                    ".gif": "image/gif",
+                    ".svg": "image/svg+xml",
+                }
+                res.header("Content-Type", content_types.get(ext, "application/octet-stream"))
+                res.send(content)
+            else:
+                res.status(404).text("Not Found")
+
+        self.get(path + "{filename}", static_handler)
 
     def _build_middleware_stack(
         self,
@@ -338,7 +349,7 @@ class App:
                 params = {}
                 for i, param_name in enumerate(param_names):
                     val = req.get_parameter(i)
-                    if val is not None:
+                    if val != "":
                         params[param_name] = val
 
                 request = Request(req, res, params)
@@ -376,9 +387,28 @@ class App:
         return async_final_handler
 
     def _register_routes(self):
-        """Register all routes with the underlying socketify app."""
+        """Register all routes with the underlying native app."""
+        if not hasattr(self, "_loop"):
+            self._loop = asyncio.new_event_loop()
+
+            def run_loop(loop):
+                asyncio.set_event_loop(loop)
+                loop.run_forever()
+
+            import threading
+
+            threading.Thread(target=run_loop, args=(self._loop,), daemon=True).start()
+
+        def wrap_async(handler):
+            def sync_handler(res, req):
+                asyncio.run_coroutine_threadsafe(handler(res, req), self._loop)
+
+            return sync_handler
+
         for route in self._router.routes:
             method = route["method"].lower()
+            if method == "delete":
+                method = "del"
             parsed_path = route["parsed_path"]
 
             final_handler = self._create_final_handler(
@@ -389,30 +419,15 @@ class App:
             )
 
             # Use the app methods to register routes
-            if method == "get":
-                self._app.get(parsed_path, final_handler)
-            elif method == "post":
-                self._app.post(parsed_path, final_handler)
-            elif method == "put":
-                self._app.put(parsed_path, final_handler)
-            elif method == "delete":
-                self._app.delete(parsed_path, final_handler)
-            elif method == "patch":
-                self._app.patch(parsed_path, final_handler)
-            elif method == "head":
-                self._app.head(parsed_path, final_handler)
-            elif method == "options":
-                self._app.options(parsed_path, final_handler)
+            if hasattr(self._app, method):
+                getattr(self._app, method)(parsed_path, wrap_async(final_handler))
 
         # Add catch-all handler for unmatched routes (404)
-        def not_found_handler(res, req):
+        async def not_found_handler(res, req):
             response = Response(res, self.templates)
             response.status(404).json({"error": "Not Found"})
 
-        # Try different patterns for catch-all
-        # self._app.any("*", not_found_handler)  # This might not work
-        # Use a more specific pattern that catches all paths
-        self._app.any("/*", not_found_handler)
+        self._app.any("/*", wrap_async(not_found_handler))
 
     def enable_swagger(self, host: str = "localhost", port: int = 8000):
         """
