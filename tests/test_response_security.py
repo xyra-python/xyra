@@ -50,7 +50,7 @@ def test_set_cookie_safe_formatting():
     res.set_cookie("session", "123")
     assert "session=123" in res.headers["Set-Cookie"]
 
-    # Attribute injection attempt
+    # Attribute injection attempt via value
     res.set_cookie("session", "123; Domain=evil.com")
     cookie = res.headers["Set-Cookie"]
 
@@ -85,3 +85,24 @@ def test_set_cookie_attributes():
     assert "HttpOnly" in cookie or "httponly" in cookie
     assert "SameSite=Lax" in cookie or "samesite=Lax" in cookie
     assert "Path=/app" in cookie or "path=/app" in cookie
+
+def test_cookie_attribute_injection_path():
+    mock_res = MockSocketifyResponse()
+    res = Response(mock_res)
+
+    with pytest.raises(ValueError, match="Invalid character in cookie path"):
+        res.set_cookie("session", "123", path="/; Domain=evil.com")
+
+def test_cookie_attribute_injection_domain():
+    mock_res = MockSocketifyResponse()
+    res = Response(mock_res)
+
+    with pytest.raises(ValueError, match="Invalid character in cookie domain"):
+        res.set_cookie("session", "123", domain="example.com; Secure")
+
+def test_clear_cookie_injection_path():
+    mock_res = MockSocketifyResponse()
+    res = Response(mock_res)
+
+    with pytest.raises(ValueError, match="Invalid character in cookie path"):
+        res.clear_cookie("session", path="/; Domain=evil.com")
