@@ -1,7 +1,13 @@
 
+import sys
+from unittest.mock import MagicMock
+
+# Mock native extension
+sys.modules["xyra.libxyra"] = MagicMock()
+
 import pytest
 
-from xyra import Response
+from xyra.response import Response
 
 
 class MockSocketifyResponse:
@@ -50,13 +56,11 @@ def test_set_cookie_safe_formatting():
     res.set_cookie("session", "123")
     assert "session=123" in res.headers["Set-Cookie"]
 
-    # Attribute injection attempt
+    # Attribute injection attempt via value
     res.set_cookie("session", "123; Domain=evil.com")
     cookie = res.headers["Set-Cookie"]
 
     # Should be quoted and semi-colon escaped or similar
-    # SimpleCookie output ensures it's safe.
-    # It usually outputs: session="123\073 Domain=evil.com"
     assert '; Domain=evil.com' not in cookie
     assert 'session=' in cookie
 
@@ -79,9 +83,50 @@ def test_set_cookie_attributes():
     # SimpleCookie keys are case-insensitive but output might vary in casing
     # usually Max-Age, Secure, HttpOnly, SameSite, Path
 
-    # We check for presence case-insensitively if needed, but SimpleCookie follows standards.
+    # We check for presence case-insensitively
     assert "Max-Age=3600" in cookie or "max-age=3600" in cookie
     assert "Secure" in cookie or "secure" in cookie
     assert "HttpOnly" in cookie or "httponly" in cookie
     assert "SameSite=Lax" in cookie or "samesite=Lax" in cookie
     assert "Path=/app" in cookie or "path=/app" in cookie
+
+def test_set_cookie_path_injection():
+    mock_res = MockSocketifyResponse()
+    res = Response(mock_res)
+
+    # Attempt to inject via path
+    with pytest.raises(ValueError, match="Invalid character in cookie path"):
+        res.set_cookie("test", "value", path="/; Secure; SameSite=Strict")
+
+    with pytest.raises(ValueError, match="Invalid character in cookie path"):
+        res.set_cookie("test", "value", path="/\r\n")
+
+def test_set_cookie_domain_injection():
+    mock_res = MockSocketifyResponse()
+    res = Response(mock_res)
+
+    # Attempt to inject via domain
+    with pytest.raises(ValueError, match="Invalid character in cookie domain"):
+        res.set_cookie("test", "value", domain="example.com; Secure")
+
+def test_clear_cookie_injection():
+    mock_res = MockSocketifyResponse()
+    res = Response(mock_res)
+
+    # clear_cookie delegates to set_cookie, so it should also fail
+    with pytest.raises(ValueError, match="Invalid character in cookie path"):
+        res.clear_cookie("test", path="/; Secure")
+
+    with pytest.raises(ValueError, match="Invalid character in cookie domain"):
+        res.clear_cookie("test", domain="example.com; Secure")
+
+def test_clear_cookie_valid():
+    mock_res = MockSocketifyResponse()
+    res = Response(mock_res)
+
+    res.clear_cookie("session_id", path="/")
+    cookie = res.headers["Set-Cookie"]
+    assert "session_id=" in cookie
+    # Check for expires (case-insensitive)
+    assert "Expires=Thu, 01 Jan 1970 00:00:00 GMT" in cookie or "expires=Thu, 01 Jan 1970 00:00:00 GMT" in cookie
+    assert "Path=/" in cookie or "path=/" in cookie

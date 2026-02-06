@@ -203,6 +203,12 @@ class Response:
             cookie[name]["samesite"] = same_site
 
         # Get the cookie string without the "Set-Cookie: " prefix
+        # SECURITY: Validate path and domain to prevent attribute injection
+        if path and (";" in path or "\r" in path or "\n" in path):
+            raise ValueError("Invalid character in cookie path")
+        if domain and (";" in domain or "\r" in domain or "\n" in domain):
+            raise ValueError("Invalid character in cookie domain")
+
         cookie_string = cookie.output(header="").strip()
         self.header("Set-Cookie", cookie_string)
         return self
@@ -217,17 +223,18 @@ class Response:
                 res.json({"message": "hello world"})
                 res.clear_cookie("session_id", path="/")
         """
-        cookie_parts = [f"{name}=", "Expires=Thu, 01 Jan 1970 00:00:00 GMT"]
-
-        if path:
-            cookie_parts.append(f"Path={path}")
-
-        if domain:
-            cookie_parts.append(f"Domain={domain}")
-
-        cookie_string = "; ".join(cookie_parts)
-        self.header("Set-Cookie", cookie_string)
-        return self
+        return self.set_cookie(
+            name,
+            "",
+            path=path,
+            domain=domain,
+            expires="Thu, 01 Jan 1970 00:00:00 GMT",
+            max_age=0,
+            # Maintain defaults for security flags to be safe
+            secure=False,
+            http_only=True,
+            same_site="Lax",
+        )
 
     def cors(
         self,
