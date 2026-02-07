@@ -1,5 +1,5 @@
+import re
 import sys
-from http.cookies import SimpleCookie
 from typing import Any
 
 if sys.implementation.name == "pypy":
@@ -11,6 +11,11 @@ import asyncio
 
 # Security: Limit maximum request body size to 10MB to prevent DoS
 MAX_BODY_SIZE = 10 * 1024 * 1024
+
+# Regex to check if cookie value needs quoting (contains chars outside legal set)
+# Legal chars: letters, digits, ! # $ % & ' * + - . : ^ _ ` | ~
+# Note: hyphen must be escaped or at start/end of class
+_COOKIE_QUOTE_PATTERN = re.compile(r"[^!#$%&'*+\-.0-9:A-Z^_`a-z|~]")
 
 
 class Response:
@@ -178,32 +183,38 @@ class Response:
                 res.json({"message": "hello world"})
                 res.set_cookie("session_id", "abc123", max_age=3600, secure=True)
         """
-        cookie: SimpleCookie = SimpleCookie()
-        cookie[name] = value
+        # PERF: Manual string formatting is faster than SimpleCookie
+        if " " in name:
+            raise ValueError("Cookie name cannot contain spaces")
+
+        # Quote value if necessary (contains special chars like space, semicolon, etc.)
+        if _COOKIE_QUOTE_PATTERN.search(value):
+            value = f'"{value.replace("\\", "\\\\").replace("\"", "\\\"")}"'
+
+        cookie_parts = [f"{name}={value}"]
 
         if max_age is not None:
-            cookie[name]["max-age"] = max_age
+            cookie_parts.append(f"Max-Age={max_age}")
 
         if expires:
-            cookie[name]["expires"] = expires
+            cookie_parts.append(f"Expires={expires}")
 
         if path:
-            cookie[name]["path"] = path
+            cookie_parts.append(f"Path={path}")
 
         if domain:
-            cookie[name]["domain"] = domain
+            cookie_parts.append(f"Domain={domain}")
 
         if secure:
-            cookie[name]["secure"] = True
+            cookie_parts.append("Secure")
 
         if http_only:
-            cookie[name]["httponly"] = True
+            cookie_parts.append("HttpOnly")
 
         if same_site:
-            cookie[name]["samesite"] = same_site
+            cookie_parts.append(f"SameSite={same_site}")
 
-        # Get the cookie string without the "Set-Cookie: " prefix
-        cookie_string = cookie.output(header="").strip()
+        cookie_string = "; ".join(cookie_parts)
         self.header("Set-Cookie", cookie_string)
         return self
 
