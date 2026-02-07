@@ -220,26 +220,31 @@ class Response:
         return self
 
     def clear_cookie(
-        self, name: str, path: str = "/", domain: str | None = None
+        self,
+        name: str,
+        path: str = "/",
+        domain: str | None = None,
+        secure: bool = False,
+        http_only: bool = True,
+        same_site: str | None = "Lax",
     ) -> "Response":
         """Clear a cookie.
         usage:
             @app.get("/")
             def hello(req: Request, res: Response):
                 res.json({"message": "hello world"})
-                res.clear_cookie("session_id", path="/")
+                res.clear_cookie("session_id", path="/", secure=True, http_only=True)
         """
-        cookie_parts = [f"{name}=", "Expires=Thu, 01 Jan 1970 00:00:00 GMT"]
-
-        if path:
-            cookie_parts.append(f"Path={path}")
-
-        if domain:
-            cookie_parts.append(f"Domain={domain}")
-
-        cookie_string = "; ".join(cookie_parts)
-        self.header("Set-Cookie", cookie_string)
-        return self
+        return self.set_cookie(
+            name,
+            "",
+            expires="Thu, 01 Jan 1970 00:00:00 GMT",
+            path=path,
+            domain=domain,
+            secure=secure,
+            http_only=http_only,
+            same_site=same_site,
+        )
 
     def cors(
         self,
