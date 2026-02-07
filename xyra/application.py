@@ -221,7 +221,21 @@ class App:
                 res.status(404).text("Not Found")
                 return
 
-            full_path = os.path.join(directory, file_path)
+            # SECURITY: Prevent Path Traversal
+            try:
+                # Resolve absolute paths
+                abs_directory = os.path.abspath(directory)
+                abs_path = os.path.abspath(os.path.join(abs_directory, file_path))
+
+                # Verify the resolved path is within the static directory
+                if os.path.commonpath([abs_directory, abs_path]) != abs_directory:
+                    res.status(403).text("Forbidden")
+                    return
+            except Exception:
+                res.status(400).text("Bad Request")
+                return
+
+            full_path = abs_path
             if os.path.exists(full_path) and os.path.isfile(full_path):
                 with open(full_path, "rb") as f:
                     content = f.read()
