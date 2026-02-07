@@ -161,9 +161,30 @@ def test_response_set_cookie(mock_socketify_response):
 def test_response_clear_cookie(mock_socketify_response):
     response = Response(mock_socketify_response)
     result = response.clear_cookie("session", path="/app")
-    expected_cookie = "session=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/app"
-    assert response.headers["Set-Cookie"] == expected_cookie
+    # Updated expectations because clear_cookie now includes defaults from set_cookie
+    # Default: HttpOnly=True, SameSite=Lax
+    cookie = response.headers["Set-Cookie"]
+    assert "session=" in cookie
+    assert "Expires=Thu, 01 Jan 1970 00:00:00 GMT" in cookie
+    assert "Path=/app" in cookie
+    assert "HttpOnly" in cookie
+    assert "SameSite=Lax" in cookie
     assert result is response
+
+
+def test_response_clear_cookie_flags(mock_socketify_response):
+    response = Response(mock_socketify_response)
+    # Test with explicit flags
+    response.clear_cookie(
+        "session", path="/app", secure=True, http_only=True, same_site="Strict"
+    )
+    cookie = response.headers["Set-Cookie"]
+    assert "session=" in cookie
+    assert "Expires=Thu, 01 Jan 1970 00:00:00 GMT" in cookie
+    assert "Path=/app" in cookie
+    assert "Secure" in cookie
+    assert "HttpOnly" in cookie
+    assert "SameSite=Strict" in cookie
 
 
 def test_response_cors(mock_socketify_response):
