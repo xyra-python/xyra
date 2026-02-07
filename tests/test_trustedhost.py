@@ -18,6 +18,7 @@ def test_trusted_host_allowed():
     middleware = TrustedHostMiddleware(["example.com", "trusted.org"])
     request = Mock()
     request.headers = {"host": "example.com"}
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 
@@ -33,6 +34,7 @@ def test_trusted_host_not_allowed():
     middleware = TrustedHostMiddleware(["example.com"])
     request = Mock()
     request.headers = {"host": "malicious.com"}
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 
@@ -49,6 +51,7 @@ def test_trusted_host_with_port():
     middleware = TrustedHostMiddleware(["example.com"])
     request = Mock()
     request.headers = {"host": "example.com:8080"}
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 
@@ -64,6 +67,7 @@ def test_trusted_host_no_host_header():
     middleware = TrustedHostMiddleware(["example.com"])
     request = Mock()
     request.headers = {}  # No Host header
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 
@@ -83,6 +87,7 @@ def test_trusted_host_multiple_hosts():
     )
     request = Mock()
     request.headers = {"host": "api.example.com"}
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 
@@ -101,6 +106,7 @@ def test_trusted_host_ipv6_literal():
     request = Mock()
     # Host header with port
     request.headers = {"host": "[::1]:8080"}
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 
@@ -117,6 +123,7 @@ def test_trusted_host_ipv6_wildcard():
     middleware = TrustedHostMiddleware(["*"])
     request = Mock()
     request.headers = {"host": "[::1]:8080"}
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 

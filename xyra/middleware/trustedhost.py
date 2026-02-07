@@ -23,7 +23,7 @@ class TrustedHostMiddleware:
     def __call__(self, req: Request, res: Response):
         """Validate the request's Host header."""
         # Headers keys are lowercase in Xyra Request
-        host = req.headers.get("host", "")
+        host = req.get_header("host") or ""
 
         # Correctly handle IPv6 literals
         if host.startswith("["):

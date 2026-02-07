@@ -35,6 +35,7 @@ def test_gzip_middleware_compress_large_data():
     middleware = GzipMiddleware(minimum_size=100)
     request = Mock()
     request.headers = {"Accept-Encoding": "gzip"}
+    request.get_header = request.headers.get
     response = _setup_response_mock()
 
     # Store original send method
@@ -62,6 +63,7 @@ def test_gzip_middleware_no_compress_small_data():
     middleware = GzipMiddleware(minimum_size=1000)
     request = Mock()
     request.headers = {"Accept-Encoding": "gzip"}
+    request.get_header = request.headers.get
     response = _setup_response_mock()
 
     # Store original send method
@@ -85,6 +87,7 @@ def test_gzip_middleware_no_accept_encoding():
     middleware = GzipMiddleware(minimum_size=100)
     request = Mock()
     request.headers = {}  # No Accept-Encoding
+    request.get_header = request.headers.get
     response = _setup_response_mock()
 
     # Store original send method
@@ -108,6 +111,7 @@ def test_gzip_middleware_already_encoded():
     middleware = GzipMiddleware(minimum_size=100)
     request = Mock()
     request.headers = {"Accept-Encoding": "gzip"}
+    request.get_header = request.headers.get
     response = _setup_response_mock()
     response.headers = {"Content-Encoding": "deflate"}  # Already encoded
 
@@ -132,6 +136,7 @@ def test_gzip_middleware_compress_string_data():
     middleware = GzipMiddleware(minimum_size=100)
     request = Mock()
     request.headers = {"Accept-Encoding": "gzip"}
+    request.get_header = request.headers.get
     response = _setup_response_mock()
 
     # Store original send method

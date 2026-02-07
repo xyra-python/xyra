@@ -22,6 +22,7 @@ def test_https_redirect_http_request():
     request.query = ""
     # Headers keys are lowercase in Xyra
     request.headers = {"host": "example.com", "x-forwarded-proto": "http"}
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 
@@ -39,6 +40,7 @@ def test_https_redirect_http_request_with_query():
     request.url = "/search"
     request.query = "q=python"
     request.headers = {"host": "example.com", "x-forwarded-proto": "http"}
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 
@@ -58,6 +60,7 @@ def test_https_redirect_https_request():
     request.url = "/path"
     request.query = ""
     request.headers = {"host": "example.com", "x-forwarded-proto": "https"}
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 
@@ -77,6 +80,7 @@ def test_https_redirect_bypass_attempt_untrusted():
     request.url = "/path"
     request.query = ""
     request.headers = {"host": "example.com", "x-forwarded-proto": "https"}
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 
@@ -95,6 +99,7 @@ def test_https_redirect_missing_host():
     request.url = "/path"
     request.query = ""
     request.headers = {"x-forwarded-proto": "http"}  # Missing host
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 
@@ -112,6 +117,7 @@ def test_https_redirect_custom_status_code():
     request.url = "/path"
     request.query = ""
     request.headers = {"host": "example.com", "x-forwarded-proto": "http"}
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 
@@ -128,6 +134,7 @@ def test_https_redirect_no_headers_assumes_http():
     request.url = "/path"
     request.query = ""
     request.headers = {"host": "example.com"}
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 
@@ -144,6 +151,7 @@ def test_https_redirect_allowed_hosts_success():
     request.url = "/path"
     request.query = ""
     request.headers = {"host": "example.com", "x-forwarded-proto": "http"}
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 
@@ -160,6 +168,7 @@ def test_https_redirect_allowed_hosts_failure():
     request.url = "/path"
     request.query = ""
     request.headers = {"host": "evil.com", "x-forwarded-proto": "http"}
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 
@@ -177,6 +186,7 @@ def test_https_redirect_invalid_host_chars():
     request.query = ""
     # Host header injection attempt
     request.headers = {"host": "example.com/evil", "x-forwarded-proto": "http"}
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 
@@ -193,6 +203,7 @@ def test_https_redirect_wildcard_host():
     request.url = "/path"
     request.query = ""
     request.headers = {"host": "sub.example.com", "x-forwarded-proto": "http"}
+    request.get_header = request.headers.get
     response = Mock()
     response._ended = False
 
