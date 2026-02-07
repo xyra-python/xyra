@@ -1,4 +1,3 @@
-
 from ..request import Request
 from ..response import Response
 
@@ -59,7 +58,9 @@ class SecurityHeadersMiddleware:
                 csp_value = "; ".join(policy_parts)
                 response.header("Content-Security-Policy", csp_value)
             else:
-                response.header("Content-Security-Policy", str(self.content_security_policy))
+                response.header(
+                    "Content-Security-Policy", str(self.content_security_policy)
+                )
 
         # Permissions-Policy
         if self.permissions_policy:

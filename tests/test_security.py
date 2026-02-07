@@ -1,4 +1,3 @@
-
 import json
 
 from xyra import App
@@ -14,6 +13,7 @@ class MockRequest:
 
     def get_header(self, name):
         return self.headers.get(name.lower())
+
 
 class MockResponse:
     def __init__(self):
@@ -42,7 +42,9 @@ class MockResponse:
         self._body = content
         self._ended = True
 
+
 # --- Tests ---
+
 
 def test_cors_secure_wildcard():
     """Test that CORS does NOT reflect origin when wildcard is used with credentials."""
@@ -55,9 +57,12 @@ def test_cors_secure_wildcard():
     assert "Access-Control-Allow-Origin" not in res._headers
     assert res._headers.get("Access-Control-Allow-Credentials") == "true"
 
+
 def test_cors_allowed_origin():
     """Test that CORS reflects origin when explicitly allowed."""
-    middleware = CorsMiddleware(allowed_origins=["http://good.com"], allow_credentials=True)
+    middleware = CorsMiddleware(
+        allowed_origins=["http://good.com"], allow_credentials=True
+    )
     req = MockRequest({"origin": "http://good.com"})
     res = MockResponse()
 
@@ -65,6 +70,7 @@ def test_cors_allowed_origin():
 
     assert res._headers.get("Access-Control-Allow-Origin") == "http://good.com"
     assert res._headers.get("Access-Control-Allow-Credentials") == "true"
+
 
 def test_cors_wildcard_no_creds():
     """Test that CORS allows wildcard when credentials are NOT allowed."""
@@ -85,6 +91,7 @@ def test_cors_wildcard_no_creds():
     allowed_origin = res._headers.get("Access-Control-Allow-Origin")
     assert allowed_origin == "http://any.com" or allowed_origin == "*"
 
+
 def test_security_headers_default():
     """Test default security headers."""
     middleware = SecurityHeadersMiddleware()
@@ -98,21 +105,33 @@ def test_security_headers_default():
     assert res._headers.get("X-XSS-Protection") == "1; mode=block"
     assert res._headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
 
+
 def test_security_headers_hsts():
     """Test HSTS headers."""
-    middleware = SecurityHeadersMiddleware(hsts_seconds=31536000, hsts_include_subdomains=True, hsts_preload=True)
+    middleware = SecurityHeadersMiddleware(
+        hsts_seconds=31536000, hsts_include_subdomains=True, hsts_preload=True
+    )
     req = MockRequest()
     res = MockResponse()
 
     middleware(req, res)
 
-    assert res._headers.get("Strict-Transport-Security") == "max-age=31536000; includeSubDomains; preload"
+    assert (
+        res._headers.get("Strict-Transport-Security")
+        == "max-age=31536000; includeSubDomains; preload"
+    )
+
 
 def test_swagger_xss_protection():
     """Test that Swagger UI path is properly escaped."""
     # We use a weird path that would cause XSS if not escaped
     dangerous_path = '"; alert(1); "'
-    app = App(swagger_options={"swagger_json_path": dangerous_path, "swagger_ui_path": "/docs"})
+    app = App(
+        swagger_options={
+            "swagger_json_path": dangerous_path,
+            "swagger_ui_path": "/docs",
+        }
+    )
     app.enable_swagger()
 
     # Find the route handler for /docs

@@ -15,13 +15,18 @@ def get_changed_files():
     # If running locally or unable to determine, might fallback to comparing with main
     # Fetch origin/main to ensure we have it for comparison
     try:
-        subprocess.run(["git", "fetch", "origin", base_ref], check=False, capture_output=True)
+        subprocess.run(
+            ["git", "fetch", "origin", base_ref], check=False, capture_output=True
+        )
         cmd = ["git", "diff", "--name-only", f"origin/{base_ref}...HEAD"]
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         return [f for f in result.stdout.splitlines() if f.strip()]
     except subprocess.CalledProcessError:
-        print(f"Warning: Could not diff against origin/{base_ref}. Returning empty list.")
+        print(
+            f"Warning: Could not diff against origin/{base_ref}. Returning empty list."
+        )
         return []
+
 
 def map_file_to_test(filepath):
     """
@@ -62,6 +67,7 @@ def map_file_to_test(filepath):
 
     return None
 
+
 def main():
     changed_files = get_changed_files()
     if not changed_files:
@@ -89,17 +95,24 @@ def main():
         # If I modified a python file with no test, maybe I should warn?
 
         # Check if any changed file was python source code in xyra/
-        source_code_changed = any(f.startswith("xyra/") and f.endswith(".py") for f in changed_files)
+        source_code_changed = any(
+            f.startswith("xyra/") and f.endswith(".py") for f in changed_files
+        )
         if source_code_changed:
-            print("Source code changed but no direct test found. Running all tests as fallback.")
+            print(
+                "Source code changed but no direct test found. Running all tests as fallback."
+            )
             sys.exit(subprocess.call(["uv", "run", "pytest"]))
         else:
-            print("Only non-code files changed (or files with no impact). Skipping tests.")
+            print(
+                "Only non-code files changed (or files with no impact). Skipping tests."
+            )
             sys.exit(0)
 
     print(f"Running selected tests: {tests_to_run}")
     cmd = ["uv", "run", "pytest"] + list(tests_to_run)
     sys.exit(subprocess.call(cmd))
+
 
 if __name__ == "__main__":
     main()

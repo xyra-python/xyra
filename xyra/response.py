@@ -189,7 +189,8 @@ class Response:
 
         # Quote value if necessary (contains special chars like space, semicolon, etc.)
         if _COOKIE_QUOTE_PATTERN.search(value):
-            value = f'"{value.replace("\\", "\\\\").replace("\"", "\\\"")}"'
+            escaped_value = value.replace("\\", "\\\\").replace("\"", "\\\"")
+            value = f'"{escaped_value}"'
 
         cookie_parts = [f"{name}={value}"]
 

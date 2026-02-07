@@ -225,6 +225,7 @@ def test_response_api_stability():
         assert hasattr(Response, method), f"Response is missing method: {method}"
         assert callable(getattr(Response, method)), f"Response.{method} is not callable"
 
+
 def test_response_set_cookie_quoting(mock_socketify_response):
     response = Response(mock_socketify_response)
 
@@ -242,7 +243,7 @@ def test_response_set_cookie_quoting(mock_socketify_response):
     response.set_cookie("quotes", 'a"b')
     cookie = response.headers["Set-Cookie"]
     # Expect escaping: "a\"b"
-    assert 'quotes="a\\\"b"' in cookie
+    assert 'quotes="a\\"b"' in cookie
 
     # Comma
     response.set_cookie("comma", "a,b")
@@ -252,5 +253,5 @@ def test_response_set_cookie_quoting(mock_socketify_response):
     # Safe chars (no quoting)
     response.set_cookie("safe", "abc-123.456")
     cookie = response.headers["Set-Cookie"]
-    assert 'safe=abc-123.456' in cookie
-    assert '"safe=abc-123.456"' not in cookie # Should not be quoted
+    assert "safe=abc-123.456" in cookie
+    assert '"safe=abc-123.456"' not in cookie  # Should not be quoted

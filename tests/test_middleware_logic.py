@@ -1,4 +1,3 @@
-
 import asyncio
 import unittest
 
@@ -7,10 +6,18 @@ from xyra.application import App
 
 # Mock socketify objects
 class MockSocketifyRequest:
-    def get_method(self): return "GET"
-    def get_url(self): return "/"
-    def for_each_header(self, callback): pass
-    def get_parameter(self, idx): return None
+    def get_method(self):
+        return "GET"
+
+    def get_url(self):
+        return "/"
+
+    def for_each_header(self, callback):
+        pass
+
+    def get_parameter(self, idx):
+        return None
+
 
 class MockSocketifyResponse:
     def __init__(self):
@@ -28,6 +35,7 @@ class MockSocketifyResponse:
     def end(self, data):
         self.ended = True
         self.body = data
+
 
 class TestConcurrency(unittest.TestCase):
     def test_middleware_execution_order(self):
@@ -82,9 +90,7 @@ class TestConcurrency(unittest.TestCase):
             res.send("ok")
 
         # Create the final handler closure
-        final_handler = app._create_final_handler(
-            handler, [], app._middlewares, "/"
-        )
+        final_handler = app._create_final_handler(handler, [], app._middlewares, "/")
 
         # Mock Req/Res
         mock_req = MockSocketifyRequest()
@@ -118,9 +124,7 @@ class TestConcurrency(unittest.TestCase):
         async def handler(req, res):
             log.append("handler")
 
-        final_handler = app._create_final_handler(
-            handler, [], app._middlewares, "/"
-        )
+        final_handler = app._create_final_handler(handler, [], app._middlewares, "/")
 
         mock_req = MockSocketifyRequest()
         mock_res = MockSocketifyResponse()
@@ -130,6 +134,7 @@ class TestConcurrency(unittest.TestCase):
         self.assertEqual(log, ["stop"])
         self.assertNotIn("handler", log)
         self.assertNotIn("never", log)
+
 
 if __name__ == "__main__":
     unittest.main()

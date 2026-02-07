@@ -45,7 +45,9 @@ def test_https_redirect_http_request_with_query():
     middleware(request, response)
 
     response.status.assert_called_once_with(301)
-    response.header.assert_called_with("Location", "https://example.com/search?q=python")
+    response.header.assert_called_with(
+        "Location", "https://example.com/search?q=python"
+    )
     response.send.assert_called_once_with("")
     assert response._ended is True
 
@@ -134,6 +136,7 @@ def test_https_redirect_no_headers_assumes_http():
     response.status.assert_called_once_with(301)
     response.header.assert_called_with("Location", "https://example.com/path")
     assert response._ended is True
+
 
 def test_https_redirect_allowed_hosts_success():
     middleware = HTTPSRedirectMiddleware(allowed_hosts=["example.com"])

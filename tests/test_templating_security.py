@@ -1,5 +1,3 @@
-
-
 import pytest
 
 from xyra.templating import Templating
@@ -17,6 +15,7 @@ def templating_engine(tmp_path):
 
     return Templating(directory=str(template_dir), auto_reload=False)
 
+
 def test_render_with_unhashable_context(templating_engine):
     """Test that rendering with unhashable context (e.g., lists) does not crash."""
     context = {"items": ["Alice", "Bob"]}
@@ -27,6 +26,7 @@ def test_render_with_unhashable_context(templating_engine):
         assert "Alice, Bob" in result
     except TypeError as e:
         pytest.fail(f"Rendering failed with TypeError: {e}")
+
 
 @pytest.mark.asyncio
 async def test_render_async_with_unhashable_context(templating_engine):

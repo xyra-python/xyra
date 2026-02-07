@@ -11,11 +11,13 @@ from xyra.response import Response
 async def test_base_middleware_dispatch_not_implemented():
     middleware = BaseHTTPMiddleware()
     mock_req = Mock(spec=Request)
+
     async def call_next(req):
         return Mock(spec=Response)
 
     with pytest.raises(NotImplementedError):
         await middleware(mock_req, call_next)
+
 
 @pytest.mark.asyncio
 async def test_base_middleware_dispatch_override():

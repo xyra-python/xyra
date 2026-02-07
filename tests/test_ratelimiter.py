@@ -142,7 +142,7 @@ def test_rate_limit_middleware_default_key_func():
     assert key == "192.168.1.1"
 
     # Test trust_proxy=False (Default)
-    middleware_secure = RateLimitMiddleware(limiter) # trust_proxy=False
+    middleware_secure = RateLimitMiddleware(limiter)  # trust_proxy=False
     request_secure = Mock()
     # Headers exist but should be ignored
     request_secure.get_header.side_effect = lambda h: "192.168.1.1"

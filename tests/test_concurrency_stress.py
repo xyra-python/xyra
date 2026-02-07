@@ -1,4 +1,3 @@
-
 import asyncio
 import unittest
 
@@ -13,10 +12,18 @@ class MockSocketifyRequest:
         self._params = params or {}
         self._headers = {}
 
-    def get_method(self): return self._method
-    def get_url(self): return self._url
-    def for_each_header(self, callback): pass
-    def get_parameter(self, idx): return list(self._params.values())[idx] if idx < len(self._params) else None
+    def get_method(self):
+        return self._method
+
+    def get_url(self):
+        return self._url
+
+    def for_each_header(self, callback):
+        pass
+
+    def get_parameter(self, idx):
+        return list(self._params.values())[idx] if idx < len(self._params) else None
+
 
 class MockSocketifyResponse:
     def __init__(self):
@@ -34,6 +41,7 @@ class MockSocketifyResponse:
     def end(self, data):
         self.ended = True
         self.body = data
+
 
 class TestConcurrencyStress(unittest.TestCase):
     def test_simultaneous_requests(self):
@@ -55,9 +63,7 @@ class TestConcurrencyStress(unittest.TestCase):
             else:
                 res.send(req_id)
 
-        final_handler = app._create_final_handler(
-            handler, ["id"], [], "/test/{id}"
-        )
+        final_handler = app._create_final_handler(handler, ["id"], [], "/test/{id}")
 
         async def run_req(i):
             mock_req = MockSocketifyRequest(f"/test/{i}", params={"id": str(i)})
@@ -75,6 +81,7 @@ class TestConcurrencyStress(unittest.TestCase):
         # Verify every request got its own ID back
         for i, res_body in enumerate(results):
             self.assertEqual(res_body, str(i))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -236,7 +236,9 @@ class App:
                     ".gif": "image/gif",
                     ".svg": "image/svg+xml",
                 }
-                res.header("Content-Type", content_types.get(ext, "application/octet-stream"))
+                res.header(
+                    "Content-Type", content_types.get(ext, "application/octet-stream")
+                )
                 res.send(content)
             else:
                 res.status(404).text("Not Found")
@@ -331,11 +333,13 @@ class App:
             is_coroutine = asyncio.iscoroutinefunction(handler_to_inspect)
             wants_call_next = "call_next" in params or "next" in params
 
-            middleware_chain.append({
-                "func": middleware,
-                "is_coroutine": is_coroutine,
-                "wants_call_next": wants_call_next
-            })
+            middleware_chain.append(
+                {
+                    "func": middleware,
+                    "is_coroutine": is_coroutine,
+                    "wants_call_next": wants_call_next,
+                }
+            )
 
         # Build the middleware stack once
         middleware_stack_entry = self._build_middleware_stack(
@@ -381,7 +385,9 @@ class App:
                 except Exception:
                     # FIX BANDIT B110: Avoid silent pass. Log the failure to debug.
                     # If we can't even send the error response, just close.
-                    req_logger.debug("Failed to send 500 error response (connection likely closed)")
+                    req_logger.debug(
+                        "Failed to send 500 error response (connection likely closed)"
+                    )
                 return
 
         return async_final_handler
@@ -466,7 +472,9 @@ class App:
                 if self._swagger_cache is None:
                     with self._swagger_lock:
                         if self._swagger_cache is None:
-                            self._swagger_cache = generate_swagger(self, **self.swagger_options)
+                            self._swagger_cache = generate_swagger(
+                                self, **self.swagger_options
+                            )
                 res.json(self._swagger_cache)
             except Exception as e:
                 res.status(500).json(
