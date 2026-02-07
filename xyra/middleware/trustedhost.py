@@ -4,7 +4,6 @@ Trusted Host Middleware for Xyra Framework
 This middleware validates that the request's Host header is in a list of allowed hosts.
 """
 
-
 from ..request import Request
 from ..response import Response
 
@@ -31,7 +30,7 @@ class TrustedHostMiddleware:
             # Find the closing bracket
             end_index = host.find("]")
             if end_index != -1:
-                host = host[:end_index + 1]
+                host = host[: end_index + 1]
             else:
                 # Malformed IPv6 literal? Fallback or treat as is
                 pass

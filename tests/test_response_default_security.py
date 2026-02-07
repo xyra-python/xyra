@@ -1,4 +1,3 @@
-
 from unittest.mock import Mock
 
 from xyra.response import Response
@@ -17,6 +16,7 @@ def test_response_set_cookie_default_samesite_lax():
     cookie = response.headers["Set-Cookie"]
     assert "SameSite=Lax" in cookie or "samesite=Lax" in cookie
 
+
 def test_response_set_cookie_explicit_samesite():
     """Test that set_cookie respects explicit SameSite."""
     mock_socketify_response = Mock()
@@ -26,6 +26,7 @@ def test_response_set_cookie_explicit_samesite():
 
     cookie = response.headers["Set-Cookie"]
     assert "SameSite=Strict" in cookie or "samesite=Strict" in cookie
+
 
 def test_response_set_cookie_none_samesite():
     """Test that set_cookie can set SameSite=None."""

@@ -45,9 +45,7 @@ def test_websocket_send_binary(mock_socketify_ws):
 def test_websocket_publish(mock_socketify_ws):
     ws = WebSocket(mock_socketify_ws)
     ws.publish("topic", "message", False, compress=True)
-    mock_socketify_ws.publish.assert_called_once_with(
-        "topic", "message", False, True
-    )
+    mock_socketify_ws.publish.assert_called_once_with("topic", "message", False, True)
 
 
 def test_websocket_subscribe(mock_socketify_ws):

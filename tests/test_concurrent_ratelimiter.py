@@ -95,10 +95,12 @@ def test_ratelimiter_cleanup_thread_safety():
 
     # Manually add old timestamps
     with limiter._lock:
-        limiter._requests[client_key] = deque([
-            current_time - 10,
-            current_time - 5,
-        ])  # Old timestamps
+        limiter._requests[client_key] = deque(
+            [
+                current_time - 10,
+                current_time - 5,
+            ]
+        )  # Old timestamps
 
     # Concurrently check if allowed and trigger cleanup
     results = []

@@ -152,7 +152,7 @@ def test_csrf_middleware_get_sets_cookie():
     args, kwargs = response.set_cookie.call_args
     assert args[0] == "csrf_token"
     # assert len(args[1]) == 43 # Old check
-    assert len(args[1]) > 43 # New signed token is longer
+    assert len(args[1]) > 43  # New signed token is longer
     assert "." in args[1]
     assert kwargs["secure"] is False
     assert kwargs["http_only"] is True
@@ -168,7 +168,7 @@ def test_csrf_middleware_cookie_parsing():
     request.method = "POST"
     request.get_header.side_effect = lambda name: {
         # Note: SimpleCookie might handle spacing differently, standard is semicolon+space
-        "cookie": f"csrf_token=\"{signed_token}\"; other=value",
+        "cookie": f'csrf_token="{signed_token}"; other=value',
         "X-CSRF-Token": signed_token,
     }.get(name)
     response = Mock()
@@ -302,9 +302,7 @@ def test_csrf_rejection_of_invalid_signature():
 
     token = secrets.token_urlsafe(32)
     # Sign with WRONG key
-    fake_signature = hmac.new(
-        b"wrong_key", token.encode(), hashlib.sha256
-    ).hexdigest()
+    fake_signature = hmac.new(b"wrong_key", token.encode(), hashlib.sha256).hexdigest()
     spoofed_token = f"{token}.{fake_signature}"
 
     request = Mock()

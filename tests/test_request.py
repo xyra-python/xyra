@@ -19,6 +19,7 @@ def mock_socketify_request():
     req.for_each_header = Mock(
         side_effect=lambda func: func("Content-Type", "application/json")
     )
+
     # Mock get_header to behave somewhat realistically
     def get_header(key):
         headers = {"content-type": "application/json"}
@@ -122,7 +123,7 @@ async def test_request_parsing_json():
 async def async_test_request_json_invalid():
     req = Mock()
     res = Mock()
-    res.get_data = AsyncMock(return_value=b'invalid json')
+    res.get_data = AsyncMock(return_value=b"invalid json")
     request = Request(req, res)
     with pytest.raises(ValueError, match="Invalid JSON"):
         await request.json()
@@ -142,7 +143,7 @@ async def test_request_json_invalid():
     """Test invalid JSON."""
     req = Mock()
     res = Mock()
-    res.get_data = AsyncMock(return_value=b'invalid json')
+    res.get_data = AsyncMock(return_value=b"invalid json")
     request = Request(req, res)
     with pytest.raises(ValueError, match="Invalid JSON"):
         await request.json()

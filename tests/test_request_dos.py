@@ -1,4 +1,3 @@
-
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -26,6 +25,7 @@ async def test_form_parsing_dos_protection():
 
     # Expect empty dict because limit was exceeded and we swallowed the error (logging warning)
     assert form_data == {}, "Form data should be empty when limit is exceeded"
+
 
 @pytest.mark.asyncio
 async def test_form_parsing_unicode_error():

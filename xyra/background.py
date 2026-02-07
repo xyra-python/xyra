@@ -10,6 +10,7 @@ class BackgroundTask:
     async def __call__(self):
         await self.func(*self.args, **self.kwargs)
 
+
 def create_background_task(func, *args, **kwargs):
     task = BackgroundTask(func, *args, **kwargs)
     return asyncio.create_task(task())

@@ -178,5 +178,8 @@ def rate_limiter(
     """
     limiter = RateLimiter(requests=requests, window=window)
     return RateLimitMiddleware(
-        limiter, key_func, trust_proxy=trust_proxy, trusted_proxy_count=trusted_proxy_count
+        limiter,
+        key_func,
+        trust_proxy=trust_proxy,
+        trusted_proxy_count=trusted_proxy_count,
     )

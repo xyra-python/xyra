@@ -5,25 +5,32 @@ def test_router_methods():
     router = Router()
 
     @router.get("/get")
-    def get_handler(req, res): pass
+    def get_handler(req, res):
+        pass
 
     @router.post("/post")
-    def post_handler(req, res): pass
+    def post_handler(req, res):
+        pass
 
     @router.put("/put")
-    def put_handler(req, res): pass
+    def put_handler(req, res):
+        pass
 
     @router.delete("/delete")
-    def delete_handler(req, res): pass
+    def delete_handler(req, res):
+        pass
 
     @router.patch("/patch")
-    def patch_handler(req, res): pass
+    def patch_handler(req, res):
+        pass
 
     @router.head("/head")
-    def head_handler(req, res): pass
+    def head_handler(req, res):
+        pass
 
     @router.options("/options")
-    def options_handler(req, res): pass
+    def options_handler(req, res):
+        pass
 
     assert len(router.routes) == 7
 

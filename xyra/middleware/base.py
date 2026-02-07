@@ -11,7 +11,9 @@ class BaseHTTPMiddleware:
     Subclasses should override `dispatch`.
     """
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         """
         Implement this method to define middleware logic.
 
