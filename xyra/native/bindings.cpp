@@ -7,6 +7,8 @@
 #include <string>
 #include <atomic>
 #include <mutex>
+#include <algorithm>
+#include <cctype>
 
 namespace py = pybind11;
 
@@ -18,7 +20,11 @@ public:
         query = std::string(req->getQuery());
 
         for (auto header : *req) {
-            headers[std::string(std::get<0>(header))] = std::string(std::get<1>(header));
+            std::string key = std::string(std::get<0>(header));
+            std::string value = std::string(std::get<1>(header));
+            std::transform(key.begin(), key.end(), key.begin(),
+                [](unsigned char c){ return std::tolower(c); });
+            headers[key] = value;
         }
 
         for (int i = 0; ; ++i) {
