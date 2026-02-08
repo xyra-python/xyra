@@ -189,6 +189,12 @@ class Response:
 
         # Quote value if necessary (contains special chars like space, semicolon, etc.)
         if _COOKIE_QUOTE_PATTERN.search(value):
+            # SECURITY: Disallow semicolon in cookie value even if quoted.
+            # RFC 6265 forbids semicolon in cookie-value (even inside DQUOTE).
+            # Allowing it risks attribute injection in lax parsers.
+            if ";" in value:
+                raise ValueError("Cookie value cannot contain ';'. Please encode it.")
+
             escaped_value = value.replace("\\", "\\\\").replace("\"", "\\\"")
             value = f'"{escaped_value}"'
 

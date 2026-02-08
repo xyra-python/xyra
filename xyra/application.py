@@ -223,9 +223,9 @@ class App:
 
             # SECURITY: Prevent Path Traversal
             try:
-                # Resolve absolute paths
-                abs_directory = os.path.abspath(directory)
-                abs_path = os.path.abspath(os.path.join(abs_directory, file_path))
+                # Resolve absolute paths and resolve symlinks to prevent traversal
+                abs_directory = os.path.realpath(directory)
+                abs_path = os.path.realpath(os.path.join(abs_directory, file_path))
 
                 # Verify the resolved path is within the static directory
                 if os.path.commonpath([abs_directory, abs_path]) != abs_directory:
