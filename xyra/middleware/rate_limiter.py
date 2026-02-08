@@ -9,18 +9,33 @@ from ..response import Response
 class RateLimiter:
     """In-memory rate limiter using sliding window."""
 
-    def __init__(self, requests: int = 100, window: int = 60):
+    def __init__(
+        self, requests: int = 100, window: int = 60, cleanup_interval: int = 1000
+    ):
         """
         Initialize rate limiter.
 
         Args:
             requests: Maximum number of requests allowed per window
             window: Time window in seconds
+            cleanup_interval: Number of requests before triggering cleanup
         """
         self.requests = requests
         self.window = window
+        self.cleanup_interval = cleanup_interval
         self._requests: dict[str, deque[float]] = defaultdict(deque)
         self._lock = threading.RLock()  # Thread-safe lock
+        self._request_counter = 0
+
+    def cleanup(self):
+        """Remove empty keys and expired requests."""
+        current_time = time.time()
+        with self._lock:
+            # Iterate over a copy of keys to allow deletion
+            for key in list(self._requests.keys()):
+                self._cleanup_old_requests(key, current_time)
+                if not self._requests[key]:
+                    del self._requests[key]
 
     def _cleanup_old_requests(self, key: str, current_time: float):
         """Remove requests outside the current window."""
@@ -44,6 +59,12 @@ class RateLimiter:
         self._cleanup_old_requests(key, current_time)
 
         with self._lock:
+            # Periodically cleanup old keys
+            self._request_counter += 1
+            if self._request_counter >= self.cleanup_interval:
+                self.cleanup()
+                self._request_counter = 0
+
             if len(self._requests[key]) < self.requests:
                 self._requests[key].append(current_time)
                 return True
@@ -162,6 +183,7 @@ def rate_limiter(
     key_func=None,
     trust_proxy: bool = False,
     trusted_proxy_count: int = 1,
+    cleanup_interval: int = 1000,
 ):
     """
     Create a rate limiter middleware.
@@ -172,11 +194,14 @@ def rate_limiter(
         key_func: Function to extract key from request
         trust_proxy: Whether to trust proxy headers
         trusted_proxy_count: Number of trusted proxies
+        cleanup_interval: Number of requests before triggering cleanup
 
     Returns:
         RateLimitMiddleware instance
     """
-    limiter = RateLimiter(requests=requests, window=window)
+    limiter = RateLimiter(
+        requests=requests, window=window, cleanup_interval=cleanup_interval
+    )
     return RateLimitMiddleware(
         limiter,
         key_func,
