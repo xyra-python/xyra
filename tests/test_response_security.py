@@ -54,12 +54,9 @@ def test_set_cookie_safe_formatting():
     assert "session=123" in res.headers["Set-Cookie"]
 
     # Attribute injection attempt
-    res.set_cookie("session", "123; Domain=evil.com")
-    cookie = res.headers["Set-Cookie"]
-
-    # Should be quoted to prevent attribute injection
-    # xyra uses manual quoting instead of SimpleCookie's escaping
-    assert 'session="123; Domain=evil.com"' in cookie
+    # Should now raise ValueError because semicolon is forbidden
+    with pytest.raises(ValueError, match="Cookie value cannot contain ';'"):
+        res.set_cookie("session", "123; Domain=evil.com")
 
 
 def test_set_cookie_attributes():
@@ -87,3 +84,12 @@ def test_set_cookie_attributes():
     assert "HttpOnly" in cookie or "httponly" in cookie
     assert "SameSite=Lax" in cookie or "samesite=Lax" in cookie
     assert "Path=/app" in cookie or "path=/app" in cookie
+
+
+def test_set_cookie_semicolon_rejection():
+    """Test that setting a cookie value containing a semicolon raises ValueError."""
+    mock_res = MockSocketifyResponse()
+    res = Response(mock_res)
+
+    with pytest.raises(ValueError, match="Cookie value cannot contain ';'"):
+        res.set_cookie("prefs", "lang=en; Secure")
