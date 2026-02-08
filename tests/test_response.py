@@ -255,10 +255,13 @@ def test_response_set_cookie_quoting(mock_socketify_response):
     cookie = response.headers["Set-Cookie"]
     assert 'space="hello world"' in cookie
 
-    # Semicolon
-    response.set_cookie("semicolon", "a;b")
-    cookie = response.headers["Set-Cookie"]
-    assert 'semicolon="a;b"' in cookie
+    # Semicolon - SHOULD FAIL
+    with pytest.raises(ValueError, match="Cookie value cannot contain ';'"):
+        response.set_cookie("semicolon", "a;b")
+
+    # Invalid Name - SHOULD FAIL
+    with pytest.raises(ValueError, match="Invalid cookie name"):
+        response.set_cookie("invalid=name", "value")
 
     # Quotes
     response.set_cookie("quotes", 'a"b')

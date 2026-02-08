@@ -17,6 +17,11 @@ MAX_BODY_SIZE = 10 * 1024 * 1024
 # Note: hyphen must be escaped or at start/end of class
 _COOKIE_QUOTE_PATTERN = re.compile(r"[^!#$%&'*+\-.0-9:A-Z^_`a-z|~]")
 
+# Regex to check valid cookie name chars (RFC 6265 token)
+# Token chars: ! # $ % & ' * + - . 0-9 A-Z ^ _ ` a-z | ~
+# Note: : is a separator, so it is NOT allowed in name.
+_COOKIE_NAME_PATTERN = re.compile(r"^[!#$%&'*+\-.0-9A-Z^_`a-z|~]+$")
+
 
 class Response:
     """
@@ -184,8 +189,8 @@ class Response:
                 res.set_cookie("session_id", "abc123", max_age=3600, secure=True)
         """
         # PERF: Manual string formatting is faster than SimpleCookie
-        if " " in name:
-            raise ValueError("Cookie name cannot contain spaces")
+        if not _COOKIE_NAME_PATTERN.match(name):
+            raise ValueError(f"Invalid cookie name: {name}")
 
         # Quote value if necessary (contains special chars like space, semicolon, etc.)
         if _COOKIE_QUOTE_PATTERN.search(value):
