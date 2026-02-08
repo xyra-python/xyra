@@ -260,14 +260,23 @@ class Request:
                 # Process data...
                 res.json({"received": data})
         """
-        body = await self.text()
+        # PERF: Get raw data (bytes) to avoid unnecessary decoding to string
+        body = await self._res.get_data()
         if not body:
             return {}
-        return self.parse_json(body)
 
-    def parse_json(self, json_string: str) -> Any:
+        if isinstance(body, bytes):
+            return self.parse_json(body)
+
+        if isinstance(body, str):
+            return self.parse_json(body)
+
+        # Fallback for other types
+        return self.parse_json(str(body))
+
+    def parse_json(self, json_string: str | bytes) -> Any:
         """
-        Parse a JSON string synchronously.
+        Parse a JSON string or bytes synchronously.
 
         usage:
             json_str = '{"name": "John"}'
