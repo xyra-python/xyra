@@ -443,11 +443,16 @@ class App:
                 getattr(self._app, method)(parsed_path, wrap_async(final_handler))
 
         # Add catch-all handler for unmatched routes (404)
-        async def not_found_handler(res, req):
-            response = Response(res, self.templates)
-            response.status(404).json({"error": "Not Found"})
+        # SECURITY: This handler is wrapped with middleware to ensure security headers
+        # and rate limiting are applied even for non-existent routes.
+        async def not_found_handler(req: Request, res: Response):
+            res.status(404).json({"error": "Not Found"})
 
-        self._app.any("/*", wrap_async(not_found_handler))
+        final_not_found_handler = self._create_final_handler(
+            not_found_handler, [], self._middlewares, "/*"
+        )
+
+        self._app.any("/*", wrap_async(final_not_found_handler))
 
     def enable_swagger(self, host: str = "localhost", port: int = 8000):
         """
