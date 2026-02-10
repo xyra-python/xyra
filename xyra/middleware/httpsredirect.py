@@ -61,7 +61,17 @@ class HTTPSRedirectMiddleware:
         # 2. Check against allowed_hosts if configured
         if self.allowed_hosts:
             is_allowed = False
-            hostname = host.split(":")[0]
+
+            # Correctly handle IPv6 literals
+            if host.startswith("["):
+                # Find the closing bracket
+                end_index = host.find("]")
+                if end_index != -1:
+                    hostname = host[: end_index + 1]
+                else:
+                    hostname = host
+            else:
+                hostname = host.split(":")[0]
 
             for allowed in self.allowed_hosts:
                 if allowed == "*":
