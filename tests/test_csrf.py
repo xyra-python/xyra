@@ -94,8 +94,8 @@ def test_csrf_middleware_post_without_token():
     response.status.assert_called_once_with(403)
     # Message might be "CSRF token missing" or "invalid" depending on impl
     # In my impl, if cookie is missing, it creates new one, then checks header vs new one.
-    # Header is missing. So "CSRF token invalid".
-    response.json.assert_called_once_with({"error": "CSRF token invalid"})
+    # Header is missing. So "CSRF token missing".
+    response.json.assert_called_once_with({"error": "CSRF token missing"})
     assert response._ended is True
 
 
@@ -123,12 +123,13 @@ def test_csrf_middleware_post_with_valid_token():
     middleware = CSRFMiddleware()
     token = secrets.token_urlsafe(32)
     signed_token = _sign_token(token, middleware.secret_key)
+    masked_token = middleware._mask_token(signed_token)
 
     request = Mock()
     request.method = "POST"
     request.get_header.side_effect = lambda name: {
         "cookie": f"csrf_token={signed_token}",
-        "X-CSRF-Token": signed_token,
+        "X-CSRF-Token": masked_token,
     }.get(name)
     response = Mock()
     response._ended = False
@@ -151,8 +152,8 @@ def test_csrf_middleware_get_sets_cookie():
     response.set_cookie.assert_called_once()
     args, kwargs = response.set_cookie.call_args
     assert args[0] == "csrf_token"
-    # assert len(args[1]) == 43 # Old check
-    assert len(args[1]) > 43  # New signed token is longer
+    # args[1] is the signed token stored in the cookie
+    assert len(args[1]) > 43
     assert "." in args[1]
     assert kwargs["secure"] is False
     assert kwargs["http_only"] is True
@@ -163,13 +164,14 @@ def test_csrf_middleware_cookie_parsing():
     middleware = CSRFMiddleware()
     token = secrets.token_urlsafe(32)
     signed_token = _sign_token(token, middleware.secret_key)
+    masked_token = middleware._mask_token(signed_token)
 
     request = Mock()
     request.method = "POST"
     request.get_header.side_effect = lambda name: {
         # Note: SimpleCookie might handle spacing differently, standard is semicolon+space
         "cookie": f'csrf_token="{signed_token}"; other=value',
-        "X-CSRF-Token": signed_token,
+        "X-CSRF-Token": masked_token,
     }.get(name)
     response = Mock()
     response._ended = False
@@ -195,7 +197,10 @@ def test_csrf_middleware_head_method():
 
 def test_csrf_middleware_custom_cookie_settings():
     """Test CSRF with custom cookie settings."""
+    # When secure=True, it should use __Host- prefix
     middleware = CSRFMiddleware(secure=True, http_only=False, same_site="Strict")
+    assert middleware.cookie_name == "__Host-csrf_token"
+
     request = Mock()
     request.method = "GET"
     request.get_header.return_value = None
@@ -206,6 +211,7 @@ def test_csrf_middleware_custom_cookie_settings():
     # Should set cookie with custom settings
     response.set_cookie.assert_called_once()
     args, kwargs = response.set_cookie.call_args
+    assert args[0] == "__Host-csrf_token"
     assert kwargs["secure"] is True
     assert kwargs["http_only"] is False
     assert kwargs["same_site"] == "Strict"
@@ -216,12 +222,13 @@ def test_csrf_middleware_multiple_cookies():
     middleware = CSRFMiddleware()
     token = secrets.token_urlsafe(32)
     signed_token = _sign_token(token, middleware.secret_key)
+    masked_token = middleware._mask_token(signed_token)
 
     request = Mock()
     request.method = "POST"
     request.get_header.side_effect = lambda name: {
         "cookie": f"session=abc123; csrf_token={signed_token}; user=john",
-        "X-CSRF-Token": signed_token,
+        "X-CSRF-Token": masked_token,
     }.get(name)
     response = Mock()
     response._ended = False
@@ -335,4 +342,7 @@ def test_csrf_token_on_request():
 
     assert hasattr(request, "csrf_token")
     assert request.csrf_token is not None
-    assert "." in request.csrf_token
+    # Masked token is base64 and doesn't contain '.'
+    assert "." not in request.csrf_token
+    # But unmasking it should result in a signed token with '.'
+    assert "." in middleware._unmask_token(request.csrf_token)

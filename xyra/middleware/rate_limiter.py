@@ -7,10 +7,18 @@ from ..response import Response
 
 
 class RateLimiter:
-    """In-memory rate limiter using sliding window."""
+    """
+    In-memory rate limiter using sliding window.
+
+    SECURITY: Implements max_entries and LRU eviction to prevent memory exhaustion DoS.
+    """
 
     def __init__(
-        self, requests: int = 100, window: int = 60, cleanup_interval: int = 1000
+        self,
+        requests: int = 100,
+        window: int = 60,
+        cleanup_interval: int = 1000,
+        max_entries: int = 10000,
     ):
         """
         Initialize rate limiter.
@@ -19,11 +27,13 @@ class RateLimiter:
             requests: Maximum number of requests allowed per window
             window: Time window in seconds
             cleanup_interval: Number of requests before triggering cleanup
+            max_entries: Maximum number of unique keys to track (LRU eviction)
         """
         self.requests = requests
         self.window = window
         self.cleanup_interval = cleanup_interval
-        self._requests: dict[str, deque[float]] = defaultdict(deque)
+        self.max_entries = max_entries
+        self._requests: dict[str, deque[float]] = {}  # Regular dict for O(1) LRU
         self._lock = threading.RLock()  # Thread-safe lock
         self._request_counter = 0
 
@@ -34,12 +44,17 @@ class RateLimiter:
             # Iterate over a copy of keys to allow deletion
             for key in list(self._requests.keys()):
                 self._cleanup_old_requests(key, current_time)
-                if not self._requests[key]:
+                # If key was removed by _cleanup_old_requests (because it didn't exist)
+                # or is now empty, delete it.
+                if key in self._requests and not self._requests[key]:
                     del self._requests[key]
 
     def _cleanup_old_requests(self, key: str, current_time: float):
         """Remove requests outside the current window."""
         with self._lock:
+            if key not in self._requests:
+                return
+
             cutoff = current_time - self.window
             timestamps = self._requests[key]
             while timestamps and timestamps[0] <= cutoff:
@@ -56,33 +71,58 @@ class RateLimiter:
             True if allowed, False if rate limited
         """
         current_time = time.time()
-        self._cleanup_old_requests(key, current_time)
 
         with self._lock:
-            # Periodically cleanup old keys
+            # 1. Cleanup old entries periodically
             self._request_counter += 1
             if self._request_counter >= self.cleanup_interval:
                 self.cleanup()
                 self._request_counter = 0
 
-            if len(self._requests[key]) < self.requests:
-                self._requests[key].append(current_time)
+            # 2. Extract or create the entry
+            if key in self._requests:
+                # Move to end to maintain LRU (Python 3.7+ dicts are ordered)
+                timestamps = self._requests.pop(key)
+                self._requests[key] = timestamps
+            else:
+                # LRU Eviction: If we exceed max_entries, remove the oldest one
+                if len(self._requests) >= self.max_entries:
+                    # Pop the first (oldest) item
+                    oldest_key = next(iter(self._requests))
+                    del self._requests[oldest_key]
+
+                timestamps = deque()
+                self._requests[key] = timestamps
+
+            # 3. Cleanup old timestamps for THIS key
+            cutoff = current_time - self.window
+            while timestamps and timestamps[0] <= cutoff:
+                timestamps.popleft()
+
+            # 4. Check limit and append
+            if len(timestamps) < self.requests:
+                timestamps.append(current_time)
                 return True
+
             return False
 
     def get_remaining_requests(self, key: str) -> int:
         """Get remaining requests allowed for the key."""
         current_time = time.time()
-        self._cleanup_old_requests(key, current_time)
 
         with self._lock:
+            if key not in self._requests:
+                return self.requests
+
+            self._cleanup_old_requests(key, current_time)
             return max(0, self.requests - len(self._requests[key]))
 
     def get_reset_time(self, key: str) -> float:
         """Get time until reset (next window)."""
         with self._lock:
-            if not self._requests[key]:
+            if key not in self._requests or not self._requests[key]:
                 return 0
+
             current_time = time.time()
             # PERF: Requests are ordered by time, so the first element is always the oldest
             oldest_request = self._requests[key][0]
@@ -184,6 +224,7 @@ def rate_limiter(
     trust_proxy: bool = False,
     trusted_proxy_count: int = 1,
     cleanup_interval: int = 1000,
+    max_entries: int = 10000,
 ):
     """
     Create a rate limiter middleware.
@@ -195,12 +236,16 @@ def rate_limiter(
         trust_proxy: Whether to trust proxy headers
         trusted_proxy_count: Number of trusted proxies
         cleanup_interval: Number of requests before triggering cleanup
+        max_entries: Maximum number of unique keys to track
 
     Returns:
         RateLimitMiddleware instance
     """
     limiter = RateLimiter(
-        requests=requests, window=window, cleanup_interval=cleanup_interval
+        requests=requests,
+        window=window,
+        cleanup_interval=cleanup_interval,
+        max_entries=max_entries,
     )
     return RateLimitMiddleware(
         limiter,
