@@ -77,12 +77,9 @@ def test_cors_wildcard_without_credentials():
 
     middleware(req, res)
 
-    # Implementation reflects origin if wildcard is present?
-    # Let's check logic:
-    # if origin and _is_origin_allowed(origin): set origin
-    # _is_origin_allowed("*") -> True
-    # So it sets origin.
+    # SECURITY: Updated implementation uses '*' directly when wildcard is allowed
+    # without credentials, instead of reflecting the origin. This is safer.
 
-    assert res.headers_dict.get("Access-Control-Allow-Origin") == "http://any.com"
+    assert res.headers_dict.get("Access-Control-Allow-Origin") == "*"
     # Credentials should not be true (default is False, but we didn't check header presence)
     assert res.headers_dict.get("Access-Control-Allow-Credentials") is None

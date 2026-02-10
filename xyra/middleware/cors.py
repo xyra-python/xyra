@@ -70,11 +70,13 @@ class CorsMiddleware:
         """Handle CORS for the request."""
         origin = request.get_header("origin")
 
-        # Set CORS headers if origin is provided and allowed
-        if origin and self._is_origin_allowed(origin):
-            response.header("Access-Control-Allow-Origin", origin)
-        elif "*" in self.allowed_origins and not self.allow_credentials:
+        # SECURITY: If "*" is allowed and no credentials, use "*" directly instead of reflecting.
+        # This is safer and more standard than reflecting the request's Origin header.
+        if "*" in self.allowed_origins and not self.allow_credentials:
             response.header("Access-Control-Allow-Origin", "*")
+        elif origin and self._is_origin_allowed(origin):
+            # Reflect the origin only if it's explicitly allowed and credentials are required
+            response.header("Access-Control-Allow-Origin", origin)
 
         # Set other CORS headers
         response.header("Access-Control-Allow-Methods", ", ".join(self.allowed_methods))

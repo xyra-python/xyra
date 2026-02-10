@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import hmac
 import secrets
@@ -8,7 +9,14 @@ from ..response import Response
 
 
 class CSRFMiddleware:
-    """CSRF (Cross-Site Request Forgery) protection middleware for Xyra applications."""
+    """
+    CSRF (Cross-Site Request Forgery) protection middleware for Xyra applications.
+
+    SECURITY:
+    - Uses Double Submit Cookie pattern with signed cookies.
+    - Implements token masking to prevent BREACH attacks.
+    - Supports __Host- cookie prefix for enhanced subdomain protection.
+    """
 
     def __init__(
         self,
@@ -21,12 +29,18 @@ class CSRFMiddleware:
         same_site: str = "Lax",
     ):
         self.secret_key = secret_key or secrets.token_hex(32)
-        self.cookie_name = cookie_name
         self.header_name = header_name
         self.exempt_methods = exempt_methods or ["GET", "HEAD", "OPTIONS"]
         self.secure = secure
         self.http_only = http_only
         self.same_site = same_site
+
+        # SECURITY: Use __Host- prefix if secure is enabled to prevent cookie tossing
+        # from subdomains. This requires Path=/ and no Domain attribute.
+        if self.secure and not cookie_name.startswith("__Host-"):
+            self.cookie_name = f"__Host-{cookie_name}"
+        else:
+            self.cookie_name = cookie_name
 
     def _sign_token(self, token: str) -> str:
         """Sign a token using HMAC."""
@@ -56,6 +70,36 @@ class CSRFMiddleware:
         """Generate a new signed CSRF token."""
         token = secrets.token_urlsafe(32)
         return self._sign_token(token)
+
+    def _mask_token(self, token: str) -> str:
+        """
+        Mask a token using a random 32-byte salt (BREACH protection).
+        Returns base64(salt + XOR(token, salt)).
+        """
+        salt = secrets.token_bytes(32)
+        token_bytes = token.encode()
+        # XOR token with salt (repeating salt if necessary)
+        masked = bytes(t ^ salt[i % 32] for i, t in enumerate(token_bytes))
+        return base64.urlsafe_b64encode(salt + masked).decode().rstrip("=")
+
+    def _unmask_token(self, masked_token: str) -> str | None:
+        """Unmask a token masked with _mask_token."""
+        try:
+            # Add back base64 padding if missing
+            missing_padding = len(masked_token) % 4
+            if missing_padding:
+                masked_token += "=" * (4 - missing_padding)
+
+            decoded = base64.urlsafe_b64decode(masked_token)
+            if len(decoded) <= 32:
+                return None
+
+            salt = decoded[:32]
+            masked = decoded[32:]
+            unmasked = bytes(t ^ salt[i % 32] for i, t in enumerate(masked))
+            return unmasked.decode()
+        except Exception:
+            return None
 
     def _get_cookie(self, request: Request, name: str) -> str | None:
         """Extract cookie value from request headers using SimpleCookie."""
@@ -87,13 +131,14 @@ class CSRFMiddleware:
         # If valid, use it. If invalid or missing, generate new one.
         if signed_cookie_token:
             # Verify signature to prevent cookie injection
-            raw_token = self._verify_signed_token(signed_cookie_token)
-            if not raw_token:
+            if not self._verify_signed_token(signed_cookie_token):
                 # Invalid signature, treat as missing/invalid
                 signed_cookie_token = None
 
         if not signed_cookie_token:
             signed_cookie_token = self._generate_token()
+            # SECURITY: When using __Host- prefix, Domain must NOT be set and Path must be /
+            # response.set_cookie defaults to Path=/ and Domain=None.
             response.set_cookie(
                 self.cookie_name,
                 signed_cookie_token,
@@ -102,16 +147,25 @@ class CSRFMiddleware:
                 same_site=self.same_site,
             )
 
-        # Attach the signed token to the request so it can be used in templates/views
-        request.csrf_token = signed_cookie_token
+        # SECURITY: Mask the token for the request (BREACH protection)
+        # request.csrf_token is what should be used in HTML forms
+        request.csrf_token = self._mask_token(signed_cookie_token)
 
         # Skip CSRF check for exempt methods
         if request.method in self.exempt_methods:
             return
 
-        # For unsafe methods, verify the header matches the cookie
-        # Both should be the signed token
-        request_token = self._get_token_from_request(request)
+        # For unsafe methods, verify the request token
+        masked_request_token = self._get_token_from_request(request)
+
+        if not masked_request_token:
+            response.status(403)
+            response.json({"error": "CSRF token missing"})
+            response._ended = True
+            return
+
+        # Unmask to get the signed token
+        request_token = self._unmask_token(masked_request_token)
 
         if not request_token or not secrets.compare_digest(
             request_token, signed_cookie_token
