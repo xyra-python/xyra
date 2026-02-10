@@ -1,6 +1,7 @@
 import asyncio
 import inspect
 import json
+import mimetypes
 import os
 import socket
 import threading
@@ -12,7 +13,7 @@ from typing import Any, Union, overload
 from . import libxyra
 from .logger import get_logger, setup_logging
 from .request import Request
-from .response import Response
+from .response import MAX_BODY_SIZE, Response
 from .routing import Router
 from .swagger import generate_swagger
 from .templating import Templating
@@ -213,22 +214,25 @@ class App:
         if not path.startswith("/"):
             path = "/" + path
 
-        import os
-
         async def static_handler(req: Request, res: Response):
-            file_path = req.params.get("filename")
+            # SECURITY: Use req.get_parameter(0) with wildcard '*' to support
+            # nested directories and ensure full path is captured.
+            file_path = req.get_parameter(0)
             if not file_path:
                 res.status(404).text("Not Found")
                 return
 
             # SECURITY: Prevent Path Traversal
             try:
-                # Resolve absolute paths and resolve symlinks to prevent traversal
-                abs_directory = os.path.realpath(directory)
-                abs_path = os.path.realpath(os.path.join(abs_directory, file_path))
+                # Ensure directory path ends with a separator to prevent partial name match
+                abs_directory = os.path.join(os.path.realpath(directory), "")
+                # Normalize file_path and join securely
+                abs_path = os.path.realpath(
+                    os.path.join(abs_directory, file_path.lstrip("/"))
+                )
 
                 # Verify the resolved path is within the static directory
-                if os.path.commonpath([abs_directory, abs_path]) != abs_directory:
+                if not abs_path.startswith(abs_directory):
                     res.status(403).text("Forbidden")
                     return
             except Exception:
@@ -237,27 +241,29 @@ class App:
 
             full_path = abs_path
             if os.path.exists(full_path) and os.path.isfile(full_path):
+                # SECURITY: Check file size to prevent DoS via memory exhaustion.
+                # Since we read the whole file into memory, we must enforce a limit.
+                try:
+                    file_size = os.path.getsize(full_path)
+                    if file_size > MAX_BODY_SIZE:
+                        res.status(413).text("Payload Too Large")
+                        return
+                except OSError:
+                    res.status(500).text("Internal Server Error")
+                    return
+
                 with open(full_path, "rb") as f:
                     content = f.read()
-                # Simple extension to content-type mapping
-                ext = os.path.splitext(full_path)[1].lower()
-                content_types = {
-                    ".html": "text/html",
-                    ".js": "application/javascript",
-                    ".css": "text/css",
-                    ".png": "image/png",
-                    ".jpg": "image/jpeg",
-                    ".gif": "image/gif",
-                    ".svg": "image/svg+xml",
-                }
-                res.header(
-                    "Content-Type", content_types.get(ext, "application/octet-stream")
-                )
+
+                # SECURITY: Use mimetypes for better Content-Type detection
+                content_type, _ = mimetypes.guess_type(full_path)
+                res.header("Content-Type", content_type or "application/octet-stream")
                 res.send(content)
             else:
                 res.status(404).text("Not Found")
 
-        self.get(path + "{filename}", static_handler)
+        # Register with wildcard to support nested directories
+        self.get(path + "*", static_handler)
 
     def _build_middleware_stack(
         self,
@@ -370,8 +376,8 @@ class App:
                     if val != "":
                         params[param_name] = val
 
-                request = Request(req, res, params)
                 response = Response(res, self.templates)
+                request = Request(req, response, params)
 
                 # Execute middleware stack
                 await middleware_stack_entry(request, response)
@@ -577,7 +583,9 @@ class App:
                     current_proc.wait()
                 env = os.environ.copy()
                 env["XYRA_RELOAD_CHILD"] = "1"
-                current_proc = subprocess.Popen([sys.executable] + sys.argv, env=env)  # nosec B603
+                current_proc = subprocess.Popen(
+                    [sys.executable] + sys.argv, env=env
+                )  # nosec B603
 
             # Watch for file changes in current directory
             def watch_and_restart():

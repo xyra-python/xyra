@@ -1,6 +1,6 @@
 import threading
 import time
-from collections import defaultdict, deque
+from collections import deque
 
 from ..request import Request
 from ..response import Response
@@ -39,7 +39,7 @@ class RateLimiter:
 
     def cleanup(self):
         """Remove empty keys and expired requests."""
-        current_time = time.time()
+        current_time = time.monotonic()
         with self._lock:
             # Iterate over a copy of keys to allow deletion
             for key in list(self._requests.keys()):
@@ -70,7 +70,8 @@ class RateLimiter:
         Returns:
             True if allowed, False if rate limited
         """
-        current_time = time.time()
+        # SECURITY: Use monotonic() to prevent bypasses via system clock changes
+        current_time = time.monotonic()
 
         with self._lock:
             # 1. Cleanup old entries periodically
@@ -108,7 +109,7 @@ class RateLimiter:
 
     def get_remaining_requests(self, key: str) -> int:
         """Get remaining requests allowed for the key."""
-        current_time = time.time()
+        current_time = time.monotonic()
 
         with self._lock:
             if key not in self._requests:
@@ -123,7 +124,7 @@ class RateLimiter:
             if key not in self._requests or not self._requests[key]:
                 return 0
 
-            current_time = time.time()
+            current_time = time.monotonic()
             # PERF: Requests are ordered by time, so the first element is always the oldest
             oldest_request = self._requests[key][0]
             return max(0, self.window - (current_time - oldest_request))
