@@ -201,3 +201,20 @@ def test_https_redirect_wildcard_host():
     response.status.assert_called_once_with(301)
     response.header.assert_called_with("Location", "https://sub.example.com/path")
     assert response._ended is True
+
+
+def test_https_redirect_ipv6_host_with_port():
+    middleware = HTTPSRedirectMiddleware(allowed_hosts=["[::1]"])
+    request = Mock()
+    request.url = "/path"
+    request.query = ""
+    # Headers keys are lowercase in Xyra
+    request.headers = {"host": "[::1]:8080", "x-forwarded-proto": "http"}
+    response = Mock()
+    response._ended = False
+
+    middleware(request, response)
+
+    response.status.assert_called_once_with(301)
+    response.header.assert_called_with("Location", "https://[::1]:8080/path")
+    assert response._ended is True
