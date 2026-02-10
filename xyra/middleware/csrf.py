@@ -57,6 +57,35 @@ class CSRFMiddleware:
         token = secrets.token_urlsafe(32)
         return self._sign_token(token)
 
+    def _mask_token(self, token: str) -> str:
+        """Mask the token using a random 32-byte mask to prevent BREACH attacks."""
+        mask = secrets.token_bytes(32)
+        token_bytes = token.encode("utf-8")
+        cipher = bytes(b ^ mask[i % 32] for i, b in enumerate(token_bytes))
+        return mask.hex() + cipher.hex()
+
+    def _unmask_token(self, masked_token: str) -> str | None:
+        """Unmask a token. Returns None if invalid format."""
+        # Mask (32 bytes) is 64 hex chars
+        mask_len = 64
+        if not masked_token or len(masked_token) <= mask_len:
+            return None
+
+        try:
+            mask_hex = masked_token[:mask_len]
+            cipher_hex = masked_token[mask_len:]
+
+            mask = bytes.fromhex(mask_hex)
+            cipher = bytes.fromhex(cipher_hex)
+
+            if len(mask) != 32:
+                return None
+
+            token_bytes = bytes(b ^ mask[i % 32] for i, b in enumerate(cipher))
+            return token_bytes.decode("utf-8")
+        except Exception:
+            return None
+
     def _get_cookie(self, request: Request, name: str) -> str | None:
         """Extract cookie value from request headers using SimpleCookie."""
         cookie_header = request.get_header("cookie")
@@ -102,20 +131,33 @@ class CSRFMiddleware:
                 same_site=self.same_site,
             )
 
-        # Attach the signed token to the request so it can be used in templates/views
-        request.csrf_token = signed_cookie_token
+        # Attach the MASKED token to the request so it can be used in templates/views (safe for BREACH)
+        request.csrf_token = self._mask_token(signed_cookie_token)
 
         # Skip CSRF check for exempt methods
         if request.method in self.exempt_methods:
             return
 
         # For unsafe methods, verify the header matches the cookie
-        # Both should be the signed token
         request_token = self._get_token_from_request(request)
 
-        if not request_token or not secrets.compare_digest(
-            request_token, signed_cookie_token
-        ):
+        is_valid = False
+        if request_token:
+            # 1. Try unmasking first (standard secure flow)
+            unmasked_token = self._unmask_token(request_token)
+            if unmasked_token and secrets.compare_digest(
+                unmasked_token, signed_cookie_token
+            ):
+                is_valid = True
+
+            # 2. Fallback: Try raw token (backward compatibility / SPAs reading cookie directly)
+            # Note: This is safe because request.csrf_token (in HTML) is masked, so BREACH cannot target the raw token.
+            if not is_valid and secrets.compare_digest(
+                request_token, signed_cookie_token
+            ):
+                is_valid = True
+
+        if not is_valid:
             response.status(403)
             response.json({"error": "CSRF token invalid"})
             response._ended = True

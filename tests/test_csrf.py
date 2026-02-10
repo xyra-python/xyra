@@ -335,4 +335,11 @@ def test_csrf_token_on_request():
 
     assert hasattr(request, "csrf_token")
     assert request.csrf_token is not None
-    assert "." in request.csrf_token
+    # Masked token is hex encoded, so no dots
+    # It should be mask(64 chars) + cipher(variable)
+    assert len(request.csrf_token) > 64
+    # Optional: check if valid hex
+    try:
+        bytes.fromhex(request.csrf_token)
+    except ValueError:
+        assert False, "CSRF token should be hex encoded"
