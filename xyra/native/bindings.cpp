@@ -74,21 +74,21 @@ public:
 
     void write_status(std::string status) {
         if (*aborted) return;
-        loop->defer([this, status]() {
+        loop->defer([res = res, aborted = aborted, status]() {
             if (!*aborted) res->writeStatus(status);
         });
     }
 
     void write_header(std::string key, std::string value) {
         if (*aborted) return;
-        loop->defer([this, key, value]() {
+        loop->defer([res = res, aborted = aborted, key, value]() {
             if (!*aborted) res->writeHeader(key, value);
         });
     }
 
     void end(std::string data) {
         if (*aborted) return;
-        loop->defer([this, data]() {
+        loop->defer([res = res, aborted = aborted, data]() {
             if (!*aborted) res->end(data);
         });
     }
