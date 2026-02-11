@@ -45,7 +45,11 @@ class GzipMiddleware:
 
                 # Set compression headers
                 res.header("Content-Encoding", "gzip")
-                res.header("Vary", "Accept-Encoding")
+                # Use .vary to support multiple Vary values (e.g. from CorsMiddleware)
+                if hasattr(res, "vary"):
+                    res.vary("Accept-Encoding")
+                else:
+                    res.header("Vary", "Accept-Encoding")
 
                 # Send compressed data
                 original_send(compressed_data)

@@ -168,6 +168,19 @@ class CSRFMiddleware:
         if request.method in self.exempt_methods:
             return
 
+        # SECURITY: For HTTPS requests, verify the Origin/Referer (Defense in Depth).
+        # This prevents CSRF even if the token is somehow leaked.
+        if self.secure:
+            source = request.get_header("origin") or request.get_header("referer")
+            host = request.get_header("host")
+            expected = f"https://{host}"
+
+            if not source or (source != expected and not source.startswith(f"{expected}/")):
+                response.status(403)
+                response.json({"error": "Origin/Referer verification failed"})
+                response._ended = True
+                return
+
         # For unsafe methods, verify the request token
         masked_request_token = await self._get_token_from_request(request)
 

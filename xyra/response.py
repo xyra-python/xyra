@@ -325,6 +325,16 @@ class Response:
         self._header_fast("Cache-Control", f"public, max-age={int(max_age)}")
         return self
 
+    def vary(self, name: str) -> "Response":
+        """Add a header name to the Vary header.
+        usage:
+            @app.get("/")
+            async def vary(req: Request, res: Response):
+                res.vary("Origin")
+        """
+        self.headers.add("Vary", name)
+        return self
+
     def no_cache(self) -> "Response":
         """Disable caching.
          usage:

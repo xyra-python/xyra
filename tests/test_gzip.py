@@ -3,15 +3,22 @@ from unittest.mock import Mock
 from xyra.middleware import GzipMiddleware, gzip_middleware
 
 
+from multidict import CIMultiDict
+
 def _setup_response_mock():
     """Helper to setup response mock with proper header method."""
     response = Mock()
-    response.headers = {}
+    response.headers = CIMultiDict()
 
     def header_func(key, value):
         response.headers[key] = value
 
     response.header = header_func
+
+    def vary_func(name):
+        response.headers.add("Vary", name)
+
+    response.vary = vary_func
 
     response._ended = False
     return response
