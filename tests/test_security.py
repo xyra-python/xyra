@@ -104,6 +104,8 @@ def test_security_headers_default():
     assert res._headers.get("X-Frame-Options") == "SAMEORIGIN"
     assert res._headers.get("X-XSS-Protection") == "1; mode=block"
     assert res._headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
+    assert res._headers.get("X-Permitted-Cross-Domain-Policies") == "none"
+    assert res._headers.get("Cross-Origin-Opener-Policy") == "same-origin"
 
 
 def test_security_headers_hsts():

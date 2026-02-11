@@ -11,6 +11,8 @@ class SecurityHeadersMiddleware:
     - X-Frame-Options: SAMEORIGIN
     - X-XSS-Protection: 1; mode=block
     - Referrer-Policy: strict-origin-when-cross-origin
+    - X-Permitted-Cross-Domain-Policies: none
+    - Cross-Origin-Opener-Policy: same-origin
 
     PERF: Headers are pre-calculated in __init__ to avoid overhead on every request.
     """
@@ -26,6 +28,8 @@ class SecurityHeadersMiddleware:
         xss_protection: str = "1; mode=block",
         content_type_options: str = "nosniff",
         referrer_policy: str = "strict-origin-when-cross-origin",
+        cross_domain_policy: str = "none",
+        opener_policy: str = "same-origin",
     ):
         self.headers: list[tuple[str, str]] = []
 
@@ -85,6 +89,17 @@ class SecurityHeadersMiddleware:
         if referrer_policy:
             self.headers.append(("Referrer-Policy", referrer_policy))
 
+        if cross_domain_policy:
+            self.headers.append(("X-Permitted-Cross-Domain-Policies", cross_domain_policy))
+
+        if opener_policy:
+            self.headers.append(("Cross-Origin-Opener-Policy", opener_policy))
+
+        # SECURITY:
+        # Risk: Missing or weak security headers expose users to XSS, Clickjacking, and other attacks.
+        # Attack: Attacker exploits lack of COOP/CSP to perform cross-origin attacks.
+        # Mitigation: Add defense-in-depth headers (COOP, CSP, HSTS) by default.
+
     def __call__(self, request: Request, response: Response):
         # PERF: Iterate over pre-calculated headers
         for key, value in self.headers:
@@ -101,6 +116,8 @@ def security_headers(
     xss_protection: str = "1; mode=block",
     content_type_options: str = "nosniff",
     referrer_policy: str = "strict-origin-when-cross-origin",
+    cross_domain_policy: str = "none",
+    opener_policy: str = "same-origin",
 ):
     """
     Create a SecurityHeaders middleware function.
@@ -115,4 +132,6 @@ def security_headers(
         xss_protection=xss_protection,
         content_type_options=content_type_options,
         referrer_policy=referrer_policy,
+        cross_domain_policy=cross_domain_policy,
+        opener_policy=opener_policy,
     )

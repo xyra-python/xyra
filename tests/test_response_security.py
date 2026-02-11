@@ -25,7 +25,7 @@ def test_header_injection_crlf_in_key():
     mock_res = MockSocketifyResponse()
     res = Response(mock_res)
 
-    with pytest.raises(ValueError, match="Header injection detected"):
+    with pytest.raises(ValueError, match="Invalid characters in header"):
         res.header("X-Header\r\nInjected", "value")
 
 
@@ -33,7 +33,7 @@ def test_header_injection_crlf_in_value():
     mock_res = MockSocketifyResponse()
     res = Response(mock_res)
 
-    with pytest.raises(ValueError, match="Header injection detected"):
+    with pytest.raises(ValueError, match="Invalid characters in header"):
         res.header("X-Header", "value\r\nInjected: true")
 
 
@@ -41,7 +41,7 @@ def test_redirect_header_injection():
     mock_res = MockSocketifyResponse()
     res = Response(mock_res)
 
-    with pytest.raises(ValueError, match="Header injection detected"):
+    with pytest.raises(ValueError, match="Invalid characters in header"):
         res.redirect("http://example.com\r\nSet-Cookie: evil=true")
 
 
