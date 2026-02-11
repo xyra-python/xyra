@@ -1,6 +1,7 @@
 import time
 import secrets
 import base64
+import pytest
 from unittest.mock import Mock
 from xyra.middleware.rate_limiter import RateLimiter, rate_limiter
 from xyra.middleware.csrf import CSRFMiddleware
@@ -35,7 +36,8 @@ def test_ratelimiter_no_creation_on_read():
     limiter.get_remaining_requests("non_existent")
     assert "non_existent" not in limiter._requests
 
-def test_csrf_token_masking_different_each_time():
+@pytest.mark.asyncio
+async def test_csrf_token_masking_different_each_time():
     # Test that CSRF tokens are different even for same base token
     middleware = CSRFMiddleware(secret_key="test_secret")
 
@@ -44,7 +46,7 @@ def test_csrf_token_masking_different_each_time():
     request.get_header.return_value = None
     response = Mock()
 
-    middleware(request, response)
+    await middleware(request, response)
     token1 = request.csrf_token
 
     # Use the same cookie for second request
@@ -55,13 +57,14 @@ def test_csrf_token_masking_different_each_time():
     request2.method = "GET"
     request2.get_header.side_effect = lambda h: f"{middleware.cookie_name}={cookie_value}" if h.lower() == "cookie" else None
 
-    middleware(request2, response)
+    await middleware(request2, response)
     token2 = request2.csrf_token
 
     assert token1 != token2
     assert middleware._unmask_token(token1) == middleware._unmask_token(token2)
 
-def test_csrf_host_prefix_enforcement():
+@pytest.mark.asyncio
+async def test_csrf_host_prefix_enforcement():
     # Test that __Host- prefix is used when secure=True
     middleware = CSRFMiddleware(cookie_name="my_token", secure=True)
     assert middleware.cookie_name == "__Host-my_token"
@@ -71,7 +74,7 @@ def test_csrf_host_prefix_enforcement():
     request.get_header.return_value = None
     response = Mock()
 
-    middleware(request, response)
+    await middleware(request, response)
 
     args, _ = response.set_cookie.call_args
     assert args[0] == "__Host-my_token"

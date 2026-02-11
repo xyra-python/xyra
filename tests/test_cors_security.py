@@ -12,13 +12,17 @@ class MockRequest:
         return self._headers.get(name.lower())
 
 
+from multidict import CIMultiDict
+
 class MockResponse:
     def __init__(self):
         self.headers_dict = {}
+        self.headers = CIMultiDict()
         self._ended = False
 
     def header(self, name, value):
         self.headers_dict[name] = value
+        self.headers[name] = value
 
     def status(self, code):
         pass

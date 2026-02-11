@@ -1,4 +1,5 @@
 import json
+from multidict import CIMultiDict
 
 from xyra import App
 from xyra.middleware.cors import CorsMiddleware
@@ -18,6 +19,7 @@ class MockRequest:
 class MockResponse:
     def __init__(self):
         self._headers = {}
+        self.headers = CIMultiDict()
         self._status_code = 200
         self._body = None
         self._ended = False
@@ -25,6 +27,7 @@ class MockResponse:
 
     def header(self, key, value):
         self._headers[key] = value
+        self.headers[key] = value
 
     def status(self, code):
         self._status_code = code

@@ -40,6 +40,7 @@ class CorsMiddleware:
                 "Content-Type",
                 "Authorization",
                 "X-Requested-With",
+                "X-CSRF-Token",
             ]
 
         self.allow_credentials = allow_credentials
@@ -74,9 +75,19 @@ class CorsMiddleware:
         # This is safer and more standard than reflecting the request's Origin header.
         if "*" in self.allowed_origins and not self.allow_credentials:
             response.header("Access-Control-Allow-Origin", "*")
+            # SECURITY: Always set Vary: Origin when the response depends on the Origin header.
+            try:
+                response.vary("Origin")
+            except (AttributeError, TypeError):
+                response.header("Vary", "Origin")
         elif origin and self._is_origin_allowed(origin):
             # Reflect the origin only if it's explicitly allowed and credentials are required
             response.header("Access-Control-Allow-Origin", origin)
+            # SECURITY: Always set Vary: Origin when the response depends on the Origin header.
+            try:
+                response.vary("Origin")
+            except (AttributeError, TypeError):
+                response.header("Vary", "Origin")
 
         # Set other CORS headers
         response.header("Access-Control-Allow-Methods", ", ".join(self.allowed_methods))
