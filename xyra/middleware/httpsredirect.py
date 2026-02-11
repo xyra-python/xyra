@@ -35,14 +35,14 @@ class HTTPSRedirectMiddleware:
         # Headers keys are lowercase in Xyra Request
         forwarded_proto = "http"
         if self.trust_proxy:
-            forwarded_proto = req.headers.get("x-forwarded-proto", "http").lower()
+            forwarded_proto = req.get_header("x-forwarded-proto", "http").lower()
 
         # If we are already https, do nothing
         if forwarded_proto == "https":
             return
 
         # If no host header, we can't redirect reliably
-        host = req.headers.get("host")
+        host = req.get_header("host")
         if not host:
             # If we can't determine host, we can't redirect safely.
             res.status(400)
