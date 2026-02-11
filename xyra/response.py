@@ -2,6 +2,8 @@ import re
 import sys
 from typing import Any
 
+from .datastructures import Headers
+
 if sys.implementation.name == "pypy":
     import ujson as json_lib
 else:
@@ -21,6 +23,10 @@ _COOKIE_QUOTE_PATTERN = re.compile(r"[^!#$%&'*+\-.0-9:A-Z^_`a-z|~]")
 # Token chars: ! # $ % & ' * + - . 0-9 A-Z ^ _ ` a-z | ~
 # Note: : is a separator, so it is NOT allowed in name.
 _COOKIE_NAME_PATTERN = re.compile(r"^[!#$%&'*+\-.0-9A-Z^_`a-z|~]+$")
+
+# SECURITY: Regex to match control characters except HTAB (\t)
+# Matches 0x00-0x08, 0x0A-0x1F, 0x7F
+_CONTROL_CHARS_PATTERN = re.compile(r"[\x00-\x08\x0a-\x1f\x7f]")
 
 
 class Response:
@@ -57,7 +63,7 @@ class Response:
             templating: Optional templating engine for rendering templates.
         """
         self._res = res
-        self.headers: dict[str, str] = {}
+        self.headers = Headers()
         self.status_code: int = 200
         self.templating = templating
         self._ended = False
@@ -99,9 +105,13 @@ class Response:
 
     def header(self, key: str, value: str) -> "Response":
         """Set a response header."""
-        # SECURITY: Prevent Header Injection (CRLF)
-        if "\n" in key or "\r" in key or "\n" in value or "\r" in value:
-            raise ValueError("Header injection detected")
+        # SECURITY:
+        # Risk: Header injection (CRLF) and response splitting.
+        # Attack: Attacker injects \r\n to start a new header or response body.
+        # Mitigation: Reject all control characters (except HTAB) in keys and values.
+        if _CONTROL_CHARS_PATTERN.search(key) or _CONTROL_CHARS_PATTERN.search(value):
+            raise ValueError("Invalid characters in header (injection attempt)")
+
         self.headers[key] = value
         return self
 
@@ -237,7 +247,16 @@ class Response:
             cookie_parts.append(f"SameSite={same_site}")
 
         cookie_string = "; ".join(cookie_parts)
-        self.header("Set-Cookie", cookie_string)
+
+        # SECURITY: Prevent Header Injection in cookies
+        if _CONTROL_CHARS_PATTERN.search(cookie_string):
+            raise ValueError("Invalid characters in cookie")
+
+        # SECURITY:
+        # Risk: Multiple cookies being overwritten.
+        # Attack: If a session/CSRF cookie is overwritten by a later cookie, security is bypassed.
+        # Mitigation: Use CIMultiDict and .add() to ensure all Set-Cookie headers are sent.
+        self.headers.add("Set-Cookie", cookie_string)
         return self
 
     def clear_cookie(

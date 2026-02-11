@@ -248,33 +248,37 @@ def test_response_api_stability():
 
 
 def test_response_set_cookie_quoting(mock_socketify_response):
-    response = Response(mock_socketify_response)
-
     # Space
+    response = Response(mock_socketify_response)
     response.set_cookie("space", "hello world")
     cookie = response.headers["Set-Cookie"]
     assert 'space="hello world"' in cookie
 
     # Semicolon - SHOULD FAIL
+    response = Response(mock_socketify_response)
     with pytest.raises(ValueError, match="Cookie value cannot contain ';'"):
         response.set_cookie("semicolon", "a;b")
 
     # Invalid Name - SHOULD FAIL
+    response = Response(mock_socketify_response)
     with pytest.raises(ValueError, match="Invalid cookie name"):
         response.set_cookie("invalid=name", "value")
 
     # Quotes
+    response = Response(mock_socketify_response)
     response.set_cookie("quotes", 'a"b')
     cookie = response.headers["Set-Cookie"]
     # Expect escaping: "a\"b"
     assert 'quotes="a\\"b"' in cookie
 
     # Comma
+    response = Response(mock_socketify_response)
     response.set_cookie("comma", "a,b")
     cookie = response.headers["Set-Cookie"]
     assert 'comma="a,b"' in cookie
 
     # Safe chars (no quoting)
+    response = Response(mock_socketify_response)
     response.set_cookie("safe", "abc-123.456")
     cookie = response.headers["Set-Cookie"]
     assert "safe=abc-123.456" in cookie
