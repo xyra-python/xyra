@@ -1,7 +1,9 @@
 import hashlib
 import hmac
 import secrets
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
+
+import pytest
 
 from xyra.middleware import CSRFMiddleware, csrf
 
@@ -42,14 +44,15 @@ def test_csrf_middleware_custom():
     assert "Lax" in middleware.same_site
 
 
-def test_csrf_middleware_option():
+@pytest.mark.asyncio
+async def test_csrf_middleware_option():
     middleware = CSRFMiddleware()
     request = Mock()
     request.method = "OPTIONS"
     request.get_header.return_value = None  # No cookie header
     response = Mock()
     response._ended = False
-    middleware(request, response)
+    await middleware(request, response)
     # For OPTIONS, should not set status or end response
     response.status.assert_not_called()
     assert response._ended is False
@@ -83,14 +86,16 @@ def test_csrf_custom_function():
     assert "Lax" in middleware.same_site
 
 
-def test_csrf_middleware_post_without_token():
+@pytest.mark.asyncio
+async def test_csrf_middleware_post_without_token():
     middleware = CSRFMiddleware()
     request = Mock()
     request.method = "POST"
     request.get_header.return_value = None  # No cookie header
+    request.is_form.return_value = False
     response = Mock()
     response._ended = False
-    middleware(request, response)
+    await middleware(request, response)
     response.status.assert_called_once_with(403)
     # Message might be "CSRF token missing" or "invalid" depending on impl
     # In my impl, if cookie is missing, it creates new one, then checks header vs new one.
@@ -99,7 +104,8 @@ def test_csrf_middleware_post_without_token():
     assert response._ended is True
 
 
-def test_csrf_middleware_post_with_invalid_token():
+@pytest.mark.asyncio
+async def test_csrf_middleware_post_with_invalid_token():
     middleware = CSRFMiddleware()
     request = Mock()
     request.method = "POST"
@@ -111,15 +117,17 @@ def test_csrf_middleware_post_with_invalid_token():
         "cookie": f"csrf_token={signed_token}",
         "X-CSRF-Token": "invalid_token",
     }.get(name)
+    request.is_form.return_value = False
     response = Mock()
     response._ended = False
-    middleware(request, response)
+    await middleware(request, response)
     response.status.assert_called_once_with(403)
     response.json.assert_called_once_with({"error": "CSRF token invalid"})
     assert response._ended is True
 
 
-def test_csrf_middleware_post_with_valid_token():
+@pytest.mark.asyncio
+async def test_csrf_middleware_post_with_valid_token():
     middleware = CSRFMiddleware()
     token = secrets.token_urlsafe(32)
     signed_token = _sign_token(token, middleware.secret_key)
@@ -131,23 +139,25 @@ def test_csrf_middleware_post_with_valid_token():
         "cookie": f"csrf_token={signed_token}",
         "X-CSRF-Token": masked_token,
     }.get(name)
+    request.is_form.return_value = False
     response = Mock()
     response._ended = False
-    middleware(request, response)
+    await middleware(request, response)
     # Should not call status or json for valid token
     response.status.assert_not_called()
     response.json.assert_not_called()
     assert response._ended is False
 
 
-def test_csrf_middleware_get_sets_cookie():
+@pytest.mark.asyncio
+async def test_csrf_middleware_get_sets_cookie():
     middleware = CSRFMiddleware()
     request = Mock()
     request.method = "GET"
     request.get_header.return_value = None  # No cookie header
     response = Mock()
     response._ended = False
-    middleware(request, response)
+    await middleware(request, response)
     # Should set cookie
     response.set_cookie.assert_called_once()
     args, kwargs = response.set_cookie.call_args
@@ -160,7 +170,8 @@ def test_csrf_middleware_get_sets_cookie():
     assert kwargs["same_site"] == "Lax"
 
 
-def test_csrf_middleware_cookie_parsing():
+@pytest.mark.asyncio
+async def test_csrf_middleware_cookie_parsing():
     middleware = CSRFMiddleware()
     token = secrets.token_urlsafe(32)
     signed_token = _sign_token(token, middleware.secret_key)
@@ -173,15 +184,17 @@ def test_csrf_middleware_cookie_parsing():
         "cookie": f'csrf_token="{signed_token}"; other=value',
         "X-CSRF-Token": masked_token,
     }.get(name)
+    request.is_form.return_value = False
     response = Mock()
     response._ended = False
-    middleware(request, response)
+    await middleware(request, response)
     # Should not call status for valid token
     response.status.assert_not_called()
     assert response._ended is False
 
 
-def test_csrf_middleware_head_method():
+@pytest.mark.asyncio
+async def test_csrf_middleware_head_method():
     """Test that HEAD method is exempt by default."""
     middleware = CSRFMiddleware()
     request = Mock()
@@ -189,13 +202,14 @@ def test_csrf_middleware_head_method():
     request.get_header.return_value = None
     response = Mock()
     response._ended = False
-    middleware(request, response)
+    await middleware(request, response)
     # Should not set status for exempt method
     response.status.assert_not_called()
     assert response._ended is False
 
 
-def test_csrf_middleware_custom_cookie_settings():
+@pytest.mark.asyncio
+async def test_csrf_middleware_custom_cookie_settings():
     """Test CSRF with custom cookie settings."""
     # When secure=True, it should use __Host- prefix
     middleware = CSRFMiddleware(secure=True, http_only=False, same_site="Strict")
@@ -206,7 +220,7 @@ def test_csrf_middleware_custom_cookie_settings():
     request.get_header.return_value = None
     response = Mock()
     response._ended = False
-    middleware(request, response)
+    await middleware(request, response)
 
     # Should set cookie with custom settings
     response.set_cookie.assert_called_once()
@@ -217,7 +231,8 @@ def test_csrf_middleware_custom_cookie_settings():
     assert kwargs["same_site"] == "Strict"
 
 
-def test_csrf_middleware_multiple_cookies():
+@pytest.mark.asyncio
+async def test_csrf_middleware_multiple_cookies():
     """Test parsing CSRF token from multiple cookies."""
     middleware = CSRFMiddleware()
     token = secrets.token_urlsafe(32)
@@ -230,15 +245,17 @@ def test_csrf_middleware_multiple_cookies():
         "cookie": f"session=abc123; csrf_token={signed_token}; user=john",
         "X-CSRF-Token": masked_token,
     }.get(name)
+    request.is_form.return_value = False
     response = Mock()
     response._ended = False
-    middleware(request, response)
+    await middleware(request, response)
     # Should not call status for valid token
     response.status.assert_not_called()
     assert response._ended is False
 
 
-def test_csrf_middleware_no_cookie_header():
+@pytest.mark.asyncio
+async def test_csrf_middleware_no_cookie_header():
     """Test when there's no cookie header at all."""
     middleware = CSRFMiddleware()
     request = Mock()
@@ -247,16 +264,18 @@ def test_csrf_middleware_no_cookie_header():
         "cookie": None,  # No cookie header
         "X-CSRF-Token": "some_token",
     }.get(name)
+    request.is_form.return_value = False
     response = Mock()
     response._ended = False
-    middleware(request, response)
+    await middleware(request, response)
     # Should return 403 for missing token (it will try to generate one, but validation fails as header won't match)
     response.status.assert_called_once_with(403)
     response.json.assert_called_once_with({"error": "CSRF token invalid"})
     assert response._ended is True
 
 
-def test_csrf_middleware_empty_cookie():
+@pytest.mark.asyncio
+async def test_csrf_middleware_empty_cookie():
     """Test when cookie header exists but CSRF token is not present."""
     middleware = CSRFMiddleware()
     request = Mock()
@@ -265,16 +284,18 @@ def test_csrf_middleware_empty_cookie():
         "cookie": "session=abc123; user=john",  # No CSRF token
         "X-CSRF-Token": "some_token",
     }.get(name)
+    request.is_form.return_value = False
     response = Mock()
     response._ended = False
-    middleware(request, response)
+    await middleware(request, response)
     # Should return 403
     response.status.assert_called_once_with(403)
     response.json.assert_called_once_with({"error": "CSRF token invalid"})
     assert response._ended is True
 
 
-def test_csrf_rejection_of_unsigned_token():
+@pytest.mark.asyncio
+async def test_csrf_rejection_of_unsigned_token():
     """Test that unsigned or spoofed tokens are rejected."""
     middleware = CSRFMiddleware(secret_key="my_secret")
 
@@ -287,11 +308,12 @@ def test_csrf_rejection_of_unsigned_token():
         "cookie": f"csrf_token={attacker_token}",
         "X-CSRF-Token": attacker_token,
     }.get(name)
+    request.is_form.return_value = False
 
     response = Mock()
     response._ended = False
 
-    middleware(request, response)
+    await middleware(request, response)
 
     # Validation should fail because the cookie token signature is invalid
     # So middleware treats cookie as missing, generates a NEW token.
@@ -303,7 +325,8 @@ def test_csrf_rejection_of_unsigned_token():
     assert response._ended is True
 
 
-def test_csrf_rejection_of_invalid_signature():
+@pytest.mark.asyncio
+async def test_csrf_rejection_of_invalid_signature():
     """Test that a token with invalid signature is rejected."""
     middleware = CSRFMiddleware(secret_key="my_secret")
 
@@ -318,17 +341,19 @@ def test_csrf_rejection_of_invalid_signature():
         "cookie": f"csrf_token={spoofed_token}",
         "X-CSRF-Token": spoofed_token,
     }.get(name)
+    request.is_form.return_value = False
 
     response = Mock()
     response._ended = False
 
-    middleware(request, response)
+    await middleware(request, response)
 
     response.status.assert_called_once_with(403)
     assert response._ended is True
 
 
-def test_csrf_token_on_request():
+@pytest.mark.asyncio
+async def test_csrf_token_on_request():
     """Test that the CSRF token is attached to the request object."""
     middleware = CSRFMiddleware()
     request = Mock()
@@ -338,7 +363,7 @@ def test_csrf_token_on_request():
     response = Mock()
     response._ended = False
 
-    middleware(request, response)
+    await middleware(request, response)
 
     assert hasattr(request, "csrf_token")
     assert request.csrf_token is not None
@@ -346,3 +371,60 @@ def test_csrf_token_on_request():
     assert "." not in request.csrf_token
     # But unmasking it should result in a signed token with '.'
     assert "." in middleware._unmask_token(request.csrf_token)
+
+
+@pytest.mark.asyncio
+async def test_csrf_middleware_form_token():
+    """Test CSRF protection using a token from form data."""
+    middleware = CSRFMiddleware()
+    token = secrets.token_urlsafe(32)
+    signed_token = _sign_token(token, middleware.secret_key)
+    masked_token = middleware._mask_token(signed_token)
+
+    request = Mock()
+    request.method = "POST"
+    # No token in header
+    request.get_header.side_effect = lambda name: {
+        "cookie": f"csrf_token={signed_token}",
+        "X-CSRF-Token": None,
+    }.get(name)
+
+    # Token in form body
+    request.is_form.return_value = True
+    request.form = AsyncMock(return_value={"_csrf": masked_token})
+
+    response = Mock()
+    response._ended = False
+
+    await middleware(request, response)
+
+    # Should not call status or json for valid token
+    response.status.assert_not_called()
+    assert response._ended is False
+
+
+@pytest.mark.asyncio
+async def test_csrf_middleware_form_token_alternative_name():
+    """Test CSRF protection using 'csrf_token' field name in form data."""
+    middleware = CSRFMiddleware()
+    token = secrets.token_urlsafe(32)
+    signed_token = _sign_token(token, middleware.secret_key)
+    masked_token = middleware._mask_token(signed_token)
+
+    request = Mock()
+    request.method = "POST"
+    request.get_header.side_effect = lambda name: {
+        "cookie": f"csrf_token={signed_token}",
+        "X-CSRF-Token": None,
+    }.get(name)
+
+    request.is_form.return_value = True
+    request.form = AsyncMock(return_value={"csrf_token": masked_token})
+
+    response = Mock()
+    response._ended = False
+
+    await middleware(request, response)
+
+    response.status.assert_not_called()
+    assert response._ended is False

@@ -38,7 +38,15 @@ class Response:
         _ended: Flag indicating if response has been sent.
     """
 
-    __slots__ = ("_res", "headers", "status_code", "templating", "_ended")
+    __slots__ = (
+        "_res",
+        "headers",
+        "status_code",
+        "templating",
+        "_ended",
+        "_body_cache",
+        "_body_future",
+    )
 
     def __init__(self, res: Any, templating=None):
         """
@@ -53,6 +61,8 @@ class Response:
         self.status_code: int = 200
         self.templating = templating
         self._ended = False
+        self._body_cache: bytes | None = None
+        self._body_future: asyncio.Future[bytes] | None = None
 
     def render(self, template_name: str, **kwargs) -> None:
         """Render a template with the given context.
@@ -312,20 +322,26 @@ class Response:
 
     async def get_data(self) -> bytes:
         """Get the request body data (async)."""
+        if self._body_cache is not None:
+            return self._body_cache
+
+        if self._body_future is not None:
+            return await self._body_future
+
         loop = asyncio.get_running_loop()
-        future = loop.create_future()
+        self._body_future = loop.create_future()
         chunks = []
         current_size = [0]
 
         def on_data(chunk, is_last):
             def resolve():
-                if future.done():
+                if self._body_future is None or self._body_future.done():
                     return
 
                 chunk_len = len(chunk)
                 # Check limit before appending
                 if current_size[0] + chunk_len > MAX_BODY_SIZE:
-                    future.set_exception(
+                    self._body_future.set_exception(
                         ValueError(
                             f"Request body too large (max {MAX_BODY_SIZE} bytes)"
                         )
@@ -336,20 +352,27 @@ class Response:
                 chunks.append(chunk)
 
                 if is_last:
-                    future.set_result(b"".join(chunks))
+                    result = b"".join(chunks)
+                    self._body_cache = result
+                    self._body_future.set_result(result)
 
             loop.call_soon_threadsafe(resolve)
 
         def on_abort():
             loop.call_soon_threadsafe(
-                lambda: future.done()
-                or future.set_exception(RuntimeError("Connection aborted"))
+                lambda: (self._body_future and self._body_future.done())
+                or (
+                    self._body_future
+                    and self._body_future.set_exception(
+                        RuntimeError("Connection aborted")
+                    )
+                )
             )
 
         self._res.on_data(on_data)
         self._res.on_aborted(on_abort)
 
-        return await future
+        return await self._body_future
 
     def get_remote_address_bytes(self) -> bytes:
         """Get the remote address as bytes."""

@@ -119,11 +119,24 @@ class CSRFMiddleware:
 
         return None
 
-    def _get_token_from_request(self, request: Request) -> str | None:
-        """Extract CSRF token from request header."""
-        return request.get_header(self.header_name)
+    async def _get_token_from_request(self, request: Request) -> str | None:
+        """Extract CSRF token from request header or form body."""
+        # 1. Check header
+        header_token = request.get_header(self.header_name)
+        if header_token:
+            return header_token
 
-    def __call__(self, request: Request, response: Response):
+        # 2. Check form body for traditional HTML form submissions
+        if request.is_form():
+            try:
+                form_data = await request.form()
+                return form_data.get("_csrf") or form_data.get("csrf_token")
+            except Exception:
+                return None
+
+        return None
+
+    async def __call__(self, request: Request, response: Response):
         """Handle CSRF protection for the request."""
         # Always try to get the existing token from cookie
         signed_cookie_token = self._get_cookie(request, self.cookie_name)
@@ -156,7 +169,7 @@ class CSRFMiddleware:
             return
 
         # For unsafe methods, verify the request token
-        masked_request_token = self._get_token_from_request(request)
+        masked_request_token = await self._get_token_from_request(request)
 
         if not masked_request_token:
             response.status(403)
