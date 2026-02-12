@@ -24,7 +24,12 @@ public:
             std::string value = std::string(std::get<1>(header));
             std::transform(key.begin(), key.end(), key.begin(),
                 [](unsigned char c){ return std::tolower(c); });
-            headers[key] = value;
+
+            if (headers.find(key) != headers.end()) {
+                headers[key] += ", " + value;
+            } else {
+                headers[key] = value;
+            }
         }
 
         for (int i = 0; ; ++i) {

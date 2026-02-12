@@ -166,3 +166,17 @@ def test_trusted_host_multiple_allowed(mock_req_res):
     req.get_header.return_value = "api.example.com" # Missing port
     middleware(req, res)
     assert res._ended
+
+def test_trusted_host_mixed_case(mock_req_res):
+    """Test mixed-case host header is accepted."""
+    req, res = mock_req_res
+    middleware = TrustedHostMiddleware(["example.com"])
+
+    req.get_header.return_value = "Example.com"
+    middleware(req, res)
+    assert not res._ended, "Should accept mixed-case host 'Example.com'"
+
+    res._ended = False
+    req.get_header.return_value = "EXAMPLE.COM"
+    middleware(req, res)
+    assert not res._ended, "Should accept upper-case host 'EXAMPLE.COM'"

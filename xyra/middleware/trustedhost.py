@@ -65,6 +65,9 @@ class TrustedHostMiddleware:
             res._ended = True
             return
 
+        # Lowercase host for case-insensitive matching
+        host = host.lower()
+
         # Parse request host
         req_domain, req_port = self._parse_host(host)
 
