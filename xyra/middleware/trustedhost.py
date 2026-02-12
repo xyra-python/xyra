@@ -16,9 +16,36 @@ class TrustedHostMiddleware:
         Initialize trusted host middleware.
 
         Args:
-            allowed_hosts: List of allowed hostnames
+            allowed_hosts: List of allowed hostnames.
+                           Example: ["example.com", "*.example.com", "example.com:8080"]
         """
         self.allowed_hosts = allowed_hosts
+        # Pre-parse allowed hosts for performance
+        self._patterns = [self._parse_host(host) for host in allowed_hosts]
+
+    def _parse_host(self, host: str) -> tuple[str, str | None]:
+        """
+        Parse a host string into (domain, port).
+        Handles IPv6 literals like [::1] or [::1]:8080 correctly.
+        """
+        if host.startswith("["):
+            # IPv6 literal
+            end_bracket = host.find("]")
+            if end_bracket != -1:
+                domain = host[: end_bracket + 1]
+                rest = host[end_bracket + 1 :]
+                if rest.startswith(":"):
+                    return domain, rest[1:]
+                return domain, None
+            # Malformed IPv6, treat as opaque string
+            return host, None
+
+        # IPv4 or domain name
+        if ":" in host:
+            domain, port = host.rsplit(":", 1)
+            return domain, port
+
+        return host, None
 
     def __call__(self, req: Request, res: Response):
         """Validate the request's Host header."""
@@ -38,33 +65,37 @@ class TrustedHostMiddleware:
             res._ended = True
             return
 
-        # Correctly handle IPv6 literals
-        if host.startswith("["):
-            # Find the closing bracket
-            end_index = host.find("]")
-            if end_index != -1:
-                host = host[: end_index + 1]
-            else:
-                # Malformed IPv6 literal? Fallback or treat as is
-                pass
-        else:
-            # IPv4 or domain name: remove port
-            host = host.split(":")[0]
+        # Parse request host
+        req_domain, req_port = self._parse_host(host)
 
         is_allowed = False
-        for allowed in self.allowed_hosts:
-            if allowed == "*":
+        for allowed_domain, allowed_port in self._patterns:
+            if allowed_domain == "*":
                 is_allowed = True
                 break
-            if allowed.startswith("*."):
-                # Wildcard subdomain
-                domain = allowed[2:]
-                if host == domain or host.endswith("." + domain):
+
+            # Check domain match
+            domain_match = False
+            if allowed_domain.startswith("*."):
+                # Wildcard subdomain matching
+                suffix = allowed_domain[2:]
+                # Matches "sub.example.com" AND "example.com"
+                if req_domain == suffix or req_domain.endswith("." + suffix):
+                    domain_match = True
+            elif allowed_domain == req_domain:
+                domain_match = True
+
+            # Check port match if domain matched
+            if domain_match:
+                # If allowed pattern specifies a port, request MUST match it exactly
+                if allowed_port is not None:
+                    if req_port == allowed_port:
+                        is_allowed = True
+                        break
+                else:
+                    # Allowed pattern has no port -> allow any port
                     is_allowed = True
                     break
-            if allowed == host:
-                is_allowed = True
-                break
 
         if not is_allowed:
             # Return 400 Bad Request for untrusted host
