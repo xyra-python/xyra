@@ -283,3 +283,24 @@ def test_response_set_cookie_quoting(mock_socketify_response):
     cookie = response.headers["Set-Cookie"]
     assert "safe=abc-123.456" in cookie
     assert '"safe=abc-123.456"' not in cookie  # Should not be quoted
+
+
+def test_response_set_cookie_same_site_none_secure(mock_socketify_response):
+    response = Response(mock_socketify_response)
+
+    # Valid: SameSite=None with Secure=True
+    response.set_cookie("valid", "value", same_site="None", secure=True)
+    cookie = response.headers["Set-Cookie"]
+    assert "SameSite=None" in cookie
+    assert "Secure" in cookie
+
+    # Invalid: SameSite=None with Secure=False
+    with pytest.raises(ValueError, match="SameSite=None requires Secure=True"):
+        response.set_cookie("invalid", "value", same_site="None", secure=False)
+
+    # Valid: SameSite=None (case insensitive) with Secure=True
+    response = Response(mock_socketify_response)
+    response.set_cookie("valid_lower", "value", same_site="none", secure=True)
+    cookie = response.headers["Set-Cookie"]
+    assert "SameSite=none" in cookie
+    assert "Secure" in cookie

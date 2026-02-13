@@ -19,9 +19,12 @@ class TrustedHostMiddleware:
             allowed_hosts: List of allowed hostnames.
                            Example: ["example.com", "*.example.com", "example.com:8080"]
         """
-        self.allowed_hosts = allowed_hosts
+        # SECURITY: Lowercase allowed hosts to ensure case-insensitive matching
+        # against the incoming Host header (which is also lowercased).
+        # This prevents bypasses where config is "Example.com" but request is "example.com".
+        self.allowed_hosts = [host.lower() for host in allowed_hosts]
         # Pre-parse allowed hosts for performance
-        self._patterns = [self._parse_host(host) for host in allowed_hosts]
+        self._patterns = [self._parse_host(host) for host in self.allowed_hosts]
 
     def _parse_host(self, host: str) -> tuple[str, str | None]:
         """

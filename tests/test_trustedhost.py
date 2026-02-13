@@ -180,3 +180,20 @@ def test_trusted_host_mixed_case(mock_req_res):
     req.get_header.return_value = "EXAMPLE.COM"
     middleware(req, res)
     assert not res._ended, "Should accept upper-case host 'EXAMPLE.COM'"
+
+def test_trusted_host_case_insensitive_config(mock_req_res):
+    """Test that configuration is case-insensitive."""
+    req, res = mock_req_res
+    # Config with uppercase
+    middleware = TrustedHostMiddleware(["Example.com"])
+
+    # Request with lowercase (standard browser behavior)
+    req.get_header.return_value = "example.com"
+    middleware(req, res)
+    assert not res._ended, "Should accept 'example.com' when config is 'Example.com'"
+
+    # Request with uppercase
+    res._ended = False
+    req.get_header.return_value = "Example.com"
+    middleware(req, res)
+    assert not res._ended, "Should accept 'Example.com' when config is 'Example.com'"
