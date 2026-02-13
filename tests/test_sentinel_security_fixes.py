@@ -1,11 +1,11 @@
-import time
-import secrets
-import base64
-import pytest
 from unittest.mock import Mock
-from xyra.middleware.rate_limiter import RateLimiter, rate_limiter
-from xyra.middleware.csrf import CSRFMiddleware
+
+import pytest
+
 from xyra.middleware.cors import CorsMiddleware
+from xyra.middleware.csrf import CSRFMiddleware
+from xyra.middleware.rate_limiter import RateLimiter
+
 
 def test_ratelimiter_lru_eviction():
     # Test that RateLimiter respects max_entries and evicts oldest

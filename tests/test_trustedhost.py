@@ -1,8 +1,11 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+
 from xyra.middleware.trustedhost import TrustedHostMiddleware
 from xyra.request import Request
 from xyra.response import Response
+
 
 @pytest.fixture
 def mock_req_res():

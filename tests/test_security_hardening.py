@@ -1,9 +1,12 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+from multidict import CIMultiDict
+
 from xyra.middleware.cors import CorsMiddleware
 from xyra.middleware.csrf import CSRFMiddleware
 from xyra.middleware.gzip import GzipMiddleware
-from multidict import CIMultiDict
+
 
 class MockHeaders(CIMultiDict):
     def __init__(self, *args, **kwargs):

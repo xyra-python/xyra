@@ -14,6 +14,7 @@ class MockRequest:
 
 from multidict import CIMultiDict
 
+
 class MockResponse:
     def __init__(self):
         self.headers_dict = {}

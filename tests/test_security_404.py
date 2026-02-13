@@ -1,6 +1,7 @@
-import pytest
 from unittest.mock import MagicMock
+
 from xyra.application import App
+
 
 def test_404_middleware_applied():
     """

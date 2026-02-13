@@ -1,7 +1,7 @@
+import os
+import sys
 import threading
 import time
-import sys
-import os
 import urllib.request
 
 # Ensure xyra is in path

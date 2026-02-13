@@ -1,6 +1,9 @@
-import pytest
 from unittest.mock import Mock
+
+import pytest
+
 from xyra.response import Response
+
 
 def test_multiple_cookies():
     mock_res = Mock()
