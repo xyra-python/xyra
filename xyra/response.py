@@ -244,6 +244,12 @@ class Response:
             cookie_parts.append("HttpOnly")
 
         if same_site:
+            # SECURITY: RFC 6265bis requires SameSite=None cookies to be Secure.
+            # Browsers (e.g. Chrome 80+) will reject SameSite=None without Secure.
+            # We enforce this to prevent developers from creating insecure cookies
+            # that would be silently dropped or expose users to risks.
+            if same_site.lower() == "none" and not secure:
+                raise ValueError("SameSite=None requires Secure=True")
             cookie_parts.append(f"SameSite={same_site}")
 
         cookie_string = "; ".join(cookie_parts)
