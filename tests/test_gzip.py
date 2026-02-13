@@ -1,9 +1,9 @@
 from unittest.mock import Mock
 
+from multidict import CIMultiDict
+
 from xyra.middleware import GzipMiddleware, gzip_middleware
 
-
-from multidict import CIMultiDict
 
 def _setup_response_mock():
     """Helper to setup response mock with proper header method."""

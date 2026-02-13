@@ -1,7 +1,7 @@
+import os
 import subprocess
 import sys
-import time
-import os
+
 
 def test_response_uaf():
     # Run the reproduction script in a subprocess
