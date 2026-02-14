@@ -225,10 +225,15 @@ class App:
             # SECURITY: Prevent Path Traversal
             try:
                 # Ensure directory path ends with a separator to prevent partial name match
-                abs_directory = os.path.join(os.path.realpath(directory), "")
+                # Use to_thread for blocking OS calls to prevent loop blocking
+                abs_directory = await asyncio.to_thread(
+                    lambda: os.path.join(os.path.realpath(directory), "")
+                )
                 # Normalize file_path and join securely
-                abs_path = os.path.realpath(
-                    os.path.join(abs_directory, file_path.lstrip("/"))
+                abs_path = await asyncio.to_thread(
+                    lambda: os.path.realpath(
+                        os.path.join(abs_directory, file_path.lstrip("/"))
+                    )
                 )
 
                 # Verify the resolved path is within the static directory
@@ -247,11 +252,18 @@ class App:
                 return
 
             full_path = abs_path
-            if os.path.exists(full_path) and os.path.isfile(full_path):
+
+            # Check existence and type asynchronously
+            exists = await asyncio.to_thread(os.path.exists, full_path)
+            is_file = False
+            if exists:
+                is_file = await asyncio.to_thread(os.path.isfile, full_path)
+
+            if exists and is_file:
                 # SECURITY: Check file size to prevent DoS via memory exhaustion.
                 # Since we read the whole file into memory, we must enforce a limit.
                 try:
-                    file_size = os.path.getsize(full_path)
+                    file_size = await asyncio.to_thread(os.path.getsize, full_path)
                     if file_size > MAX_BODY_SIZE:
                         res.status(413).text("Payload Too Large")
                         return
@@ -259,8 +271,16 @@ class App:
                     res.status(500).text("Internal Server Error")
                     return
 
-                with open(full_path, "rb") as f:
-                    content = f.read()
+                # Read file asynchronously
+                try:
+                    def read_file():
+                        with open(full_path, "rb") as f:
+                            return f.read()
+
+                    content = await asyncio.to_thread(read_file)
+                except OSError:
+                    res.status(500).text("Internal Server Error")
+                    return
 
                 # SECURITY: Use mimetypes for better Content-Type detection
                 content_type, _ = mimetypes.guess_type(full_path)
