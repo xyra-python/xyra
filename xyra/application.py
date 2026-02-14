@@ -235,6 +235,13 @@ class App:
                 if not abs_path.startswith(abs_directory):
                     res.status(403).text("Forbidden")
                     return
+
+                # SECURITY: Block access to hidden files/directories (dotfiles), except .well-known
+                rel_path = os.path.relpath(abs_path, abs_directory)
+                for part in rel_path.split(os.sep):
+                    if part.startswith(".") and part != ".well-known":
+                        res.status(403).text("Forbidden")
+                        return
             except Exception:
                 res.status(400).text("Bad Request")
                 return
@@ -258,6 +265,8 @@ class App:
                 # SECURITY: Use mimetypes for better Content-Type detection
                 content_type, _ = mimetypes.guess_type(full_path)
                 res.header("Content-Type", content_type or "application/octet-stream")
+                # SECURITY: Prevent MIME sniffing
+                res.header("X-Content-Type-Options", "nosniff")
                 res.send(content)
             else:
                 res.status(404).text("Not Found")
