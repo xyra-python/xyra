@@ -13,6 +13,7 @@ class SecurityHeadersMiddleware:
     - Referrer-Policy: strict-origin-when-cross-origin
     - X-Permitted-Cross-Domain-Policies: none
     - Cross-Origin-Opener-Policy: same-origin
+    - Permissions-Policy: geolocation=(), camera=(), microphone=()
 
     PERF: Headers are pre-calculated in __init__ to avoid overhead on every request.
     """
@@ -23,7 +24,7 @@ class SecurityHeadersMiddleware:
         hsts_include_subdomains: bool = True,
         hsts_preload: bool = False,
         content_security_policy: str | dict | None = None,
-        permissions_policy: str | dict | None = None,
+        permissions_policy: str | dict | None = "geolocation=(), camera=(), microphone=()",
         frame_options: str = "SAMEORIGIN",
         xss_protection: str = "1; mode=block",
         content_type_options: str = "nosniff",
@@ -111,7 +112,7 @@ def security_headers(
     hsts_include_subdomains: bool = True,
     hsts_preload: bool = False,
     content_security_policy: str | dict | None = None,
-    permissions_policy: str | dict | None = None,
+    permissions_policy: str | dict | None = "geolocation=(), camera=(), microphone=()",
     frame_options: str = "SAMEORIGIN",
     xss_protection: str = "1; mode=block",
     content_type_options: str = "nosniff",

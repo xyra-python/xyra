@@ -170,9 +170,23 @@ class CSRFMiddleware:
 
         # SECURITY: For HTTPS requests, verify the Origin/Referer (Defense in Depth).
         # This prevents CSRF even if the token is somehow leaked.
-        if self.secure:
+        # Check if request is secure (HTTPS) either by config or proxy header
+        is_https = self.secure
+        if not is_https:
+            proto = request.get_header("x-forwarded-proto")
+            if proto and proto.lower() == "https":
+                is_https = True
+
+        if is_https:
             source = request.get_header("origin") or request.get_header("referer")
             host = request.get_header("host")
+
+            if not host:
+                response.status(400)
+                response.json({"error": "Host header missing"})
+                response._ended = True
+                return
+
             expected = f"https://{host}"
 
             if not source or (source != expected and not source.startswith(f"{expected}/")):

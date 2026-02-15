@@ -469,6 +469,17 @@ class App:
         )
         self._app.any("/*", wrap_async(final_handler))
 
+    def enable_security_headers(self, **kwargs):
+        """
+        Enable Security Headers middleware with safe defaults.
+
+        Args:
+            **kwargs: Arguments passed to SecurityHeadersMiddleware.
+        """
+        from .middleware.security_headers import SecurityHeadersMiddleware
+
+        self.use(SecurityHeadersMiddleware(**kwargs))
+
     def enable_swagger(self, host: str = "localhost", port: int = 8000):
         """
         Enable Swagger UI documentation for the API.
