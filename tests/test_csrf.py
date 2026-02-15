@@ -428,3 +428,30 @@ async def test_csrf_middleware_form_token_alternative_name():
 
     response.status.assert_not_called()
     assert response._ended is False
+
+@pytest.mark.asyncio
+async def test_csrf_spa_raw_token():
+    """Test SPA flow where client reads cookie and sends raw signed token."""
+    middleware = CSRFMiddleware(http_only=False)
+
+    # Generate a signed token (what would be in the cookie)
+    # We use internal method to simulate cookie generation
+    signed_token = middleware._generate_token()
+
+    request = Mock()
+    request.method = "POST"
+    # Client sends the raw signed token (read from cookie) in the header
+    request.get_header.side_effect = lambda name: {
+        "cookie": f"csrf_token={signed_token}",
+        "X-CSRF-Token": signed_token,
+    }.get(name)
+    request.is_form.return_value = False
+
+    response = Mock()
+    response._ended = False
+
+    await middleware(request, response)
+
+    # Should be accepted
+    response.status.assert_not_called()
+    assert response._ended is False

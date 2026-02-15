@@ -207,6 +207,11 @@ class CSRFMiddleware:
         # Unmask to get the signed token
         request_token = self._unmask_token(masked_request_token)
 
+        # If unmasking failed (or wasn't masked), try using the token as-is
+        # This supports SPAs that read the cookie (if http_only=False) and send it directly
+        if request_token is None:
+            request_token = masked_request_token
+
         if not request_token or not secrets.compare_digest(
             request_token, signed_cookie_token
         ):
