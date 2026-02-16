@@ -364,6 +364,18 @@ class Response:
         self._header_fast("Expires", "0")
         return self
 
+    def close(self) -> None:
+        """
+        Close the connection immediately.
+
+        usage:
+            @app.get("/")
+            def close(req: Request, res: Response):
+                res.close()
+        """
+        self._res.close()
+        self._ended = True
+
     async def get_data(self) -> bytes:
         """Get the request body data (async)."""
         if self._body_cache is not None:
@@ -385,6 +397,11 @@ class Response:
                 chunk_len = len(chunk)
                 # Check limit before appending
                 if current_size[0] + chunk_len > MAX_BODY_SIZE:
+                    # SECURITY: Abort connection immediately to prevent DoS via large payload
+                    # This stops the client from sending more data
+                    if hasattr(self._res, "close"):
+                        self._res.close()
+
                     self._body_future.set_exception(
                         ValueError(
                             f"Request body too large (max {MAX_BODY_SIZE} bytes)"
