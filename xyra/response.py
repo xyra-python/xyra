@@ -231,10 +231,16 @@ class Response:
         if expires:
             cookie_parts.append(f"Expires={expires}")
 
+        # SECURITY: Validate cookie attributes to prevent Attribute Injection
+        # Values like Path, Domain, and SameSite must not contain semicolons or control characters.
         if path:
+            if ";" in path or _CONTROL_CHARS_PATTERN.search(path):
+                raise ValueError("Invalid characters in Path attribute")
             cookie_parts.append(f"Path={path}")
 
         if domain:
+            if ";" in domain or _CONTROL_CHARS_PATTERN.search(domain):
+                raise ValueError("Invalid characters in Domain attribute")
             cookie_parts.append(f"Domain={domain}")
 
         if secure:
@@ -250,6 +256,9 @@ class Response:
             # that would be silently dropped or expose users to risks.
             if same_site.lower() == "none" and not secure:
                 raise ValueError("SameSite=None requires Secure=True")
+
+            if ";" in same_site or _CONTROL_CHARS_PATTERN.search(same_site):
+                raise ValueError("Invalid characters in SameSite attribute")
             cookie_parts.append(f"SameSite={same_site}")
 
         cookie_string = "; ".join(cookie_parts)
