@@ -19,7 +19,9 @@ public:
         method = std::string(req->getMethod());
         query = std::string(req->getQuery());
 
+        int header_count = 0;
         for (auto header : *req) {
+            if (++header_count > 100) break; // Limit headers count
             std::string key = std::string(std::get<0>(header));
             std::string value = std::string(std::get<1>(header));
             std::transform(key.begin(), key.end(), key.begin(),
@@ -98,6 +100,13 @@ public:
         });
     }
 
+    void close() {
+        if (*aborted) return;
+        loop->defer([res = res, aborted = aborted]() {
+            if (!*aborted) res->close();
+        });
+    }
+
     void on_data(py::function callback) {
         if (*aborted) return;
         res->onData([callback, a = aborted](std::string_view chunk, bool isLast) {
@@ -161,6 +170,7 @@ PYBIND11_MODULE(libxyra, m) {
         .def("write_status", &Response::write_status)
         .def("write_header", &Response::write_header)
         .def("end", &Response::end)
+        .def("close", &Response::close)
         .def("on_data", &Response::on_data)
         .def("on_aborted", &Response::on_aborted)
         .def("get_remote_address_bytes", &Response::get_remote_address_bytes);

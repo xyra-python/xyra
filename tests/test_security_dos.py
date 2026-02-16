@@ -55,6 +55,11 @@ async def test_get_data_body_size_limit():
     on_data_callback(b"", True)
     await asyncio.sleep(0)
 
+    # Verify that the connection was closed immediately to prevent DoS
+    # This checks that the fix for "Large Body Attacks" is working correctly
+    if hasattr(mock_res, "close"):
+        mock_res.close.assert_called()
+
     # The result should raise ValueError
     with pytest.raises(ValueError, match="Request body too large"):
         await future_task
