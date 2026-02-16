@@ -93,3 +93,21 @@ def test_set_cookie_semicolon_rejection():
 
     with pytest.raises(ValueError, match="Cookie value cannot contain ';'"):
         res.set_cookie("prefs", "lang=en; Secure")
+
+
+def test_set_cookie_attribute_injection_prevention():
+    """Test prevention of attribute injection via path, domain, and same_site."""
+    mock_res = MockSocketifyResponse()
+    res = Response(mock_res)
+
+    # Attempt to inject via path
+    with pytest.raises(ValueError, match="Invalid characters in Path attribute"):
+        res.set_cookie("session", "value", path="/; Secure; SameSite=Strict")
+
+    # Attempt to inject via same_site
+    with pytest.raises(ValueError, match="Invalid characters in SameSite attribute"):
+        res.set_cookie("session", "value", same_site="Lax; Secure")
+
+    # Attempt to inject via domain
+    with pytest.raises(ValueError, match="Invalid characters in Domain attribute"):
+        res.set_cookie("session", "value", domain="example.com; Secure")

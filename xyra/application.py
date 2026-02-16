@@ -417,8 +417,10 @@ class App:
                     # Only log errors, redirects, or slow requests (>100ms)
                     if response.status_code >= 400 or duration > 100:
                         req_logger = get_logger("xyra")
+                        # SECURITY: Sanitize URL to prevent Log Injection (CRLF)
+                        safe_url = request.url.replace("\n", "%0A").replace("\r", "%0D")
                         req_logger.info(
-                            f"{request.method} {request.url} {response.status_code} {duration}ms"
+                            f"{request.method} {safe_url} {response.status_code} {duration}ms"
                         )
             except Exception as e:
                 # Log the full traceback for debugging
