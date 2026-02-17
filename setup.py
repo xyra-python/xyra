@@ -70,12 +70,13 @@ class CMakeBuild(build_ext):
 
 setup(
     name='xyra',
-    version='0.2.1',
+    version='0.2.2',
     author='Xyra Team',
     author_email='team@xyra.dev',
     description='High Performance Frameworks, Easy to learn and Ready for Production',
     long_description='',
     ext_modules=[CMakeExtension('xyra.libxyra', sourcedir='xyra/native')],
     cmdclass={"build_ext": CMakeBuild},
+    include_package_data=True,
     zip_safe=False,
 )
