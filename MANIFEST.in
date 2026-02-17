@@ -1,3 +1,24 @@
 recursive-include xyra/native *
-recursive-include xyra/uWebSockets *
+recursive-include xyra/uWebSockets/src *
+recursive-include xyra/uWebSockets/uSockets/src *
+include xyra/uWebSockets/LICENSE
+include xyra/uWebSockets/uSockets/LICENSE
+
+prune xyra/uWebSockets/benchmarks
+prune xyra/uWebSockets/examples
+prune xyra/uWebSockets/fuzzing
+prune xyra/uWebSockets/h1spec
+prune xyra/uWebSockets/libEpollBenchmarker
+prune xyra/uWebSockets/libdeflate
+prune xyra/uWebSockets/misc
+prune xyra/uWebSockets/tests
+
+prune xyra/uWebSockets/uSockets/boringssl
+prune xyra/uWebSockets/uSockets/examples
+prune xyra/uWebSockets/uSockets/lsquic
+prune xyra/uWebSockets/uSockets/misc
+prune xyra/uWebSockets/uSockets/tests
+
 global-exclude .git*
+global-exclude *.py[co]
+global-exclude __pycache__

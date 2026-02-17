@@ -3,8 +3,6 @@ import platform
 import re
 import subprocess
 import sys
-from distutils.version import LooseVersion
-
 from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
 
@@ -24,9 +22,12 @@ class CMakeBuild(build_ext):
                                ", ".join(e.name for e in self.extensions)) from e
 
         if platform.system() == "Windows":
-            cmake_version = LooseVersion(re.search(r'version\s*([\d.]+)', out.decode()).group(1))
-            if cmake_version < '3.1.0':
-                raise RuntimeError("CMake >= 3.1.0 is required on Windows")
+            match = re.search(r'version\s*([\d.]+)', out.decode())
+            if match:
+                cmake_version_str = match.group(1)
+                cmake_version = tuple(int(x) for x in cmake_version_str.split('.') if x.isdigit())
+                if cmake_version < (3, 1, 0):
+                    raise RuntimeError("CMake >= 3.1.0 is required on Windows")
 
         for ext in self.extensions:
             self.build_extension(ext)
