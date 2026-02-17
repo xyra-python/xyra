@@ -1,4 +1,4 @@
-from .params import parse_path
+from .libxyra import parse_path
 
 
 class Router:

@@ -3,6 +3,7 @@ import sys
 from typing import Any
 
 from .datastructures import Headers
+from .libxyra import format_cookie
 
 if sys.implementation.name == "pypy":
     import ujson as json_lib
@@ -13,16 +14,6 @@ import asyncio
 
 # Security: Limit maximum request body size to 10MB to prevent DoS
 MAX_BODY_SIZE = 10 * 1024 * 1024
-
-# Regex to check if cookie value needs quoting (contains chars outside legal set)
-# Legal chars: letters, digits, ! # $ % & ' * + - . : ^ _ ` | ~
-# Note: hyphen must be escaped or at start/end of class
-_COOKIE_QUOTE_PATTERN = re.compile(r"[^!#$%&'*+\-.0-9:A-Z^_`a-z|~]")
-
-# Regex to check valid cookie name chars (RFC 6265 token)
-# Token chars: ! # $ % & ' * + - . 0-9 A-Z ^ _ ` a-z | ~
-# Note: : is a separator, so it is NOT allowed in name.
-_COOKIE_NAME_PATTERN = re.compile(r"^[!#$%&'*+\-.0-9A-Z^_`a-z|~]+$")
 
 # SECURITY: Regex to match control characters except HTAB (\t)
 # Matches 0x00-0x08, 0x0A-0x1F, 0x7F
@@ -208,70 +199,20 @@ class Response:
                 res.json({"message": "hello world"})
                 res.set_cookie("session_id", "abc123", max_age=3600, secure=True)
         """
-        # PERF: Manual string formatting is faster than SimpleCookie
-        if not _COOKIE_NAME_PATTERN.match(name):
-            raise ValueError(f"Invalid cookie name: {name}")
+        # Optimized native implementation
+        try:
+            cookie_string = format_cookie(
+                name, value, max_age, expires, path, domain, secure, http_only, same_site
+            )
+            # SECURITY:
+            # Risk: Multiple cookies being overwritten.
+            # Attack: If a session/CSRF cookie is overwritten by a later cookie, security is bypassed.
+            # Mitigation: Use CIMultiDict and .add() to ensure all Set-Cookie headers are sent.
+            self.headers.add("Set-Cookie", cookie_string)
+        except ValueError as e:
+            # Re-raise as ValueError if it comes from C++ binding (mapped from std::invalid_argument)
+            raise ValueError(str(e)) from e
 
-        # Quote value if necessary (contains special chars like space, semicolon, etc.)
-        if _COOKIE_QUOTE_PATTERN.search(value):
-            # SECURITY: Disallow semicolon in cookie value even if quoted.
-            # RFC 6265 forbids semicolon in cookie-value (even inside DQUOTE).
-            # Allowing it risks attribute injection in lax parsers.
-            if ";" in value:
-                raise ValueError("Cookie value cannot contain ';'. Please encode it.")
-
-            escaped_value = value.replace("\\", "\\\\").replace("\"", "\\\"")
-            value = f'"{escaped_value}"'
-
-        cookie_parts = [f"{name}={value}"]
-
-        if max_age is not None:
-            cookie_parts.append(f"Max-Age={max_age}")
-
-        if expires:
-            cookie_parts.append(f"Expires={expires}")
-
-        # SECURITY: Validate cookie attributes to prevent Attribute Injection
-        # Values like Path, Domain, and SameSite must not contain semicolons or control characters.
-        if path:
-            if ";" in path or _CONTROL_CHARS_PATTERN.search(path):
-                raise ValueError("Invalid characters in Path attribute")
-            cookie_parts.append(f"Path={path}")
-
-        if domain:
-            if ";" in domain or _CONTROL_CHARS_PATTERN.search(domain):
-                raise ValueError("Invalid characters in Domain attribute")
-            cookie_parts.append(f"Domain={domain}")
-
-        if secure:
-            cookie_parts.append("Secure")
-
-        if http_only:
-            cookie_parts.append("HttpOnly")
-
-        if same_site:
-            # SECURITY: RFC 6265bis requires SameSite=None cookies to be Secure.
-            # Browsers (e.g. Chrome 80+) will reject SameSite=None without Secure.
-            # We enforce this to prevent developers from creating insecure cookies
-            # that would be silently dropped or expose users to risks.
-            if same_site.lower() == "none" and not secure:
-                raise ValueError("SameSite=None requires Secure=True")
-
-            if ";" in same_site or _CONTROL_CHARS_PATTERN.search(same_site):
-                raise ValueError("Invalid characters in SameSite attribute")
-            cookie_parts.append(f"SameSite={same_site}")
-
-        cookie_string = "; ".join(cookie_parts)
-
-        # SECURITY: Prevent Header Injection in cookies
-        if _CONTROL_CHARS_PATTERN.search(cookie_string):
-            raise ValueError("Invalid characters in cookie")
-
-        # SECURITY:
-        # Risk: Multiple cookies being overwritten.
-        # Attack: If a session/CSRF cookie is overwritten by a later cookie, security is bypassed.
-        # Mitigation: Use CIMultiDict and .add() to ensure all Set-Cookie headers are sent.
-        self.headers.add("Set-Cookie", cookie_string)
         return self
 
     def clear_cookie(
