@@ -1,15 +1,16 @@
 import os
 import sys
 import tempfile
-import asyncio
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 # Ensure libxyra is mocked
 if "xyra.libxyra" not in sys.modules:
     sys.modules["xyra.libxyra"] = MagicMock()
 
 from xyra import App, Request, Response
+
 
 @pytest.mark.asyncio
 async def test_static_files_security():

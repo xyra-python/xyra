@@ -1,12 +1,10 @@
 
-import pytest
-from unittest.mock import MagicMock, patch
-import sys
 import logging
 
+import pytest
+
 from xyra.application import App
-from xyra.request import Request
-from xyra.response import Response
+
 
 class MockNativeRequest:
     def __init__(self, url="/test", method="GET"):

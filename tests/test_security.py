@@ -59,7 +59,7 @@ def test_cors_secure_wildcard():
     middleware(req, res)
 
     assert "Access-Control-Allow-Origin" not in res._headers
-    assert res._headers.get("Access-Control-Allow-Credentials") == "true"
+    assert "Access-Control-Allow-Credentials" not in res._headers
 
 
 def test_cors_allowed_origin():

@@ -1,12 +1,12 @@
 import os
-import re
-import sys
 import platform
+import re
 import subprocess
-
-from setuptools import setup, Extension
-from setuptools.command.build_ext import build_ext
+import sys
 from distutils.version import LooseVersion
+
+from setuptools import Extension, setup
+from setuptools.command.build_ext import build_ext
 
 
 class CMakeExtension(Extension):
@@ -19,9 +19,9 @@ class CMakeBuild(build_ext):
     def run(self):
         try:
             out = subprocess.check_output(['cmake', '--version'])
-        except OSError:
+        except OSError as e:
             raise RuntimeError("CMake must be installed to build the following extensions: " +
-                               ", ".join(e.name for e in self.extensions))
+                               ", ".join(e.name for e in self.extensions)) from e
 
         if platform.system() == "Windows":
             cmake_version = LooseVersion(re.search(r'version\s*([\d.]+)', out.decode()).group(1))
@@ -50,7 +50,7 @@ class CMakeBuild(build_ext):
         build_args = ['--config', cfg]
 
         if platform.system() == "Windows":
-            cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir)]
+            cmake_args += [f'-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{cfg.upper()}={extdir}']
             if sys.maxsize > 2**32:
                 cmake_args += ['-A', 'x64']
             build_args += ['--', '/m']
@@ -76,6 +76,6 @@ setup(
     description='High Performance Frameworks, Easy to learn and Ready for Production',
     long_description='',
     ext_modules=[CMakeExtension('xyra.libxyra', sourcedir='xyra/native')],
-    cmdclass=dict(build_ext=CMakeBuild),
+    cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
 )

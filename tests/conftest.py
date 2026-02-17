@@ -13,7 +13,8 @@ if "xyra.libxyra" not in sys.modules:
     def mock_format_cookie(name, value, max_age=None, expires=None, path="/", domain=None, secure=False, http_only=True, same_site="Lax"):
         # Validation
         def has_control(s):
-            if not s: return False
+            if not s:
+                return False
             for c in s:
                 if (0 <= ord(c) <= 8) or (10 <= ord(c) <= 31) or ord(c) == 127:
                     return True

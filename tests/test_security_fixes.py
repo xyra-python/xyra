@@ -52,8 +52,10 @@ def test_cors_wildcard_with_credentials_does_not_reflect_origin():
                 "Should not reflect origin when wildcard is used with credentials"
             )
 
-    # Credentials might still be set true globally, but without Origin, browser blocks it
-    response.header.assert_any_call("Access-Control-Allow-Credentials", "true")
+    # Credentials should NOT be set when using * + credentials as it is an invalid/insecure state
+    for call_args in response.header.call_args_list:
+        name, value = call_args[0]
+        assert name != "Access-Control-Allow-Credentials"
 
 
 def test_json_parsing_raises_exception():

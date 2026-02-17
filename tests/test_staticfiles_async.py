@@ -1,10 +1,11 @@
 
-import asyncio
 import os
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
-import sys
+
 from xyra import App, Request, Response
+
 
 @pytest.mark.asyncio
 async def test_static_files_non_blocking():
