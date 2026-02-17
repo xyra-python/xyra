@@ -81,7 +81,8 @@ class Request:
         Get the URL of the request (cached).
 
         Returns:
-            Full request URL including query string.
+            Request path component (without query string).
+            To get the query string, use `req.query` or `req.query_params`.
 
         usage:
             @app.get("/debug")

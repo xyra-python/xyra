@@ -31,10 +31,11 @@ class GzipMiddleware:
 
         def compressed_send(data):
             # Check if response should be compressed
+            accept_encoding = req.get_header("accept-encoding", "")
             if (
                 isinstance(data, (str, bytes))
                 and len(data) >= self.minimum_size
-                and "gzip" in req.headers.get("Accept-Encoding", "").lower()
+                and "gzip" in (accept_encoding or "").lower()
                 and "Content-Encoding" not in res.headers
             ):
                 # Compress the data

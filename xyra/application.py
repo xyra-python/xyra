@@ -500,6 +500,12 @@ class App:
         """
         from .middleware.security_headers import SecurityHeadersMiddleware
 
+        # SECURITY: Set secure defaults if not provided.
+        # We start with a minimal CSP that blocks object injection and base-uri hijacking,
+        # which is generally safe for most applications (including those with inline scripts).
+        if "content_security_policy" not in kwargs:
+            kwargs["content_security_policy"] = "object-src 'none'; base-uri 'self'"
+
         self.use(SecurityHeadersMiddleware(**kwargs))
 
     def enable_swagger(self, host: str = "localhost", port: int = 8000):
