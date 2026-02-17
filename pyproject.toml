@@ -54,7 +54,7 @@ docs = [
 ]
 
 [build-system]
-requires = ["setuptools>=45", "wheel"]
+requires = ["setuptools>=45", "wheel", "pybind11>=3.0.1", "cmake"]
 build-backend = "setuptools.build_meta"
 
 [project.urls]

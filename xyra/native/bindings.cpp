@@ -9,8 +9,165 @@
 #include <mutex>
 #include <algorithm>
 #include <cctype>
+#include <sstream>
+#include <iomanip>
+#include <optional>
 
 namespace py = pybind11;
+
+// --- Helper Functions ---
+
+// Simple URL decoder
+std::string url_decode(std::string_view str) {
+    std::string ret;
+    ret.reserve(str.length());
+    for (size_t i = 0; i < str.length(); ++i) {
+        if (str[i] == '%') {
+            if (i + 2 < str.length()) {
+                int value;
+                std::istringstream is(std::string(str.substr(i + 1, 2)));
+                if (is >> std::hex >> value) {
+                    ret += static_cast<char>(value);
+                    i += 2;
+                } else {
+                    ret += '%'; // invalid hex, keep as is
+                }
+            } else {
+                ret += '%';
+            }
+        } else if (str[i] == '+') {
+            ret += ' ';
+        } else {
+            ret += str[i];
+        }
+    }
+    return ret;
+}
+
+// Cookie helpers
+bool is_control_char(char c) {
+    return (c >= 0x00 && c <= 0x08) || (c >= 0x0a && c <= 0x1f) || c == 0x7f;
+}
+
+bool is_cookie_token_char(char c) {
+    // ! # $ % & ' * + - . 0-9 A-Z ^ _ ` a-z | ~
+    // ASCII only
+    if (c < 33 || c > 126) return false;
+    if (c == '"' || c == ',' || c == '/' || c == '{' || c == '}' ||
+        c == '(' || c == ')' || c == '<' || c == '>' || c == '@' ||
+        c == '[' || c == ']' || c == '\\' || c == ':' || c == ';' ||
+        c == '=' || c == '?') return false;
+    return true;
+}
+
+bool needs_quoting(const std::string& value) {
+    // Chars allowed without quoting: ! # $ % & ' * + - . : ^ _ ` | ~ and digits/letters
+    // Essentially everything except comma, semi-colon, whitespace, backslash, double quote
+    for (char c : value) {
+        if (c == ' ' || c == '"' || c == ',' || c == ';' || c == '\\') return true;
+        if (is_control_char(c)) return true; // Should ideally reject, but here we quote
+    }
+    return false;
+}
+
+std::string format_cookie(std::string name, std::string value,
+                          std::optional<int> max_age, std::optional<std::string> expires,
+                          std::string path, std::optional<std::string> domain,
+                          bool secure, bool http_only, std::optional<std::string> same_site) {
+
+    // Validate name
+    for (char c : name) {
+        if (!is_cookie_token_char(c)) throw std::invalid_argument("Invalid cookie name");
+    }
+
+    // Handle quoting
+    if (needs_quoting(value)) {
+        if (value.find(';') != std::string::npos) throw std::invalid_argument("Cookie value cannot contain ';'");
+        // Simple escaping logic if needed, but RFC 6265 usually just wraps in quotes
+        // Python code replaced \ with \\ and " with \"
+        std::string escaped;
+        for (char c : value) {
+            if (c == '\\') escaped += "\\\\";
+            else if (c == '"') escaped += "\\\"";
+            else escaped += c;
+        }
+        value = "\"" + escaped + "\"";
+    }
+
+    std::stringstream ss;
+    ss << name << "=" << value;
+
+    if (max_age.has_value()) {
+        ss << "; Max-Age=" << max_age.value();
+    }
+    if (expires.has_value()) {
+        ss << "; Expires=" << expires.value();
+    }
+
+    if (!path.empty()) {
+        if (path.find(';') != std::string::npos || std::any_of(path.begin(), path.end(), is_control_char))
+            throw std::invalid_argument("Invalid characters in Path attribute");
+        ss << "; Path=" << path;
+    }
+
+    if (domain.has_value()) {
+        std::string d = domain.value();
+        if (d.find(';') != std::string::npos || std::any_of(d.begin(), d.end(), is_control_char))
+            throw std::invalid_argument("Invalid characters in Domain attribute");
+        ss << "; Domain=" << d;
+    }
+
+    if (secure) ss << "; Secure";
+    if (http_only) ss << "; HttpOnly";
+
+    if (same_site.has_value()) {
+        std::string s = same_site.value();
+        if (s == "None" || s == "none") {
+            if (!secure) throw std::invalid_argument("SameSite=None requires Secure=True");
+        }
+        if (s.find(';') != std::string::npos || std::any_of(s.begin(), s.end(), is_control_char))
+            throw std::invalid_argument("Invalid characters in SameSite attribute");
+        ss << "; SameSite=" << s;
+    }
+
+    std::string result = ss.str();
+    if (std::any_of(result.begin(), result.end(), is_control_char)) {
+        throw std::invalid_argument("Invalid characters in cookie");
+    }
+    return result;
+}
+
+// Parse path logic
+std::pair<std::string, std::vector<std::string>> parse_path(std::string path) {
+    std::vector<std::string> param_names;
+    std::string native_path = "";
+
+    size_t start = 0;
+    while (start < path.length()) {
+        size_t end = path.find('/', start);
+        if (end == std::string::npos) end = path.length();
+
+        std::string_view segment_view = std::string_view(path).substr(start, end - start);
+        std::string segment(segment_view);
+
+        if (!segment.empty()) {
+            // Check for {param}
+            if (segment.front() == '{' && segment.back() == '}') {
+                std::string param_name = segment.substr(1, segment.length() - 2);
+                param_names.push_back(param_name);
+                native_path += "/:" + param_name;
+            } else {
+                native_path += "/" + segment;
+            }
+        }
+
+        start = end + 1;
+    }
+
+    if (native_path.empty()) native_path = "/";
+    return {native_path, param_names};
+}
+
 
 class Request {
 public:
@@ -60,6 +217,41 @@ public:
         py::dict h;
         for (auto const& [key, val] : headers) h[key.c_str()] = val;
         return h;
+    }
+
+    // New: get_queries
+    py::dict get_queries() {
+        py::dict result;
+        std::map<std::string, std::vector<std::string>> query_params;
+
+        size_t start = 0;
+        while (start < query.length()) {
+            size_t end = query.find('&', start);
+            if (end == std::string::npos) end = query.length();
+
+            if (end > start) {
+                std::string_view pair_view = std::string_view(query).substr(start, end - start);
+                size_t eq = pair_view.find('=');
+                std::string key, value;
+
+                if (eq != std::string_view::npos) {
+                    key = url_decode(pair_view.substr(0, eq));
+                    value = url_decode(pair_view.substr(eq + 1));
+                } else {
+                    key = url_decode(pair_view);
+                    value = "";
+                }
+                query_params[key].push_back(value);
+            }
+            start = end + 1;
+        }
+
+        for (auto const& [k, v] : query_params) {
+            py::list l;
+            for (const auto& item : v) l.append(item);
+            result[k.c_str()] = l;
+        }
+        return result;
     }
 
 private:
@@ -158,13 +350,23 @@ private:
 };
 
 PYBIND11_MODULE(libxyra, m) {
+    m.def("parse_path", &parse_path, "Parse route path");
+    m.def("format_cookie", &format_cookie,
+          py::arg("name"), py::arg("value"),
+          py::arg("max_age") = py::none(), py::arg("expires") = py::none(),
+          py::arg("path") = "/", py::arg("domain") = py::none(),
+          py::arg("secure") = false, py::arg("http_only") = true,
+          py::arg("same_site") = "Lax",
+          "Format cookie string");
+
     py::class_<Request>(m, "Request")
         .def("get_url", &Request::get_url)
         .def("get_method", &Request::get_method)
         .def("get_header", &Request::get_header)
         .def("get_parameter", &Request::get_parameter)
         .def("get_query", &Request::get_query)
-        .def("get_headers", &Request::get_headers);
+        .def("get_headers", &Request::get_headers)
+        .def("get_queries", &Request::get_queries);
 
     py::class_<Response>(m, "Response")
         .def("write_status", &Response::write_status)
