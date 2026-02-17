@@ -73,30 +73,38 @@ class CorsMiddleware:
 
         # SECURITY: If "*" is allowed and no credentials, use "*" directly instead of reflecting.
         # This is safer and more standard than reflecting the request's Origin header.
+        is_allowed = False
         if "*" in self.allowed_origins and not self.allow_credentials:
             response.header("Access-Control-Allow-Origin", "*")
+            is_allowed = True
             # SECURITY: Always set Vary: Origin when the response depends on the Origin header.
             try:
                 response.vary("Origin")
             except (AttributeError, TypeError):
                 response.header("Vary", "Origin")
-        elif origin and self._is_origin_allowed(origin):
-            # Reflect the origin only if it's explicitly allowed and credentials are required
-            response.header("Access-Control-Allow-Origin", origin)
-            # SECURITY: Always set Vary: Origin when the response depends on the Origin header.
+        else:
+            # For specific origins (or allow_credentials=True), the response depends on the Origin header.
+            # We must set Vary: Origin even if we don't allow the request, to prevent caching of negative responses.
             try:
                 response.vary("Origin")
             except (AttributeError, TypeError):
                 response.header("Vary", "Origin")
 
-        # Set other CORS headers
-        response.header("Access-Control-Allow-Methods", ", ".join(self.allowed_methods))
-        response.header("Access-Control-Allow-Headers", ", ".join(self.allowed_headers))
+            if origin and self._is_origin_allowed(origin):
+                # Reflect the origin only if it's explicitly allowed
+                response.header("Access-Control-Allow-Origin", origin)
+                is_allowed = True
 
-        if self.allow_credentials:
-            response.header("Access-Control-Allow-Credentials", "true")
+        # Set other CORS headers ONLY if origin is allowed
+        # SECURITY: Prevent leaking CORS configuration to unauthorized origins
+        if is_allowed:
+            response.header("Access-Control-Allow-Methods", ", ".join(self.allowed_methods))
+            response.header("Access-Control-Allow-Headers", ", ".join(self.allowed_headers))
 
-        response.header("Access-Control-Max-Age", str(self.max_age))
+            if self.allow_credentials:
+                response.header("Access-Control-Allow-Credentials", "true")
+
+            response.header("Access-Control-Max-Age", str(self.max_age))
 
         # Handle preflight OPTIONS request
         if request.method == "OPTIONS":
