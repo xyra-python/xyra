@@ -53,9 +53,8 @@ def test_cors_wildcard_reflection_with_credentials_blocked(caplog):
     # It should NOT be reflected now.
     assert res.headers_dict.get("Access-Control-Allow-Origin") is None
 
-    # Credentials header is still set if we allow credentials globally,
-    # but without ACAO, the browser rejects it.
-    assert res.headers_dict.get("Access-Control-Allow-Credentials") == "true"
+    # Credentials header should NOT be set if origin is not allowed (Defense in Depth).
+    assert res.headers_dict.get("Access-Control-Allow-Credentials") is None
 
 
 def test_cors_explicit_origin_with_credentials():
