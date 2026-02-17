@@ -1,7 +1,8 @@
-import sys
-import subprocess
-import pytest
 import os
+import subprocess
+import sys
+
+import pytest
 
 # Ensure libxyra.so is found
 if not os.path.exists("xyra/libxyra.so") and not any(f.startswith("libxyra") for f in os.listdir("xyra")):

@@ -95,7 +95,7 @@ def test_cors_and_gzip_vary_coexistence():
     cors(req, res)
 
     # Mock original send for gzip
-    original_send = res.send
+    # original_send = res.send
     gzip(req, res)
 
     # Trigger gzip send

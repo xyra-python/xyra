@@ -1,10 +1,12 @@
+
 import pytest
-import json
+
 from xyra.application import App
+from xyra.middleware.csrf import CSRFMiddleware
+from xyra.middleware.security_headers import SecurityHeadersMiddleware
 from xyra.request import Request
 from xyra.response import Response
-from xyra.middleware.security_headers import SecurityHeadersMiddleware
-from xyra.middleware.csrf import CSRFMiddleware
+
 
 class MockSocketifyRequest:
     def __init__(self, method="GET", url="/", headers=None):

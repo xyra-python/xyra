@@ -1,5 +1,7 @@
 import logging
 
+from multidict import CIMultiDict
+
 from xyra.middleware.cors import CorsMiddleware
 
 
@@ -10,9 +12,6 @@ class MockRequest:
 
     def get_header(self, name):
         return self._headers.get(name.lower())
-
-
-from multidict import CIMultiDict
 
 
 class MockResponse:
