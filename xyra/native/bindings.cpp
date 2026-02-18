@@ -56,7 +56,7 @@ std::string url_decode(std::string_view str) {
 
 // Cookie helpers
 bool is_control_char(char c) {
-    return (c >= 0x00 && c <= 0x08) || (c >= 0x0a && c <= 0x1f) || c == 0x7f;
+    return (c >= 0x00 && c <= 0x1f) || c == 0x7f;
 }
 
 bool is_cookie_token_char(char c) {

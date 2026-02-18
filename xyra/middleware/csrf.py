@@ -165,17 +165,15 @@ class CSRFMiddleware:
         request.csrf_token = self._mask_token(signed_cookie_token)
 
         # Skip CSRF check for exempt methods
-        if request.method in self.exempt_methods:
+        if request.method.upper() in self.exempt_methods:
             return
 
         # SECURITY: For HTTPS requests, verify the Origin/Referer (Defense in Depth).
         # This prevents CSRF even if the token is somehow leaked.
-        # Check if request is secure (HTTPS) either by config or proxy header
+        # Check if request is secure (HTTPS) based on configuration.
+        # SECURITY: Do not trust X-Forwarded-Proto blindly as it can be spoofed.
+        # Users behind proxies should configure secure=True.
         is_https = self.secure
-        if not is_https:
-            proto = request.get_header("x-forwarded-proto")
-            if proto and proto.lower() == "https":
-                is_https = True
 
         if is_https:
             source = request.get_header("origin") or request.get_header("referer")
