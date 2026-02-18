@@ -80,8 +80,9 @@ async def test_security_headers_defaults():
 
 @pytest.mark.asyncio
 async def test_csrf_hardening_https_forwarded_reject():
-    # Test that Origin is checked if X-Forwarded-Proto is https, even if secure=False
-    csrf = CSRFMiddleware(secure=False)
+    # Test that Origin is checked if secure=True.
+    # Note: X-Forwarded-Proto is ignored for security reasons.
+    csrf = CSRFMiddleware(secure=True)
 
     mock_req_native = MockSocketifyRequest(
         method="POST",
@@ -106,8 +107,8 @@ async def test_csrf_hardening_https_forwarded_reject():
 
 @pytest.mark.asyncio
 async def test_csrf_hardening_https_forwarded_allow_check_token():
-    # Test that if Origin matches on HTTPS (forwarded), it proceeds to Token check
-    csrf = CSRFMiddleware(secure=False)
+    # Test that if Origin matches on HTTPS (secure=True), it proceeds to Token check
+    csrf = CSRFMiddleware(secure=True)
 
     mock_req_native = MockSocketifyRequest(
         method="POST",
@@ -131,7 +132,7 @@ async def test_csrf_hardening_https_forwarded_allow_check_token():
 @pytest.mark.asyncio
 async def test_csrf_hardening_host_missing():
     # Test that missing Host header on HTTPS results in 400
-    csrf = CSRFMiddleware(secure=False)
+    csrf = CSRFMiddleware(secure=True)
 
     mock_req_native = MockSocketifyRequest(
         method="POST",
