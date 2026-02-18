@@ -17,6 +17,16 @@ namespace py = pybind11;
 
 // --- Helper Functions ---
 
+// Helper to safely destroy Python objects when uWS destroys the lambda without GIL
+struct SafeCallback {
+    py::function func;
+    SafeCallback(py::function f) : func(f) {}
+    ~SafeCallback() {
+        py::gil_scoped_acquire acquire;
+        func = py::function();
+    }
+};
+
 // Simple URL decoder
 std::string url_decode(std::string_view str) {
     std::string ret;
@@ -266,6 +276,10 @@ class Response {
 public:
     Response(uWS::HttpResponse<false> *res, uWS::Loop *loop) : res(res), loop(loop) {
         aborted = std::make_shared<std::atomic<bool>>(false);
+        // Cache remote address immediately while we are on the correct thread
+        std::string_view addr = res->getRemoteAddress();
+        remote_address = std::string(addr);
+
         res->onAborted([a = aborted]() {
             *a = true;
         });
@@ -288,44 +302,65 @@ public:
     void end(std::string data) {
         if (*aborted) return;
         loop->defer([res = res, aborted = aborted, data]() {
-            if (!*aborted) res->end(data);
+            if (!*aborted) {
+                res->end(data);
+                *aborted = true; // Mark as aborted/invalid to prevent UAF
+            }
         });
     }
 
     void close() {
         if (*aborted) return;
         loop->defer([res = res, aborted = aborted]() {
-            if (!*aborted) res->close();
+            if (!*aborted) {
+                res->close();
+                *aborted = true; // Mark as aborted/invalid to prevent UAF
+            }
         });
     }
 
     void on_data(py::function callback) {
         if (*aborted) return;
-        res->onData([callback, a = aborted](std::string_view chunk, bool isLast) {
-            if (*a) return;
+        auto safe_cb = std::make_shared<SafeCallback>(callback);
+        // Defer to uWS loop to avoid race condition when calling res->onData from another thread
+        loop->defer([res = res, aborted = aborted, safe_cb]() mutable {
             py::gil_scoped_acquire acquire;
-            callback(py::bytes(chunk.data(), chunk.length()), isLast);
+            if (!*aborted) {
+                res->onData([safe_cb, a = aborted](std::string_view chunk, bool isLast) {
+                    if (*a) return;
+                    py::gil_scoped_acquire acquire;
+                    safe_cb->func(py::bytes(chunk.data(), chunk.length()), isLast);
+                });
+            }
         });
     }
 
     void on_aborted(py::function callback) {
-        res->onAborted([callback, a = aborted]() {
-            *a = true;
+        if (*aborted) return;
+        auto safe_cb = std::make_shared<SafeCallback>(callback);
+        // Defer to uWS loop for thread safety
+        loop->defer([res = res, aborted = aborted, safe_cb]() mutable {
             py::gil_scoped_acquire acquire;
-            callback();
+            if (!*aborted) {
+                res->onAborted([safe_cb, a = aborted]() {
+                    *a = true;
+                    py::gil_scoped_acquire acquire;
+                    safe_cb->func();
+                });
+            }
         });
     }
 
     py::bytes get_remote_address_bytes() {
-        if (*aborted) return py::bytes("");
-        std::string_view addr = res->getRemoteAddress();
-        return py::bytes(addr.data(), addr.length());
+        // Return cached address safely
+        return py::bytes(remote_address);
     }
 
 private:
     uWS::HttpResponse<false> *res;
     uWS::Loop *loop;
     std::shared_ptr<std::atomic<bool>> aborted;
+    std::string remote_address;
 };
 
 class WebSocket {
