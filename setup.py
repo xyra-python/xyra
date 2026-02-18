@@ -47,6 +47,9 @@ class CMakeBuild(build_ext):
                       '-DPYTHON_EXECUTABLE=' + sys.executable,
                       '-Dpybind11_DIR=' + pybind11_cmake_dir]
 
+        if "CMAKE_TOOLCHAIN_FILE" in os.environ:
+            cmake_args += ['-DCMAKE_TOOLCHAIN_FILE=' + os.environ["CMAKE_TOOLCHAIN_FILE"]]
+
         cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]
 
