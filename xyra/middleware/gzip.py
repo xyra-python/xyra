@@ -34,7 +34,7 @@ class GzipMiddleware:
             if (
                 isinstance(data, (str, bytes))
                 and len(data) >= self.minimum_size
-                and "gzip" in req.headers.get("Accept-Encoding", "").lower()
+                and "gzip" in req.get_header("accept-encoding", "").lower()
                 and "Content-Encoding" not in res.headers
             ):
                 # Compress the data
