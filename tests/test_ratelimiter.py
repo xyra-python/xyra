@@ -130,22 +130,23 @@ def test_rate_limit_middleware_custom_key_func():
 def test_rate_limit_middleware_default_key_func():
     limiter = RateLimiter(requests=5, window=60)
 
-    # Test trust_proxy=True
+    # Test trust_proxy=True (Deprecated but should warn and use remote_addr)
     middleware = RateLimitMiddleware(limiter, trust_proxy=True)
     request = Mock()
+    request.remote_addr = "10.0.0.1"
+    # Even if X-Forwarded-For is present, it should use remote_addr
     request.get_header.side_effect = lambda h: {
         "X-Forwarded-For": "192.168.1.1",
         "X-Real-IP": None,
     }.get(h)
 
     key = middleware.key_func(request)
-    assert key == "192.168.1.1"
+    # The fix ensures remote_addr is always used, ignoring insecure trust_proxy logic
+    assert key == "10.0.0.1"
 
     # Test trust_proxy=False (Default)
     middleware_secure = RateLimitMiddleware(limiter)  # trust_proxy=False
     request_secure = Mock()
-    # Headers exist but should be ignored
-    request_secure.get_header.side_effect = lambda h: "192.168.1.1"
     request_secure.remote_addr = "10.0.0.1"
 
     key = middleware_secure.key_func(request_secure)
