@@ -328,29 +328,42 @@ class Response:
         loop = asyncio.get_running_loop()
         self._body_future = loop.create_future()
         chunks = []
-        current_size = [0]
+        # Track received bytes synchronously in on_data to fail fast
+        received_bytes = [0]
+        # Flag to prevent multiple close calls or scheduling unnecessary callbacks
+        aborted = [False]
 
         def on_data(chunk, is_last):
+            if aborted[0]:
+                return
+
+            # SECURITY: Track total size immediately to prevent DoS via buffering
+            chunk_len = len(chunk)
+            received_bytes[0] += chunk_len
+
+            if received_bytes[0] > MAX_BODY_SIZE:
+                aborted[0] = True
+                # Abort immediately to stop memory growth
+                if hasattr(self._res, "close"):
+                    # This runs in uWebSockets thread, so it's safe/correct to call native close
+                    self._res.close()
+
+                # Signal error to the future (thread-safe)
+                def fail():
+                    if self._body_future and not self._body_future.done():
+                        self._body_future.set_exception(
+                            ValueError(
+                                f"Request body too large (max {MAX_BODY_SIZE} bytes)"
+                            )
+                        )
+
+                loop.call_soon_threadsafe(fail)
+                return
+
             def resolve():
                 if self._body_future is None or self._body_future.done():
                     return
 
-                chunk_len = len(chunk)
-                # Check limit before appending
-                if current_size[0] + chunk_len > MAX_BODY_SIZE:
-                    # SECURITY: Abort connection immediately to prevent DoS via large payload
-                    # This stops the client from sending more data
-                    if hasattr(self._res, "close"):
-                        self._res.close()
-
-                    self._body_future.set_exception(
-                        ValueError(
-                            f"Request body too large (max {MAX_BODY_SIZE} bytes)"
-                        )
-                    )
-                    return
-
-                current_size[0] += chunk_len
                 chunks.append(chunk)
 
                 if is_last:
