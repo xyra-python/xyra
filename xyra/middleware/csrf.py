@@ -28,7 +28,19 @@ class CSRFMiddleware:
         http_only: bool = True,
         same_site: str = "Lax",
     ):
-        self.secret_key = secret_key or secrets.token_hex(32)
+        if not secret_key:
+            from ..logger import get_logger
+            logger = get_logger("xyra")
+            logger.warning(
+                "🚨 Security Warning: CSRF secret_key not provided or empty. "
+                "Using a random key generated at startup. "
+                "This will invalidate sessions on server restart or in multi-worker environments. "
+                "Please set a persistent 'secret_key'."
+            )
+            self.secret_key = secrets.token_hex(32)
+        else:
+            self.secret_key = secret_key
+
         self.header_name = header_name
         self.exempt_methods = exempt_methods or ["GET", "HEAD", "OPTIONS"]
         self.secure = secure

@@ -146,44 +146,31 @@ class RateLimitMiddleware:
         Args:
             limiter: RateLimiter instance
             key_func: Function to extract key from request (default: client IP)
-            trust_proxy: Whether to trust proxy headers (X-Forwarded-For, X-Real-IP)
-            trusted_proxy_count: Number of trusted proxies in front of the app (default: 1).
-                                 Used to select the correct IP from X-Forwarded-For.
+            trust_proxy: (Deprecated) Whether to trust proxy headers. Use ProxyHeadersMiddleware instead.
+            trusted_proxy_count: (Deprecated) Number of trusted proxies.
         """
         self.limiter = limiter
         self.key_func = key_func or self._default_key_func
-        self.trust_proxy = trust_proxy
-        self.trusted_proxy_count = trusted_proxy_count
+
+        if trust_proxy:
+            from ..logger import get_logger
+            logger = get_logger("xyra")
+            logger.warning(
+                "🚨 Security Warning: 'trust_proxy' in RateLimitMiddleware is deprecated and unsafe. "
+                "It allows IP spoofing via X-Forwarded-For headers if not properly validated. "
+                "Please use 'xyra.middleware.ProxyHeadersMiddleware' to securely resolve client IPs "
+                "before this middleware runs."
+            )
 
     def _default_key_func(self, request: Request) -> str:
         """
         Default key function using client IP.
 
         SECURITY:
-        By default (trust_proxy=False), we use the direct connection IP (remote_addr)
-        to prevent IP spoofing via headers like X-Forwarded-For.
-        If the app is behind a trusted proxy, set trust_proxy=True.
+        We strictly use request.remote_addr to prevent IP spoofing.
+        To handle proxies correctly, use ProxyHeadersMiddleware which validates
+        X-Forwarded-For and updates request.remote_addr securely.
         """
-        if self.trust_proxy:
-            # Try to get real IP from headers if trust_proxy is enabled
-            # Priority 1: X-Forwarded-For (standard chain)
-            xff = request.get_header("X-Forwarded-For")
-            if xff:
-                # Split by comma and strip whitespace
-                ips = [ip.strip() for ip in xff.split(",")]
-                # Select the IP based on the trusted proxy count (from the right)
-                # If count is 1, we take the last IP (-1)
-                # If count is 2, we take the second to last (-2)
-                if ips:
-                    idx = -min(len(ips), self.trusted_proxy_count)
-                    return ips[idx]
-
-            # Priority 2: X-Real-IP (often set by single proxy)
-            x_real_ip = request.get_header("X-Real-IP")
-            if x_real_ip:
-                return x_real_ip.strip()
-
-        # Fallback to direct connection IP
         return request.remote_addr or "unknown"
 
     def __call__(self, request: Request, response: Response):
