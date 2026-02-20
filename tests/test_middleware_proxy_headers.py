@@ -23,7 +23,7 @@ def create_request(remote_addr, headers=None):
 
     # Mock headers - normalize to lowercase keys as Request expects
     headers = {k.lower(): v for k, v in (headers or {}).items()}
-    req.get_header.side_effect = lambda k: headers.get(k)
+    req.get_header.side_effect = lambda k, default=None: headers.get(k, default)
 
     # Create Request
     request = Request(req, res)
@@ -92,6 +92,13 @@ def test_proxy_headers_chain_recursive_trust():
 
 def test_proxy_headers_trust_all():
     # Trust all proxies (*)
+    # Default count is 1.
+    # Remote: 8.8.8.8 (Trusted).
+    # XFF: 1.2.3.4.
+    # Check 1.2.3.4. Count=1. Max hops=0.
+    # Hops=0. 0 < 0 False.
+    # Result: 1.2.3.4.
+
     request, response = create_request("8.8.8.8", {"X-Forwarded-For": "1.2.3.4"})
 
     mw = ProxyHeadersMiddleware(["*"])
@@ -171,3 +178,54 @@ def test_proxy_headers_garbage_remote_addr():
     mw(request, response)
 
     assert request.remote_addr == "unknown"
+
+def test_proxy_headers_trust_all_with_spoofing():
+    # Scenario: LB (Trusted) receives request from Attacker.
+    # Attacker sends XFF: Spoofed.
+    # LB appends AttackerIP.
+    # XFF: Spoofed, AttackerIP.
+    # trust_all=True ("*").
+    # Default trusted_proxy_count=1 (trusts LB).
+    # Expected: AttackerIP.
+
+    request, response = create_request("10.0.0.1", {"X-Forwarded-For": "1.2.3.4, 5.6.7.8"})
+
+    # 10.0.0.1 is LB.
+    # 5.6.7.8 is Attacker (Real).
+    # 1.2.3.4 is Spoofed.
+
+    mw = ProxyHeadersMiddleware(["*"]) # Default count=1
+    mw(request, response)
+
+    # Should stop at 5.6.7.8
+    assert request.remote_addr == "5.6.7.8"
+
+def test_proxy_headers_trust_all_with_count():
+    # Scenario: LB -> Proxy1 -> Client.
+    # App sees LB.
+    # XFF: Client, Proxy1.
+    # trust_all=True. trusted_proxy_count=2.
+
+    request, response = create_request("10.0.0.1", {"X-Forwarded-For": "1.1.1.1, 2.2.2.2"})
+
+    mw = ProxyHeadersMiddleware(["*"], trusted_proxy_count=2)
+    mw(request, response)
+
+    # 1. Trust LB (implicit).
+    # 2. Trust Proxy1 (2.2.2.2) (count=2 means 1 additional hop).
+    # Result: Client (1.1.1.1).
+
+    assert request.remote_addr == "1.1.1.1"
+
+def test_proxy_headers_trust_all_count_exceeded():
+    # Scenario: LB -> Client.
+    # XFF: Client.
+    # trusted_proxy_count=5.
+
+    request, response = create_request("10.0.0.1", {"X-Forwarded-For": "1.1.1.1"})
+
+    mw = ProxyHeadersMiddleware(["*"], trusted_proxy_count=5)
+    mw(request, response)
+
+    # Should fall back to first IP (Client)
+    assert request.remote_addr == "1.1.1.1"
