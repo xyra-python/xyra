@@ -71,7 +71,8 @@ class SecurityHeadersMiddleware:
                         sources_str = " ".join(value)
                         policy_parts.append(f"{feature}=({sources_str})")
                     else:
-                        policy_parts.append(f"{feature}={value}")
+                        # SECURITY: Ensure single values are also wrapped in parentheses (e.g., self -> (self))
+                        policy_parts.append(f"{feature}=({value})")
                 pp_value = ", ".join(policy_parts)
                 self.headers.append(("Permissions-Policy", pp_value))
             else:

@@ -151,3 +151,33 @@ async def test_csrf_hardening_host_missing():
 
     assert res.status_code == 400
     assert b"Host header missing" in mock_res_native.body
+
+
+@pytest.mark.asyncio
+async def test_security_headers_dict_permissions_policy():
+    """Test Permissions-Policy header generation from dict with single values."""
+    from xyra.middleware.security_headers import SecurityHeadersMiddleware
+
+    # Case 1: Single value string
+    middleware = SecurityHeadersMiddleware(permissions_policy={"geolocation": "self"})
+
+    mock_res_native = MockSocketifyResponse()
+    res = Response(mock_res_native)
+
+    middleware(None, res)
+
+    # Expect geolocation=(self) NOT geolocation=self
+    # This verifies the fix for the known issue
+    assert res.headers["Permissions-Policy"] == "geolocation=(self)"
+
+    # Case 2: List of values
+    middleware = SecurityHeadersMiddleware(
+        permissions_policy={"geolocation": ["self", "https://example.com"]}
+    )
+
+    mock_res_native = MockSocketifyResponse()
+    res = Response(mock_res_native)
+
+    middleware(None, res)
+
+    assert res.headers["Permissions-Policy"] == "geolocation=(self https://example.com)"

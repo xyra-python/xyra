@@ -37,7 +37,11 @@ std::string url_decode(std::string_view str) {
                 int value;
                 std::istringstream is(std::string(str.substr(i + 1, 2)));
                 if (is >> std::hex >> value) {
-                    ret += static_cast<char>(value);
+                    if (value == 0) {
+                        ret += '?'; // SECURITY: sanitize null byte
+                    } else {
+                        ret += static_cast<char>(value);
+                    }
                     i += 2;
                 } else {
                     ret += '%'; // invalid hex, keep as is
