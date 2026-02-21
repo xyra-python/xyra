@@ -24,10 +24,15 @@ def test_multiple_cookies():
     res._write_headers()
 
     # write_header should be called for each cookie
-    calls = [call.args for call in mock_res.write_header.call_args_list if call.args[0] == "Set-Cookie"]
+    calls = [
+        call.args
+        for call in mock_res.write_header.call_args_list
+        if call.args[0] == "Set-Cookie"
+    ]
     assert len(calls) == 2
     assert any("cookie1=val1" in c[1] for c in calls)
     assert any("cookie2=val2" in c[1] for c in calls)
+
 
 def test_header_injection_control_chars():
     mock_res = Mock()
@@ -45,6 +50,7 @@ def test_header_injection_control_chars():
     # Wait, my regex was [\x00-\x08\x0a-\x1f\x7f]. HTAB is \x09. So HTAB is allowed!
     res.header("X-Header", "value\twith-tab")
     assert res.headers["X-Header"] == "value\twith-tab"
+
 
 def test_cookie_injection_control_chars():
     mock_res = Mock()

@@ -11,6 +11,7 @@ from xyra import App, Request, Response
 
 # This script attempts to trigger UAF in Response object.
 
+
 def run_server():
     app = App()
 
@@ -30,19 +31,22 @@ def run_server():
     print("Starting server on 9001")
     app.listen(9001)
 
+
 def main():
     # Start server in a thread
     server_thread = threading.Thread(target=run_server, daemon=True)
     server_thread.start()
 
-    time.sleep(2) # Wait for server start
+    time.sleep(2)  # Wait for server start
 
     try:
         # Send many requests to trigger race condition
         for i in range(100):
             try:
-                with urllib.request.urlopen("http://localhost:9001/uaf", timeout=1) as response:
-                    body = response.read().decode('utf-8')
+                with urllib.request.urlopen(
+                    "http://localhost:9001/uaf", timeout=1
+                ) as response:
+                    body = response.read().decode("utf-8")
                     assert response.status == 200
                     assert body == "ok"
             except Exception as e:
@@ -58,6 +62,7 @@ def main():
 
     print("Success: No crash")
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

@@ -202,7 +202,15 @@ class Response:
         # Optimized native implementation
         try:
             cookie_string = format_cookie(
-                name, value, max_age, expires, path, domain, secure, http_only, same_site
+                name,
+                value,
+                max_age,
+                expires,
+                path,
+                domain,
+                secure,
+                http_only,
+                same_site,
             )
             # SECURITY:
             # Risk: Multiple cookies being overwritten.
@@ -293,11 +301,11 @@ class Response:
 
     def no_cache(self) -> "Response":
         """Disable caching.
-         usage:
-             data_users = {"id":1, "name": "john"}
-             @app.get("/")
-             async def nocache(req: Request, res: Response):
-                 res.no_cache().json(data_users)
+        usage:
+            data_users = {"id":1, "name": "john"}
+            @app.get("/")
+            async def nocache(req: Request, res: Response):
+                res.no_cache().json(data_users)
         """
         # PERF: Use fast header setting as keys and values are trusted
         self._header_fast("Cache-Control", "no-cache, no-store, must-revalidate")

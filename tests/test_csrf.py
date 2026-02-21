@@ -429,6 +429,7 @@ async def test_csrf_middleware_form_token_alternative_name():
     response.status.assert_not_called()
     assert response._ended is False
 
+
 @pytest.mark.asyncio
 async def test_csrf_spa_raw_token():
     """Test SPA flow where client reads cookie and sends raw signed token."""
@@ -456,6 +457,7 @@ async def test_csrf_spa_raw_token():
     response.status.assert_not_called()
     assert response._ended is False
 
+
 @pytest.mark.asyncio
 async def test_csrf_exempt_methods_case_sensitivity():
     """Test that exempt methods are case-insensitive."""
@@ -463,11 +465,11 @@ async def test_csrf_exempt_methods_case_sensitivity():
     middleware = CSRFMiddleware(exempt_methods=["get"])
 
     assert "GET" in middleware.exempt_methods
-    assert "get" not in middleware.exempt_methods # Should be normalized
+    assert "get" not in middleware.exempt_methods  # Should be normalized
 
     request = Mock()
-    request.method = "GET" # Standard uppercase
-    request.get_header.return_value = None # No token
+    request.method = "GET"  # Standard uppercase
+    request.get_header.return_value = None  # No token
 
     response = Mock()
     response._ended = False

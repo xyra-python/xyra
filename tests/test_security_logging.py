@@ -1,4 +1,3 @@
-
 import logging
 
 import pytest
@@ -13,9 +12,15 @@ class MockNativeRequest:
         self.headers = {}
         self.params = {}
 
-    def get_url(self): return self.url
-    def get_method(self): return self.method
-    def get_header(self, name): return self.headers.get(name.lower(), "")
+    def get_url(self):
+        return self.url
+
+    def get_method(self):
+        return self.method
+
+    def get_header(self, name):
+        return self.headers.get(name.lower(), "")
+
 
 class MockNativeResponse:
     def __init__(self):
@@ -24,17 +29,30 @@ class MockNativeResponse:
         self.body = ""
         self.aborted = False
 
-    def write_header(self, k, v): pass
-    def write_status(self, s): self.status = s
-    def end(self, d): self.body = d
-    def on_aborted(self, cb): pass
-    def on_data(self, cb): pass
-    def get_remote_address_bytes(self): return b""
+    def write_header(self, k, v):
+        pass
+
+    def write_status(self, s):
+        self.status = s
+
+    def end(self, d):
+        self.body = d
+
+    def on_aborted(self, cb):
+        pass
+
+    def on_data(self, cb):
+        pass
+
+    def get_remote_address_bytes(self):
+        return b""
+
 
 @pytest.mark.asyncio
 async def test_log_injection_sanitization():
     # Setup logging capture
     from xyra.logger import get_logger
+
     logger = get_logger("xyra")
     log_capture = []
 

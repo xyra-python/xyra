@@ -5,8 +5,11 @@ import sys
 import pytest
 
 # Ensure libxyra.so is found
-if not os.path.exists("xyra/libxyra.so") and not any(f.startswith("libxyra") for f in os.listdir("xyra")):
+if not os.path.exists("xyra/libxyra.so") and not any(
+    f.startswith("libxyra") for f in os.listdir("xyra")
+):
     pytest.skip("Native extension not built", allow_module_level=True)
+
 
 @pytest.mark.integration
 def test_native_bindings_subprocess():
@@ -84,6 +87,10 @@ if not hasattr(xyra.libxyra.Request, "get_queries"):
 
 print("Native bindings OK")
 """
-    result = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True, cwd=os.getcwd())
+    result = subprocess.run(
+        [sys.executable, "-c", script], capture_output=True, text=True, cwd=os.getcwd()
+    )
     if result.returncode != 0:
-        pytest.fail(f"Native bindings test failed:\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}")
+        pytest.fail(
+            f"Native bindings test failed:\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+        )

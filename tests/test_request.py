@@ -274,6 +274,7 @@ def test_request_query_params_fallback():
 
     assert request.query_params == {"key": ["value"]}
 
+
 def test_request_parse_json_bytes():
     """Test synchronous JSON bytes parsing."""
     req = Mock()

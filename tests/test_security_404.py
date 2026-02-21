@@ -30,4 +30,6 @@ def test_404_middleware_applied():
 
     # FIXED BEHAVIOR: Middleware IS applied to 404 handler,
     # so _create_final_handler IS called for "/*".
-    assert called_for_404, "Middleware NOT applied to 404 handler! Security headers missing on 404."
+    assert called_for_404, (
+        "Middleware NOT applied to 404 handler! Security headers missing on 404."
+    )

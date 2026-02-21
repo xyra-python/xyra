@@ -1,4 +1,3 @@
-
 import pytest
 
 from xyra.application import App
@@ -33,6 +32,7 @@ class MockSocketifyRequest:
     def get_parameter(self, idx):
         return ""
 
+
 class MockSocketifyResponse:
     def __init__(self):
         self.headers = {}
@@ -56,6 +56,7 @@ class MockSocketifyResponse:
     def on_data(self, callback):
         pass
 
+
 @pytest.mark.asyncio
 async def test_security_headers_defaults():
     app = App()
@@ -78,6 +79,7 @@ async def test_security_headers_defaults():
     assert headers["X-Permitted-Cross-Domain-Policies"] == "none"
     assert headers["Cross-Origin-Opener-Policy"] == "same-origin"
 
+
 @pytest.mark.asyncio
 async def test_csrf_hardening_https_forwarded_reject():
     # Test that Origin is checked if secure=True.
@@ -89,8 +91,8 @@ async def test_csrf_hardening_https_forwarded_reject():
         headers={
             "x-forwarded-proto": "https",
             "host": "example.com",
-            "origin": "http://attacker.com" # Mismatch scheme
-        }
+            "origin": "http://attacker.com",  # Mismatch scheme
+        },
     )
     mock_res_native = MockSocketifyResponse()
 
@@ -105,6 +107,7 @@ async def test_csrf_hardening_https_forwarded_reject():
     assert res._ended is True
     assert b"Origin/Referer verification failed" in mock_res_native.body
 
+
 @pytest.mark.asyncio
 async def test_csrf_hardening_https_forwarded_allow_check_token():
     # Test that if Origin matches on HTTPS (secure=True), it proceeds to Token check
@@ -115,8 +118,8 @@ async def test_csrf_hardening_https_forwarded_allow_check_token():
         headers={
             "x-forwarded-proto": "https",
             "host": "example.com",
-            "origin": "https://example.com"
-        }
+            "origin": "https://example.com",
+        },
     )
     mock_res_native = MockSocketifyResponse()
 
@@ -129,6 +132,7 @@ async def test_csrf_hardening_https_forwarded_allow_check_token():
     assert res.status_code == 403
     assert b"CSRF token missing" in mock_res_native.body
 
+
 @pytest.mark.asyncio
 async def test_csrf_hardening_host_missing():
     # Test that missing Host header on HTTPS results in 400
@@ -139,8 +143,8 @@ async def test_csrf_hardening_host_missing():
         headers={
             "x-forwarded-proto": "https",
             # Host missing
-            "origin": "https://example.com"
-        }
+            "origin": "https://example.com",
+        },
     )
     mock_res_native = MockSocketifyResponse()
 

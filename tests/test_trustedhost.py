@@ -19,6 +19,7 @@ def mock_req_res():
 
     return req, res
 
+
 def test_trusted_host_exact_match(mock_req_res):
     """Test exact domain match allows any port."""
     req, res = mock_req_res
@@ -38,6 +39,7 @@ def test_trusted_host_exact_match(mock_req_res):
     middleware(req, res)
     assert res._ended
 
+
 def test_trusted_host_port_strict(mock_req_res):
     """Test specifying a port enforces strict matching."""
     req, res = mock_req_res
@@ -54,10 +56,11 @@ def test_trusted_host_port_strict(mock_req_res):
     assert res._ended
 
     # No port (default)
-    res._ended = False # reset
+    res._ended = False  # reset
     req.get_header.return_value = "example.com"
     middleware(req, res)
     assert res._ended
+
 
 def test_trusted_host_wildcard(mock_req_res):
     """Test wildcard subdomain matching."""
@@ -84,6 +87,7 @@ def test_trusted_host_wildcard(mock_req_res):
     middleware(req, res)
     assert res._ended
 
+
 def test_trusted_host_wildcard_strict_port(mock_req_res):
     """Test wildcard subdomain with strict port."""
     req, res = mock_req_res
@@ -106,6 +110,7 @@ def test_trusted_host_wildcard_strict_port(mock_req_res):
     middleware(req, res)
     assert not res._ended
 
+
 def test_trusted_host_ipv6(mock_req_res):
     """Test IPv6 literal matching."""
     req, res = mock_req_res
@@ -119,6 +124,7 @@ def test_trusted_host_ipv6(mock_req_res):
     req.get_header.return_value = "[::1]:8080"
     middleware(req, res)
     assert not res._ended
+
 
 def test_trusted_host_ipv6_with_port(mock_req_res):
     """Test IPv6 literal with strict port."""
@@ -138,6 +144,7 @@ def test_trusted_host_ipv6_with_port(mock_req_res):
     middleware(req, res)
     assert res._ended
 
+
 def test_trusted_host_malformed(mock_req_res):
     """Test malformed Host headers are rejected."""
     req, res = mock_req_res
@@ -153,6 +160,7 @@ def test_trusted_host_malformed(mock_req_res):
     middleware(req, res)
     assert res._ended
 
+
 def test_trusted_host_multiple_allowed(mock_req_res):
     """Test multiple allowed hosts with different rules."""
     req, res = mock_req_res
@@ -166,9 +174,10 @@ def test_trusted_host_multiple_allowed(mock_req_res):
     middleware(req, res)
     assert not res._ended
 
-    req.get_header.return_value = "api.example.com" # Missing port
+    req.get_header.return_value = "api.example.com"  # Missing port
     middleware(req, res)
     assert res._ended
+
 
 def test_trusted_host_mixed_case(mock_req_res):
     """Test mixed-case host header is accepted."""
@@ -183,6 +192,7 @@ def test_trusted_host_mixed_case(mock_req_res):
     req.get_header.return_value = "EXAMPLE.COM"
     middleware(req, res)
     assert not res._ended, "Should accept upper-case host 'EXAMPLE.COM'"
+
 
 def test_trusted_host_case_insensitive_config(mock_req_res):
     """Test that configuration is case-insensitive."""
