@@ -103,7 +103,11 @@ class ProxyHeadersMiddleware:
         try:
             # Split by comma and strip whitespace
             # XFF format: client, proxy1, proxy2
-            ips = [ip.strip() for ip in xff.split(",")]
+            # SECURITY: Limit the number of IPs processed to prevent DoS via CPU/Memory exhaustion.
+            # We only care about the last few IPs (the trusted chain).
+            # 20 hops is more than enough for any reasonable architecture.
+            raw_ips = xff.rsplit(",", 20)
+            ips = [ip.strip() for ip in raw_ips]
         except Exception:
             return
 

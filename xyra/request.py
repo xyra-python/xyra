@@ -78,10 +78,12 @@ class Request:
     @property
     def url(self) -> str:
         """
-        Get the URL of the request (cached).
+        Get the request URL path (cached).
 
         Returns:
-            Full request URL including query string.
+            Request path (e.g., "/api/users").
+            Does not include query string or protocol/host.
+            Use `req.full_path` for path + query.
 
         usage:
             @app.get("/debug")
@@ -94,6 +96,20 @@ class Request:
                 raise ValueError("Request URL is None")
             self._url_cache = url
         return self._url_cache
+
+    @property
+    def full_path(self) -> str:
+        """
+        Get the full request path including query string.
+
+        Returns:
+            Path + query string (e.g., "/api/users?id=1").
+        """
+        path = self.url
+        query = self.query
+        if query:
+            return f"{path}?{query}"
+        return path
 
     @property
     def remote_addr(self) -> str:
