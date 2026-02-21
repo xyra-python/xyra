@@ -35,6 +35,7 @@ class CSRFMiddleware:
 
         if not secret_key:
             from ..logger import get_logger
+
             logger = get_logger("xyra")
             logger.warning(
                 "🚨 Security Warning: CSRF secret_key not provided or empty. "
@@ -207,7 +208,9 @@ class CSRFMiddleware:
 
             expected = f"https://{host}"
 
-            if not source or (source != expected and not source.startswith(f"{expected}/")):
+            if not source or (
+                source != expected and not source.startswith(f"{expected}/")
+            ):
                 response.status(403)
                 response.json({"error": "Origin/Referer verification failed"})
                 response._ended = True

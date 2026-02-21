@@ -32,7 +32,9 @@ async def test_static_files_security():
 
         # .well-known (should be allowed)
         os.makedirs(os.path.join(temp_dir, "public", ".well-known"), exist_ok=True)
-        with open(os.path.join(temp_dir, "public", ".well-known", "assetlinks.json"), "w") as f:
+        with open(
+            os.path.join(temp_dir, "public", ".well-known", "assetlinks.json"), "w"
+        ) as f:
             f.write("{}")
 
         app = App()
@@ -51,17 +53,21 @@ async def test_static_files_security():
             mock_res = MagicMock(spec=Response)
             # Mock header method to store headers
             headers = {}
+
             def set_header(k, v):
                 headers[k] = v
                 return mock_res
+
             mock_res.header.side_effect = set_header
             # Also mock headers.add for vary logic if needed, but static_files uses res.header
 
             # Mock status
             mock_res.status_code = 200
+
             def set_status(c):
                 mock_res.status_code = c
                 return mock_res
+
             mock_res.status.side_effect = set_status
 
             await handler(mock_req, mock_res)

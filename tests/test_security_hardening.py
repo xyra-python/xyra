@@ -17,6 +17,7 @@ class MockHeaders(CIMultiDict):
         self.added.append((key, value))
         super().add(key, value)
 
+
 class MockRequest:
     def __init__(self, headers, method="GET"):
         self._headers = CIMultiDict(headers)
@@ -32,6 +33,7 @@ class MockRequest:
 
     def is_form(self):
         return False
+
 
 class MockResponse:
     def __init__(self):
@@ -59,6 +61,7 @@ class MockResponse:
     def set_cookie(self, *args, **kwargs):
         pass
 
+
 def test_cors_vary_origin():
     middleware = CorsMiddleware(allowed_origins=["http://good.com"])
 
@@ -80,9 +83,11 @@ def test_cors_vary_origin():
     assert res.headers.get("Access-Control-Allow-Origin") == "*"
     assert ("Vary", "Origin") in res.headers.added
 
+
 def test_cors_default_allowed_headers_includes_csrf():
     middleware = CorsMiddleware()
     assert "X-CSRF-Token" in middleware.allowed_headers
+
 
 def test_cors_and_gzip_vary_coexistence():
     cors = CorsMiddleware(allowed_origins=["*"])
@@ -107,6 +112,7 @@ def test_cors_and_gzip_vary_coexistence():
     assert "Origin" in vary_values
     assert "Accept-Encoding" in vary_values
 
+
 @pytest.mark.asyncio
 async def test_csrf_origin_check_https():
     # Middleware with secure=True (HTTPS)
@@ -116,12 +122,15 @@ async def test_csrf_origin_check_https():
     token = middleware._generate_token()
 
     # Case 1: Valid Origin
-    req = MockRequest(headers={
-        "Origin": "https://example.com",
-        "Host": "example.com",
-        "Cookie": f"__Host-csrf_token={token}",
-        "X-CSRF-Token": middleware._mask_token(token)
-    }, method="POST")
+    req = MockRequest(
+        headers={
+            "Origin": "https://example.com",
+            "Host": "example.com",
+            "Cookie": f"__Host-csrf_token={token}",
+            "X-CSRF-Token": middleware._mask_token(token),
+        },
+        method="POST",
+    )
     res = MockResponse()
 
     # We need to mock _get_cookie because MockRequest doesn't handle complex cookie parsing
@@ -132,12 +141,15 @@ async def test_csrf_origin_check_https():
     assert res.status_code == 200
 
     # Case 2: Mismatched Origin
-    req = MockRequest(headers={
-        "Origin": "https://evil.com",
-        "Host": "example.com",
-        "Cookie": f"__Host-csrf_token={token}",
-        "X-CSRF-Token": middleware._mask_token(token)
-    }, method="POST")
+    req = MockRequest(
+        headers={
+            "Origin": "https://evil.com",
+            "Host": "example.com",
+            "Cookie": f"__Host-csrf_token={token}",
+            "X-CSRF-Token": middleware._mask_token(token),
+        },
+        method="POST",
+    )
     res = MockResponse()
     middleware._get_cookie = MagicMock(return_value=token)
 
@@ -146,12 +158,15 @@ async def test_csrf_origin_check_https():
     assert res.status_code == 403
 
     # Case 3: Valid Referer fallback
-    req = MockRequest(headers={
-        "Referer": "https://example.com/page",
-        "Host": "example.com",
-        "Cookie": f"__Host-csrf_token={token}",
-        "X-CSRF-Token": middleware._mask_token(token)
-    }, method="POST")
+    req = MockRequest(
+        headers={
+            "Referer": "https://example.com/page",
+            "Host": "example.com",
+            "Cookie": f"__Host-csrf_token={token}",
+            "X-CSRF-Token": middleware._mask_token(token),
+        },
+        method="POST",
+    )
     res = MockResponse()
     middleware._get_cookie = MagicMock(return_value=token)
 
@@ -160,12 +175,15 @@ async def test_csrf_origin_check_https():
     assert res.status_code == 200
 
     # Case 4: Mismatched Referer
-    req = MockRequest(headers={
-        "Referer": "https://evil.com/page",
-        "Host": "example.com",
-        "Cookie": f"__Host-csrf_token={token}",
-        "X-CSRF-Token": middleware._mask_token(token)
-    }, method="POST")
+    req = MockRequest(
+        headers={
+            "Referer": "https://evil.com/page",
+            "Host": "example.com",
+            "Cookie": f"__Host-csrf_token={token}",
+            "X-CSRF-Token": middleware._mask_token(token),
+        },
+        method="POST",
+    )
     res = MockResponse()
     middleware._get_cookie = MagicMock(return_value=token)
 
@@ -174,11 +192,14 @@ async def test_csrf_origin_check_https():
     assert res.status_code == 403
 
     # Case 5: Missing both on HTTPS
-    req = MockRequest(headers={
-        "Host": "example.com",
-        "Cookie": f"__Host-csrf_token={token}",
-        "X-CSRF-Token": middleware._mask_token(token)
-    }, method="POST")
+    req = MockRequest(
+        headers={
+            "Host": "example.com",
+            "Cookie": f"__Host-csrf_token={token}",
+            "X-CSRF-Token": middleware._mask_token(token),
+        },
+        method="POST",
+    )
     res = MockResponse()
     middleware._get_cookie = MagicMock(return_value=token)
 

@@ -24,7 +24,9 @@ class SecurityHeadersMiddleware:
         hsts_include_subdomains: bool = True,
         hsts_preload: bool = False,
         content_security_policy: str | dict | None = None,
-        permissions_policy: str | dict | None = "geolocation=(), camera=(), microphone=()",
+        permissions_policy: str
+        | dict
+        | None = "geolocation=(), camera=(), microphone=()",
         frame_options: str = "SAMEORIGIN",
         xss_protection: str = "1; mode=block",
         content_type_options: str = "nosniff",
@@ -72,7 +74,10 @@ class SecurityHeadersMiddleware:
                         policy_parts.append(f"{feature}=({sources_str})")
                     else:
                         # SECURITY: Ensure single values are also wrapped in parentheses (e.g., self -> (self))
-                        policy_parts.append(f"{feature}=({value})")
+                        if str(value).startswith("(") and str(value).endswith(")"):
+                            policy_parts.append(f"{feature}={value}")
+                        else:
+                            policy_parts.append(f"{feature}=({value})")
                 pp_value = ", ".join(policy_parts)
                 self.headers.append(("Permissions-Policy", pp_value))
             else:
@@ -92,7 +97,9 @@ class SecurityHeadersMiddleware:
             self.headers.append(("Referrer-Policy", referrer_policy))
 
         if cross_domain_policy:
-            self.headers.append(("X-Permitted-Cross-Domain-Policies", cross_domain_policy))
+            self.headers.append(
+                ("X-Permitted-Cross-Domain-Policies", cross_domain_policy)
+            )
 
         if opener_policy:
             self.headers.append(("Cross-Origin-Opener-Policy", opener_policy))

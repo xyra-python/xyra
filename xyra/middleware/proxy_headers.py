@@ -19,7 +19,9 @@ class ProxyHeadersMiddleware:
     but only if the request comes from a trusted proxy. This prevents IP spoofing attacks.
     """
 
-    def __init__(self, trusted_proxies: list[str], trusted_proxy_count: int | None = None):
+    def __init__(
+        self, trusted_proxies: list[str], trusted_proxy_count: int | None = None
+    ):
         """
         Initialize proxy headers middleware.
 

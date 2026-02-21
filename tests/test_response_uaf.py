@@ -14,10 +14,7 @@ def test_response_uaf():
     # Run with timeout (30 seconds should be enough)
     try:
         proc = subprocess.run(
-            [sys.executable, script_path],
-            capture_output=True,
-            text=True,
-            timeout=30
+            [sys.executable, script_path], capture_output=True, text=True, timeout=30
         )
 
         # Check return code

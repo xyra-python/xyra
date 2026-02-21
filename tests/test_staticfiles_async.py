@@ -1,4 +1,3 @@
-
 import os
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -42,7 +41,7 @@ async def test_static_files_non_blocking():
             if func == os.path.isfile:
                 return True
             if func == os.path.getsize:
-                return 1024 # 1KB
+                return 1024  # 1KB
 
             # For lambdas (path resolution)
             if callable(func) and func.__name__ == "<lambda>":

@@ -2,8 +2,8 @@ import socket
 import unittest
 from unittest.mock import MagicMock
 
-from xyra.middleware.rate_limiter import RateLimiter, RateLimitMiddleware
 from xyra.middleware.proxy_headers import ProxyHeadersMiddleware
+from xyra.middleware.rate_limiter import RateLimiter, RateLimitMiddleware
 from xyra.request import Request
 
 
@@ -34,7 +34,7 @@ class TestIpSpoofing(unittest.TestCase):
         self.request._remote_addr_cache = None
 
         limiter = RateLimiter()
-        middleware = RateLimitMiddleware(limiter) # No trust_proxy needed
+        middleware = RateLimitMiddleware(limiter)  # No trust_proxy needed
 
         # Should use remote_addr (1.2.3.4)
         key = middleware._default_key_func(self.request)
@@ -46,7 +46,8 @@ class TestIpSpoofing(unittest.TestCase):
         # If we trust proxy, we resolve.
 
         self.mock_res.get_remote_address_bytes.return_value = socket.inet_pton(
-            socket.AF_INET, "1.2.3.4" # Proxy IP
+            socket.AF_INET,
+            "1.2.3.4",  # Proxy IP
         )
         self.request._remote_addr_cache = None
 
@@ -96,6 +97,7 @@ class TestIpSpoofing(unittest.TestCase):
         rl_mw = RateLimitMiddleware(limiter)
         key = rl_mw._default_key_func(self.request)
         self.assertEqual(key, "1.2.3.4")
+
 
 if __name__ == "__main__":
     unittest.main()

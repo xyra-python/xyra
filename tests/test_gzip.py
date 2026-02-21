@@ -174,6 +174,7 @@ def test_gzip_middleware_compress_string_data():
     assert isinstance(compressed_data, bytes)
     assert response.headers["Content-Encoding"] == "gzip"
 
+
 def test_gzip_middleware_lowercase_header():
     """Regression test for case-insensitive header lookup."""
     middleware = GzipMiddleware(minimum_size=100)

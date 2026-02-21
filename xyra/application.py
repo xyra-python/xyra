@@ -273,6 +273,7 @@ class App:
 
                 # Read file asynchronously
                 try:
+
                     def read_file():
                         with open(full_path, "rb") as f:
                             return f.read()
@@ -625,9 +626,7 @@ class App:
                     current_proc.wait()
                 env = os.environ.copy()
                 env["XYRA_RELOAD_CHILD"] = "1"
-                current_proc = subprocess.Popen(
-                    [sys.executable] + sys.argv, env=env
-                )  # nosec B603
+                current_proc = subprocess.Popen([sys.executable] + sys.argv, env=env)  # nosec B603
 
             # Watch for file changes in current directory
             def watch_and_restart():

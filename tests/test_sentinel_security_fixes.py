@@ -26,6 +26,7 @@ def test_ratelimiter_lru_eviction():
     assert "user_0" not in limiter._requests  # Oldest should be gone
     assert "new_user" in limiter._requests
 
+
 def test_ratelimiter_no_creation_on_read():
     # Test that reading state doesn't create new entries
     limiter = RateLimiter(requests=10, window=60)
@@ -35,6 +36,7 @@ def test_ratelimiter_no_creation_on_read():
 
     limiter.get_remaining_requests("non_existent")
     assert "non_existent" not in limiter._requests
+
 
 @pytest.mark.asyncio
 async def test_csrf_token_masking_different_each_time():
@@ -55,13 +57,18 @@ async def test_csrf_token_masking_different_each_time():
 
     request2 = Mock()
     request2.method = "GET"
-    request2.get_header.side_effect = lambda h: f"{middleware.cookie_name}={cookie_value}" if h.lower() == "cookie" else None
+    request2.get_header.side_effect = (
+        lambda h: f"{middleware.cookie_name}={cookie_value}"
+        if h.lower() == "cookie"
+        else None
+    )
 
     await middleware(request2, response)
     token2 = request2.csrf_token
 
     assert token1 != token2
     assert middleware._unmask_token(token1) == middleware._unmask_token(token2)
+
 
 @pytest.mark.asyncio
 async def test_csrf_host_prefix_enforcement():
@@ -79,13 +86,16 @@ async def test_csrf_host_prefix_enforcement():
     args, _ = response.set_cookie.call_args
     assert args[0] == "__Host-my_token"
 
+
 def test_cors_no_reflection_on_wildcard():
     # Test that Origin is not reflected when "*" is allowed
     middleware = CorsMiddleware(allowed_origins=["*"], allow_credentials=False)
 
     request = Mock()
     request.method = "GET"
-    request.get_header.side_effect = lambda h: "https://attacker.com" if h.lower() == "origin" else None
+    request.get_header.side_effect = (
+        lambda h: "https://attacker.com" if h.lower() == "origin" else None
+    )
     response = Mock()
     headers = {}
     response.header.side_effect = lambda k, v: headers.__setitem__(k, v)

@@ -154,6 +154,7 @@ class RateLimitMiddleware:
 
         if trust_proxy:
             from ..logger import get_logger
+
             logger = get_logger("xyra")
             logger.warning(
                 "🚨 Security Warning: 'trust_proxy' in RateLimitMiddleware is deprecated and unsafe. "

@@ -70,9 +70,9 @@ async def test_path_traversal_blocked():
                 sent_data = sent_data.encode()
 
         # Expectation: Should NOT return "SECRET". Should return 404 or similar.
-        assert (
-            b"SECRET" not in sent_data
-        ), "Path Traversal Vulnerability: Secret file content leaked!"
+        assert b"SECRET" not in sent_data, (
+            "Path Traversal Vulnerability: Secret file content leaked!"
+        )
 
         # Verify status code is 404 or 403
         # mock_native_res.write_status might have been called
@@ -145,9 +145,9 @@ async def test_symlink_traversal_blocked():
 
         # Vulnerability check: If vulnerable, it returns "SECRET_LEAK"
         # We assert that it does NOT leak.
-        assert (
-            b"SECRET_LEAK" not in sent_data
-        ), "Symlink Traversal Vulnerability: Secret file content leaked!"
+        assert b"SECRET_LEAK" not in sent_data, (
+            "Symlink Traversal Vulnerability: Secret file content leaked!"
+        )
 
         # Verify status code is 403 Forbidden
         status_args = mock_native_res.write_status.call_args

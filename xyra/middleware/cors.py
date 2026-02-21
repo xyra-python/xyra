@@ -98,8 +98,12 @@ class CorsMiddleware:
         # Set other CORS headers ONLY if origin is allowed
         # SECURITY: Prevent leaking CORS configuration to unauthorized origins
         if is_allowed:
-            response.header("Access-Control-Allow-Methods", ", ".join(self.allowed_methods))
-            response.header("Access-Control-Allow-Headers", ", ".join(self.allowed_headers))
+            response.header(
+                "Access-Control-Allow-Methods", ", ".join(self.allowed_methods)
+            )
+            response.header(
+                "Access-Control-Allow-Headers", ", ".join(self.allowed_headers)
+            )
 
             if self.allow_credentials:
                 response.header("Access-Control-Allow-Credentials", "true")

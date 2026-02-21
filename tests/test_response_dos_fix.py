@@ -1,9 +1,9 @@
 import asyncio
-from unittest.mock import Mock, call
+from unittest.mock import Mock
 
 import pytest
 
-from xyra.response import Response, MAX_BODY_SIZE
+from xyra.response import Response
 
 
 @pytest.mark.asyncio
@@ -41,7 +41,7 @@ async def test_get_data_dos_vulnerability():
         num_chunks = 20
 
         # Simulate synchronous calls from uWebSockets thread
-        for i in range(num_chunks):
+        for _ in range(num_chunks):
             on_data_callback(chunk, False)
 
         # Verify fix: call_soon_threadsafe should ONLY be called for chunks within limit + 1 abort.
