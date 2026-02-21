@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import hmac
+import os
 import secrets
 from http.cookies import SimpleCookie
 
@@ -28,6 +29,10 @@ class CSRFMiddleware:
         http_only: bool = True,
         same_site: str = "Lax",
     ):
+        # SECURITY: Prefer environment variable if secret_key not passed explicitly
+        if not secret_key:
+            secret_key = os.environ.get("XYRA_SECRET_KEY")
+
         if not secret_key:
             from ..logger import get_logger
             logger = get_logger("xyra")
@@ -35,7 +40,7 @@ class CSRFMiddleware:
                 "🚨 Security Warning: CSRF secret_key not provided or empty. "
                 "Using a random key generated at startup. "
                 "This will invalidate sessions on server restart or in multi-worker environments. "
-                "Please set a persistent 'secret_key'."
+                "Please set a persistent 'secret_key' or XYRA_SECRET_KEY environment variable."
             )
             self.secret_key = secrets.token_hex(32)
         else:
@@ -43,6 +48,9 @@ class CSRFMiddleware:
 
         self.header_name = header_name
         self.exempt_methods = exempt_methods or ["GET", "HEAD", "OPTIONS"]
+        # SECURITY: Normalize methods to uppercase to prevent case-sensitivity bypasses
+        self.exempt_methods = [method.upper() for method in self.exempt_methods]
+
         self.secure = secure
         self.http_only = http_only
         self.same_site = same_site
