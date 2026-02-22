@@ -68,16 +68,35 @@ class SecurityHeadersMiddleware:
                 policy_parts = []
                 for feature, value in permissions_policy.items():
                     if isinstance(value, list):
-                        # If list, format as (value1 value2) or similar?
-                        # Standard is: geolocation=(self "https://example.com")
                         sources_str = " ".join(value)
+
+                        # SECURITY: Validate list content does not contain unquoted ')' which could close the list
+                        # and allow injection of other features.
+                        if not self._is_safe_policy_value(sources_str):
+                            raise ValueError(
+                                f"Invalid Permissions-Policy value for '{feature}': '{value}'. "
+                                "Value contains unsafe characters (unquoted closing parenthesis) which could allow injection."
+                            )
+
                         policy_parts.append(f"{feature}=({sources_str})")
                     else:
-                        # SECURITY: Ensure single values are also wrapped in parentheses (e.g., self -> (self))
-                        if str(value).startswith("(") and str(value).endswith(")"):
-                            policy_parts.append(f"{feature}={value}")
+                        val_str = str(value)
+                        # Check if it looks wrapped
+                        is_wrapped = val_str.startswith("(") and val_str.endswith(")")
+                        content = val_str[1:-1] if is_wrapped else val_str
+
+                        # SECURITY: Validate content does not contain unquoted ')' which could close the list
+                        # and allow injection of other features.
+                        if not self._is_safe_policy_value(content):
+                            raise ValueError(
+                                f"Invalid Permissions-Policy value for '{feature}': '{value}'. "
+                                "Value contains unsafe characters (unquoted closing parenthesis) which could allow injection."
+                            )
+
+                        if is_wrapped:
+                            policy_parts.append(f"{feature}={val_str}")
                         else:
-                            policy_parts.append(f"{feature}=({value})")
+                            policy_parts.append(f"{feature}=({val_str})")
                 pp_value = ", ".join(policy_parts)
                 self.headers.append(("Permissions-Policy", pp_value))
             else:
@@ -108,6 +127,19 @@ class SecurityHeadersMiddleware:
         # Risk: Missing or weak security headers expose users to XSS, Clickjacking, and other attacks.
         # Attack: Attacker exploits lack of COOP/CSP to perform cross-origin attacks.
         # Mitigation: Add defense-in-depth headers (COOP, CSP, HSTS) by default.
+
+    def _is_safe_policy_value(self, val: str) -> bool:
+        """
+        Check if the policy value is safe from injection.
+        Disallows unquoted ')' characters.
+        """
+        in_quote = False
+        for char in val:
+            if char == '"':
+                in_quote = not in_quote
+            elif char == ')' and not in_quote:
+                return False
+        return True
 
     def __call__(self, request: Request, response: Response):
         # PERF: Iterate over pre-calculated headers
