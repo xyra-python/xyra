@@ -1,6 +1,7 @@
 import threading
 import time
 from collections import deque
+from ipaddress import ip_network, ip_address, IPv6Address
 
 from ..request import Request
 from ..response import Response
@@ -171,8 +172,28 @@ class RateLimitMiddleware:
         We strictly use request.remote_addr to prevent IP spoofing.
         To handle proxies correctly, use ProxyHeadersMiddleware which validates
         X-Forwarded-For and updates request.remote_addr securely.
+
+        SECURITY:
+        For IPv6, we aggregate /64 subnets to prevent DoS via IP rotation.
         """
-        return request.remote_addr or "unknown"
+        ip = request.remote_addr or "unknown"
+
+        # Check if it looks like IPv6 (contains ':')
+        if ":" in ip:
+            try:
+                # Use strict=False to handle host bits being set
+                # We mask to /64 which is the standard user allocation
+                addr = ip_address(ip)
+                if isinstance(addr, IPv6Address) and addr.ipv4_mapped:
+                    return str(addr.ipv4_mapped)
+
+                network = ip_network(f"{ip}/64", strict=False)
+                return str(network.network_address)
+            except ValueError:
+                # Invalid IP or not an IP, return as is
+                return ip
+
+        return ip
 
     def __call__(self, request: Request, response: Response):
         """Apply rate limiting."""
