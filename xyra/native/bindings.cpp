@@ -239,11 +239,17 @@ public:
         std::map<std::string, std::vector<std::string>> query_params;
 
         size_t start = 0;
+        int param_count = 0;
         while (start < query.length()) {
             size_t end = query.find('&', start);
             if (end == std::string::npos) end = query.length();
 
             if (end > start) {
+                // SECURITY: Limit max number of query parameters to 1000 to prevent DoS (CPU/Memory exhaustion)
+                if (++param_count > 1000) {
+                    throw std::invalid_argument("Too many query parameters (limit 1000)");
+                }
+
                 std::string_view pair_view = std::string_view(query).substr(start, end - start);
                 size_t eq = pair_view.find('=');
                 std::string key, value;
