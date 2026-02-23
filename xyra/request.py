@@ -36,6 +36,9 @@ class Request:
         "_query_cache",
         "__dict__",
         "_remote_addr_cache",
+        "_scheme_cache",
+        "_host_cache",
+        "_port_cache",
     )
 
     def __init__(
@@ -53,6 +56,96 @@ class Request:
         self._url_cache: str | None = None
         self._query_cache: str | None = None
         self._remote_addr_cache: str | None = None
+        self._scheme_cache: str | None = None
+        self._host_cache: str | None = None
+        self._port_cache: int | None = None
+
+    @property
+    def scheme(self) -> str:
+        """
+        Get the request scheme (http or https).
+        Defaults to 'http' unless updated by middleware (e.g. ProxyHeadersMiddleware).
+
+        Returns:
+            Scheme string ('http' or 'https').
+        """
+        if self._scheme_cache is None:
+            self._scheme_cache = "http"
+        return self._scheme_cache
+
+    @property
+    def host(self) -> str:
+        """
+        Get the request host (domain or IP).
+        Defaults to Host header (without port).
+
+        Returns:
+            Host string (e.g., "example.com" or "127.0.0.1").
+        """
+        if self._host_cache is None:
+            host_header = self.get_header("host", "")
+            if not host_header:
+                self._host_cache = ""
+                return self._host_cache
+
+            # Handle IPv6 literals (e.g., [::1]:8080)
+            if host_header.startswith("["):
+                end = host_header.find("]")
+                if end != -1:
+                    self._host_cache = host_header[: end + 1]
+                else:
+                    self._host_cache = host_header
+            # Handle IPv4 or Domain with port (e.g., example.com:8080)
+            elif ":" in host_header:
+                self._host_cache = host_header.split(":")[0]
+            else:
+                self._host_cache = host_header
+
+        return self._host_cache
+
+    @property
+    def port(self) -> int:
+        """
+        Get the request port.
+        Defaults to Host header port or 80/443 based on scheme.
+
+        Returns:
+            Port number as integer.
+        """
+        if self._port_cache is None:
+            host_header = self.get_header("host", "")
+
+            # Default based on scheme
+            default_port = 443 if self.scheme == "https" else 80
+
+            if not host_header:
+                self._port_cache = default_port
+                return self._port_cache
+
+            if host_header.startswith("["):
+                # IPv6 literal with port [::1]:8080
+                end = host_header.find("]")
+                if (
+                    end != -1
+                    and len(host_header) > end + 1
+                    and host_header[end + 1] == ":"
+                ):
+                    try:
+                        self._port_cache = int(host_header[end + 2 :])
+                    except ValueError:
+                        self._port_cache = default_port
+                else:
+                    self._port_cache = default_port
+            elif ":" in host_header:
+                # IPv4 or Domain with port
+                try:
+                    self._port_cache = int(host_header.split(":")[1])
+                except ValueError:
+                    self._port_cache = default_port
+            else:
+                self._port_cache = default_port
+
+        return self._port_cache
 
     @property
     def method(self) -> str:

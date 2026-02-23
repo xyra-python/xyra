@@ -120,6 +120,7 @@ class ProxyHeadersMiddleware:
         # The first untrusted IP we encounter is the client IP.
 
         client_ip = remote_addr  # Default fallback if logic fails or all trusted
+        client_index = -1  # Index in the `ips` list (from left) that corresponds to the client
 
         if self.trust_all:
             # SECURITY: If trusting all, we rely on trusted_proxy_count to limit recursion.
@@ -130,12 +131,13 @@ class ProxyHeadersMiddleware:
             # max_hops = trusted_proxy_count - 1
             max_hops = self.trusted_proxy_count - 1  # type: ignore
 
-            for ip in reversed(ips):
+            for i in range(len(ips) - 1, -1, -1):
                 if hops < max_hops:
                     hops += 1
                     continue
                 else:
-                    client_ip = ip
+                    client_ip = ips[i]
+                    client_index = i
                     break
             else:
                 # If we exhausted the list without finding an untrusted IP (within count limits),
@@ -143,14 +145,16 @@ class ProxyHeadersMiddleware:
                 # We default to the first IP (originator).
                 if ips:
                     client_ip = ips[0]
+                    client_index = 0
         else:
             # Standard logic using IP whitelist
             # Iterate right to left
-            for ip in reversed(ips):
-                if self._is_trusted(ip):
+            for i in range(len(ips) - 1, -1, -1):
+                if self._is_trusted(ips[i]):
                     continue
                 else:
-                    client_ip = ip
+                    client_ip = ips[i]
+                    client_index = i
                     break
             else:
                 # All IPs in XFF are trusted (and remote_addr is trusted).
@@ -159,6 +163,7 @@ class ProxyHeadersMiddleware:
                 # In this case, the "client" is the first IP in the list (the originator).
                 if ips:
                     client_ip = ips[0]
+                    client_index = 0
 
         # Update the request's remote_addr cache
         # Validate that the resolved IP is a valid IP string
@@ -168,7 +173,55 @@ class ProxyHeadersMiddleware:
             # Set the cache directly
             req._remote_addr_cache = client_ip
         except ValueError:
-            pass
+            # If IP is invalid, we don't update anything
+            return
+
+        # Handle X-Forwarded-Proto, X-Forwarded-Host, X-Forwarded-Port
+        # We assume that the proxy chain is consistent for these headers.
+        # We use the same 'depth' (peeled proxies) to find the correct value.
+
+        # Number of proxies stripped from the end of the list
+        # ips = [Client, Proxy1] (len=2). client_index=0. peeled = 2 - 1 - 0 = 1.
+        peeled_count = len(ips) - 1 - client_index
+
+        def get_forwarded_value(header_name: str) -> str | None:
+            header_val = req.get_header(header_name)
+            if not header_val:
+                return None
+            try:
+                # Split by comma, limit similar to XFF
+                values = [v.strip() for v in header_val.rsplit(",", 20)]
+                if not values:
+                    return None
+
+                # Calculate index from the right
+                # target_index = len(values) - 1 - peeled_count
+                target_index = len(values) - 1 - peeled_count
+
+                if target_index < 0:
+                    # List is shorter than XFF list, fallback to the first value (originator)
+                    return values[0]
+                return values[target_index]
+            except Exception:
+                return None
+
+        # Update Scheme
+        proto = get_forwarded_value("x-forwarded-proto")
+        if proto:
+            req._scheme_cache = proto.lower()
+
+        # Update Host
+        host = get_forwarded_value("x-forwarded-host")
+        if host:
+            req._host_cache = host
+
+        # Update Port
+        port_str = get_forwarded_value("x-forwarded-port")
+        if port_str:
+            try:
+                req._port_cache = int(port_str)
+            except ValueError:
+                pass
 
 
 def proxy_headers(
