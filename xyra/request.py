@@ -204,14 +204,25 @@ class Request:
         if self._query_params_cache is None:
             # PERF: use native's direct accessor if available (faster C++ implementation)
             # This returns a dict with lists of values, matching parse_qs behavior.
-            if hasattr(self._req, "get_queries"):
-                self._query_params_cache = self._req.get_queries()
-            else:
-                query_string = self.query
-                if not query_string:
-                    self._query_params_cache = {}
+            try:
+                if hasattr(self._req, "get_queries"):
+                    self._query_params_cache = self._req.get_queries()
                 else:
-                    self._query_params_cache = parse_qs(query_string)
+                    query_string = self.query
+                    if not query_string:
+                        self._query_params_cache = {}
+                    else:
+                        # SECURITY: Limit max_num_fields to 1000 to prevent DoS via Hash Collision / CPU Exhaustion
+                        self._query_params_cache = parse_qs(
+                            query_string, keep_blank_values=True, max_num_fields=1000
+                        )
+            except ValueError as e:
+                # SECURITY: Handle DoS attempt
+                logger = get_logger("xyra")
+                logger.warning(
+                    f"Query params exceeded max fields limit or failed to parse: {e}. Returning empty dict."
+                )
+                self._query_params_cache = {}
         return self._query_params_cache
 
     def get_parameter(self, index: int) -> str | None:
