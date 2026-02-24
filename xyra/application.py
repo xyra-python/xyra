@@ -501,6 +501,11 @@ class App:
         """
         from .middleware.security_headers import SecurityHeadersMiddleware
 
+        # SECURITY: Set default CSP if not provided.
+        # This mitigates XSS and injection attacks by default.
+        if "content_security_policy" not in kwargs:
+            kwargs["content_security_policy"] = "object-src 'none'; base-uri 'self'"
+
         self.use(SecurityHeadersMiddleware(**kwargs))
 
     def enable_swagger(self, host: str = "localhost", port: int = 8000):

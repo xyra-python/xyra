@@ -19,10 +19,13 @@ class MockHeaders(CIMultiDict):
 
 
 class MockRequest:
-    def __init__(self, headers, method="GET"):
+    def __init__(self, headers, method="GET", scheme="https", host="example.com", port=443):
         self._headers = CIMultiDict(headers)
         self.method = method
         self.csrf_token = None
+        self.scheme = scheme
+        self.host = host
+        self.port = port
 
     @property
     def headers(self):
