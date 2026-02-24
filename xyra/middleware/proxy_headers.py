@@ -199,8 +199,17 @@ class ProxyHeadersMiddleware:
                 target_index = len(values) - 1 - peeled_count
 
                 if target_index < 0:
-                    # List is shorter than XFF list, fallback to the first value (originator)
-                    return values[0]
+                    # SECURITY: List is shorter than expected based on trusted proxy count.
+                    # If target_index == -1, it means the list length matches the peeled count.
+                    # This is valid: the first value (values[0]) was added by the furthest trusted proxy we peeled.
+                    if target_index == -1:
+                        return values[0]
+
+                    # If target_index < -1, it implies multiple trusted proxies did not append to the header.
+                    # Returning the first value (values[0]) is unsafe as it might be attacker-controlled
+                    # and was not overwritten/appended by the trusted proxies we peeled off.
+                    # We return None to ignore this header and fallback to the connection's properties.
+                    return None
                 return values[target_index]
             except Exception:
                 return None
