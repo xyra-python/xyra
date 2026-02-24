@@ -257,3 +257,63 @@ def test_proxy_headers_trust_all_count_exceeded():
 
     # Should fall back to first IP (Client)
     assert request.remote_addr == "1.1.1.1"
+
+
+def test_proxy_headers_host_poisoning():
+    # Trusted proxies: 3 (Trust P3, P2, P1)
+    # Remote Addr is P3 (10.0.0.3). XFF: Client, P1, P2.
+    # XFH: Evil. (len 1).
+    # peeled_count = 2 (P1, P2 peeled from XFF).
+    # target_index = 1 - 1 - 2 = -2.
+    # Should be None (ignored).
+
+    request, response = create_request(
+        "10.0.0.3",
+        {
+            "X-Forwarded-For": "1.2.3.4, 10.0.0.1, 10.0.0.2",
+            "X-Forwarded-Host": "evil.com",
+            "Host": "internal-service",
+        },
+    )
+
+    mw = ProxyHeadersMiddleware(["*"], trusted_proxy_count=3)
+    mw(request, response)
+
+    assert request._host_cache is None
+
+
+def test_proxy_headers_valid_minus_one_case():
+    # Case where target_index is -1 (valid).
+    # XFF: Client, P1. (peeled_count=1).
+    # XFH: ClientHost. (len 1).
+    # target_index = 1 - 1 - 1 = -1.
+    # Should return ClientHost.
+
+    request, response = create_request(
+        "10.0.0.2",
+        {
+            "X-Forwarded-For": "1.2.3.4, 10.0.0.1",
+            "X-Forwarded-Host": "client.com",
+            "Host": "internal-service",
+        },
+    )
+
+    mw = ProxyHeadersMiddleware(["*"], trusted_proxy_count=2)
+    mw(request, response)
+
+    assert request._host_cache == "client.com"
+
+def test_proxy_headers_valid_chain_resolution():
+    request, response = create_request(
+        "10.0.0.2",
+        {
+            "X-Forwarded-For": "1.2.3.4, 10.0.0.1",
+            "X-Forwarded-Host": "client.com, proxy1.com",
+            "Host": "internal-service",
+        },
+    )
+
+    mw = ProxyHeadersMiddleware(["*"], trusted_proxy_count=2)
+    mw(request, response)
+
+    assert request._host_cache == "client.com"
