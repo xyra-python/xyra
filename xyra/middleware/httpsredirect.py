@@ -22,23 +22,31 @@ class HTTPSRedirectMiddleware:
 
         Args:
             redirect_status_code: HTTP status code for redirect (301 or 302)
-            trust_proxy: Whether to trust proxy headers (X-Forwarded-Proto)
+            trust_proxy: (Deprecated) Whether to trust proxy headers.
+                         Use ProxyHeadersMiddleware to securely resolve scheme.
             allowed_hosts: List of allowed hosts (e.g. ["example.com", "*.example.com"])
         """
         self.redirect_status_code = redirect_status_code
         self.trust_proxy = trust_proxy
         self.allowed_hosts = allowed_hosts
 
+        if self.trust_proxy:
+            from ..logger import get_logger
+
+            logger = get_logger("xyra")
+            logger.warning(
+                "🚨 Security Warning: 'trust_proxy' in HTTPSRedirectMiddleware is deprecated and unsafe. "
+                "It allows scheme spoofing via X-Forwarded-Proto headers if not properly validated. "
+                "Please use 'xyra.middleware.ProxyHeadersMiddleware' to securely resolve the scheme "
+                "before this middleware runs."
+            )
+
     def __call__(self, req: Request, res: Response):
         """Redirect HTTP requests to HTTPS."""
-        # Check X-Forwarded-Proto (standard for load balancers)
-        # Headers keys are lowercase in Xyra Request
-        forwarded_proto = "http"
-        if self.trust_proxy:
-            forwarded_proto = req.get_header("x-forwarded-proto", "http").lower()
-
-        # If we are already https, do nothing
-        if forwarded_proto == "https":
+        # Check scheme (resolved by ProxyHeadersMiddleware if configured)
+        # SECURITY: Do NOT read X-Forwarded-Proto directly unless verified by ProxyHeadersMiddleware.
+        # req.scheme defaults to "http", but is updated to "https" if ProxyHeadersMiddleware verifies it.
+        if req.scheme == "https":
             return
 
         # If no host header, we can't redirect reliably
