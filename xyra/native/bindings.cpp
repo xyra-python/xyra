@@ -27,6 +27,11 @@ struct SafeCallback {
     }
 };
 
+struct WebSocketData {
+    std::shared_ptr<std::atomic<bool>> is_closed;
+    WebSocketData() : is_closed(std::make_shared<std::atomic<bool>>(false)) {}
+};
+
 // Simple URL decoder
 std::string url_decode(std::string_view str) {
     std::string ret;
@@ -375,23 +380,39 @@ private:
 
 class WebSocket {
 public:
-    WebSocket(uWS::WebSocket<false, true, void *> *ws) : ws(ws) {}
+    WebSocket(uWS::WebSocket<false, true, WebSocketData> *ws) : ws(ws) {
+        // SECURITY: Capture the shared is_closed flag from user data to prevent UAF
+        is_closed = ws->getUserData()->is_closed;
+    }
     void send(std::string message, bool is_binary = false) {
+        if (*is_closed) return;
         ws->send(message, is_binary ? uWS::OpCode::BINARY : uWS::OpCode::TEXT);
     }
-    void close() { ws->close(); }
-    void subscribe(std::string topic) { ws->subscribe(topic); }
-    void unsubscribe(std::string topic) { ws->unsubscribe(topic); }
+    void close() {
+        if (*is_closed) return;
+        ws->close();
+    }
+    void subscribe(std::string topic) {
+        if (*is_closed) return;
+        ws->subscribe(topic);
+    }
+    void unsubscribe(std::string topic) {
+        if (*is_closed) return;
+        ws->unsubscribe(topic);
+    }
     void publish(std::string topic, std::string message, bool is_binary = false, bool compress = false) {
+        if (*is_closed) return;
         ws->publish(topic, message, is_binary ? uWS::OpCode::BINARY : uWS::OpCode::TEXT, compress);
     }
-    py::bytes get_remote_address_bytes() {
+    py::object get_remote_address_bytes() {
+        if (*is_closed) return py::none();
         std::string_view addr = ws->getRemoteAddress();
         return py::bytes(addr.data(), addr.length());
     }
 
 private:
-    uWS::WebSocket<false, true, void *> *ws;
+    uWS::WebSocket<false, true, WebSocketData> *ws;
+    std::shared_ptr<std::atomic<bool>> is_closed;
 };
 
 PYBIND11_MODULE(libxyra, m) {
@@ -489,7 +510,7 @@ PYBIND11_MODULE(libxyra, m) {
             return &app;
         })
         .def("ws", [](uWS::App &app, std::string pattern, py::dict config) {
-            uWS::App::WebSocketBehavior<void *> behavior;
+            uWS::App::WebSocketBehavior<WebSocketData> behavior;
 
             if (config.contains("open")) {
                 py::function open_handler = config["open"];
@@ -505,15 +526,23 @@ PYBIND11_MODULE(libxyra, m) {
                     message_handler(WebSocket(ws), std::string(message), (int)opCode);
                 };
             }
+            // Always set close handler to manage lifecycle, even if user didn't provide one
+            py::function close_handler;
             if (config.contains("close")) {
-                py::function close_handler = config["close"];
-                behavior.close = [close_handler](auto *ws, int code, std::string_view message) {
-                    py::gil_scoped_acquire acquire;
-                    close_handler(WebSocket(ws), code, std::string(message));
-                };
+                close_handler = config["close"];
             }
 
-            app.ws<void *>(pattern, std::move(behavior));
+            behavior.close = [close_handler](auto *ws, int code, std::string_view message) {
+                // SECURITY: Mark socket as closed to prevent UAF in Python wrappers
+                *ws->getUserData()->is_closed = true;
+
+                py::gil_scoped_acquire acquire;
+                if (close_handler) {
+                    close_handler(WebSocket(ws), code, std::string(message));
+                }
+            };
+
+            app.ws<WebSocketData>(pattern, std::move(behavior));
             return &app;
         })
         .def("listen", [](uWS::App &app, int port, py::function callback) {
