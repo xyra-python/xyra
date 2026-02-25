@@ -97,6 +97,8 @@ async def test_csrf_hardening_https_forwarded_reject():
     mock_res_native = MockSocketifyResponse()
 
     req = Request(mock_req_native, Response(mock_res_native))
+    # Emulate ProxyHeadersMiddleware having run
+    req._scheme_cache = "https"
     res = Response(mock_res_native)
 
     # Run middleware
@@ -124,6 +126,8 @@ async def test_csrf_hardening_https_forwarded_allow_check_token():
     mock_res_native = MockSocketifyResponse()
 
     req = Request(mock_req_native, Response(mock_res_native))
+    # Emulate ProxyHeadersMiddleware having run
+    req._scheme_cache = "https"
     res = Response(mock_res_native)
 
     await csrf(req, res)
@@ -149,6 +153,8 @@ async def test_csrf_hardening_host_missing():
     mock_res_native = MockSocketifyResponse()
 
     req = Request(mock_req_native, Response(mock_res_native))
+    # Emulate ProxyHeadersMiddleware having run
+    req._scheme_cache = "https"
     res = Response(mock_res_native)
 
     await csrf(req, res)

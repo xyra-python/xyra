@@ -159,6 +159,10 @@ class CSRFMiddleware:
 
     async def __call__(self, request: Request, response: Response):
         """Handle CSRF protection for the request."""
+        # Determine if we are in a secure context (HTTPS)
+        # We respect explicit configuration OR the request scheme (e.g. from ProxyHeadersMiddleware)
+        is_https = self.secure or request.scheme == "https"
+
         # Always try to get the existing token from cookie
         signed_cookie_token = self._get_cookie(request, self.cookie_name)
 
@@ -176,7 +180,7 @@ class CSRFMiddleware:
             response.set_cookie(
                 self.cookie_name,
                 signed_cookie_token,
-                secure=self.secure,
+                secure=is_https,
                 http_only=self.http_only,
                 same_site=self.same_site,
             )
@@ -191,14 +195,13 @@ class CSRFMiddleware:
 
         # SECURITY: For HTTPS requests, verify the Origin/Referer (Defense in Depth).
         # This prevents CSRF even if the token is somehow leaked.
-        # Check if request is secure (HTTPS) based on configuration.
-        # SECURITY: Do not trust X-Forwarded-Proto blindly as it can be spoofed.
-        # Users behind proxies should configure secure=True.
-        is_https = self.secure
-
         if is_https:
             source = request.get_header("origin") or request.get_header("referer")
-            host = request.get_header("host")
+
+            # Use resolved host/port which respects ProxyHeadersMiddleware
+            scheme = request.scheme
+            host = request.host
+            port = request.port
 
             if not host:
                 response.status(400)
@@ -206,7 +209,11 @@ class CSRFMiddleware:
                 response._ended = True
                 return
 
-            expected = f"https://{host}"
+            # Construct expected origin handling standard ports
+            if (scheme == "http" and port == 80) or (scheme == "https" and port == 443):
+                expected = f"{scheme}://{host}"
+            else:
+                expected = f"{scheme}://{host}:{port}"
 
             if not source or (
                 source != expected and not source.startswith(f"{expected}/")
