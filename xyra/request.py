@@ -39,6 +39,9 @@ class Request:
         "_scheme_cache",
         "_host_cache",
         "_port_cache",
+        "_body_cache",
+        "_json_cache",
+        "_form_cache",
     )
 
     def __init__(
@@ -59,6 +62,9 @@ class Request:
         self._scheme_cache: str | None = None
         self._host_cache: str | None = None
         self._port_cache: int | None = None
+        self._body_cache: str | bytes | None = None
+        self._json_cache: Any = None
+        self._form_cache: dict[str, str] | None = None
 
     @property
     def scheme(self) -> str:
@@ -361,7 +367,11 @@ class Request:
                 text = await req.text()
                 res.text(text)
         """
-        body = await self._res.get_data()
+        # Cache body to allow multiple reads (e.g. CSRF middleware + handler)
+        if self._body_cache is None:
+            self._body_cache = await self._res.get_data()
+
+        body = self._body_cache
         if isinstance(body, bytes):
             return body.decode("utf-8")
         elif isinstance(body, str):
@@ -380,19 +390,31 @@ class Request:
                 # Process data...
                 res.json({"received": data})
         """
+        # Return cached JSON if available
+        if self._json_cache is not None:
+            return self._json_cache
+
+        # Cache body to allow multiple reads
+        if self._body_cache is None:
+            self._body_cache = await self._res.get_data()
+
         # PERF: Get raw data (bytes) to avoid unnecessary decoding to string
-        body = await self._res.get_data()
+        body = self._body_cache
         if not body:
             return {}
 
+        parsed = None
         if isinstance(body, bytes):
-            return self.parse_json(body)
+            parsed = self.parse_json(body)
+        elif isinstance(body, str):
+            parsed = self.parse_json(body)
+        else:
+            # Fallback for other types
+            parsed = self.parse_json(str(body))
 
-        if isinstance(body, str):
-            return self.parse_json(body)
-
-        # Fallback for other types
-        return self.parse_json(str(body))
+        # Cache parsed JSON
+        self._json_cache = parsed
+        return parsed
 
     def parse_json(self, json_string: str | bytes) -> Any:
         """
@@ -419,6 +441,10 @@ class Request:
                 name = form_data.get("name")
                 res.json({"submitted": True, "name": name})
         """
+        # Return cached form if available
+        if self._form_cache is not None:
+            return self._form_cache
+
         try:
             text_content = await self.text()
         except UnicodeDecodeError:
@@ -438,6 +464,7 @@ class Request:
                 text_content, keep_blank_values=True, max_num_fields=1000
             )
             form_data = dict(parsed_pairs)
+            self._form_cache = form_data
             return form_data
         except ValueError as e:
             # SECURITY: Handle DoS attempt
@@ -445,12 +472,14 @@ class Request:
             logger.warning(
                 f"Form data exceeded max fields limit: {e}. Returning empty dict."
             )
+            self._form_cache = {}
             return {}
         except Exception as e:
             # Secure handling: If parse_qsl fails, return empty dict and log error.
             # Do NOT fallback to simple split which bypasses URL decoding.
             logger = get_logger("xyra")
             logger.warning(f"Failed to parse form data: {e}. Returning empty dict.")
+            self._form_cache = {}
             return {}
 
     @property
