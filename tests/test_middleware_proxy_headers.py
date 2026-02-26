@@ -136,7 +136,8 @@ def test_proxy_headers_fully_invalid_xff():
     request, response = create_request("10.0.0.1", {"X-Forwarded-For": "invalid"})
     mw = ProxyHeadersMiddleware(["10.0.0.1"])
     mw(request, response)
-    assert request.remote_addr == "10.0.0.1"
+    # SECURITY: Should be "unknown" to prevent attribution to the trusted proxy IP
+    assert request.remote_addr == "unknown"
 
 
 def test_proxy_headers_spoofing_attempt():

@@ -173,7 +173,16 @@ class ProxyHeadersMiddleware:
             # Set the cache directly
             req._remote_addr_cache = client_ip
         except ValueError:
-            # If IP is invalid, we don't update anything
+            # SECURITY: If IP is invalid, we MUST NOT leave remote_addr as the trusted proxy IP.
+            # This would allow attackers to bypass IP-based rate limits or blocklists by
+            # making their requests appear to come from the trusted proxy itself.
+            # We set it to "unknown" so they share a single rate limit bucket (or get blocked).
+            logger = get_logger("xyra")
+            logger.warning(
+                f"Security Warning: Resolved client IP '{client_ip}' from trusted proxy is invalid. "
+                "Setting remote_addr to 'unknown' to prevent IP spoofing/DoS attribution to proxy."
+            )
+            req._remote_addr_cache = "unknown"
             return
 
         # Handle X-Forwarded-Proto, X-Forwarded-Host, X-Forwarded-Port
