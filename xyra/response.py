@@ -124,6 +124,16 @@ class Response:
 
         # Write status code
         self._res.write_status(str(self.status_code))
+
+        # SECURITY: Set default Content-Type if missing to prevent MIME sniffing/XSS.
+        # Browsers may sniff "text/html" from response body if Content-Type is missing.
+        # Default to safe types: text/plain for strings, application/octet-stream for bytes.
+        if "content-type" not in self.headers:
+            if isinstance(data, str):
+                self._header_fast("Content-Type", "text/plain; charset=utf-8")
+            else:
+                self._header_fast("Content-Type", "application/octet-stream")
+
         # Write headers
         self._write_headers()
 
