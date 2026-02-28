@@ -9,6 +9,7 @@ import time
 import traceback
 from collections.abc import Callable
 from typing import Any, Union, overload
+from urllib.parse import unquote
 
 from . import libxyra
 from .logger import get_logger, setup_logging
@@ -221,6 +222,10 @@ class App:
             if not file_path:
                 res.status(404).text("Not Found")
                 return
+
+            # SECURITY: URL decode the path to handle files with spaces
+            # and to ensure path traversal checks apply to the fully-decoded path.
+            file_path = unquote(file_path)
 
             # SECURITY: Prevent Path Traversal
             try:
