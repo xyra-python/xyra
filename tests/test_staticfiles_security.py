@@ -94,3 +94,11 @@ async def test_static_files_security():
         # Test 4: .well-known file -> Should succeed 200
         res, headers = await simulate_request(".well-known/assetlinks.json")
         assert res.status_code == 200, ".well-known should be allowed"
+
+        # Test 5: URL-encoded Path Traversal (%2e%2e/ -> ../)
+        # Assuming the static folder is inside a parent dir with a secret file
+        with open(os.path.join(temp_dir, "secret.txt"), "w") as f:
+            f.write("SECRET")
+
+        res, headers = await simulate_request("%2e%2e/secret.txt")
+        assert res.status_code == 403, "URL-encoded path traversal should be 403"

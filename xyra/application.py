@@ -222,6 +222,11 @@ class App:
                 res.status(404).text("Not Found")
                 return
 
+            import urllib.parse
+            # SECURITY: Unquote URL-encoded paths to prevent bypass of path traversal checks
+            # (e.g., %2e%2e/ -> ../)
+            file_path = urllib.parse.unquote(file_path)
+
             # SECURITY: Prevent Path Traversal
             try:
                 # Ensure directory path ends with a separator to prevent partial name match
