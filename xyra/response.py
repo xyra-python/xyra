@@ -15,11 +15,6 @@ import asyncio
 # Security: Limit maximum request body size to 10MB to prevent DoS
 MAX_BODY_SIZE = 10 * 1024 * 1024
 
-# SECURITY: Regex to match control characters except HTAB (\t)
-# Matches 0x00-0x08, 0x0A-0x1F, 0x7F
-_CONTROL_CHARS_PATTERN = re.compile(r"[\x00-\x08\x0a-\x1f\x7f]")
-
-
 class Response:
     """
     HTTP response wrapper for Xyra applications.
@@ -96,13 +91,6 @@ class Response:
 
     def header(self, key: str, value: str) -> "Response":
         """Set a response header."""
-        # SECURITY:
-        # Risk: Header injection (CRLF) and response splitting.
-        # Attack: Attacker injects \r\n to start a new header or response body.
-        # Mitigation: Reject all control characters (except HTAB) in keys and values.
-        if _CONTROL_CHARS_PATTERN.search(key) or _CONTROL_CHARS_PATTERN.search(value):
-            raise ValueError("Invalid characters in header (injection attempt)")
-
         self.headers[key] = value
         return self
 
