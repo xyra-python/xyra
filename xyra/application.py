@@ -235,9 +235,13 @@ class App:
                     lambda: os.path.join(os.path.realpath(directory), "")
                 )
                 # Normalize file_path and join securely
+                # SECURITY: Use ntpath to strip Windows drive letters and both slash types
+                # to prevent absolute path injection (e.g., C:\Windows\System32\cmd.exe)
+                import ntpath
+                stripped_path = ntpath.splitdrive(file_path.lstrip("/\\"))[1].lstrip("/\\")
                 abs_path = await asyncio.to_thread(
                     lambda: os.path.realpath(
-                        os.path.join(abs_directory, file_path.lstrip("/"))
+                        os.path.join(abs_directory, stripped_path)
                     )
                 )
 
