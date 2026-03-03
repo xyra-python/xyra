@@ -102,6 +102,8 @@ ignore = [
 "__init__.py" = ["F401"]
 "tests/**/*" = ["B011"] # assert false
 "tests/test_security_dos.py" = ["E402", "I001"]
+"tests/test_request_caching_regression.py" = ["E402"]
+"tests/test_https_bypass_regression.py" = ["E402"]
 
 [tool.black]
 line-length = 88
