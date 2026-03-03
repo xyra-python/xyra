@@ -168,3 +168,6 @@ exclude_lines = [
     "raise AssertionError",
     "raise NotImplementedError",
 ]
+
+[tool.cibuildwheel]
+enable = ["cpython-prerelease"]
