@@ -197,7 +197,10 @@ public:
 
         int header_count = 0;
         for (auto header : *req) {
-            if (++header_count > 100) break; // Limit headers count
+            if (++header_count > 100) {
+                headers_truncated = true;
+                break; // Limit headers count
+            }
             std::string key = std::string(std::get<0>(header));
             std::string value = std::string(std::get<1>(header));
             std::transform(key.begin(), key.end(), key.begin(),
@@ -285,6 +288,8 @@ private:
     std::string query;
     std::map<std::string, std::string> headers;
     std::vector<std::string> params;
+public:
+    bool headers_truncated = false;
 };
 
 class Response {
@@ -432,7 +437,8 @@ PYBIND11_MODULE(libxyra, m) {
         .def("get_parameter", &Request::get_parameter)
         .def("get_query", &Request::get_query)
         .def("get_headers", &Request::get_headers)
-        .def("get_queries", &Request::get_queries);
+        .def("get_queries", &Request::get_queries)
+        .def_readonly("headers_truncated", &Request::headers_truncated);
 
     py::class_<Response>(m, "Response")
         .def("write_status", &Response::write_status)

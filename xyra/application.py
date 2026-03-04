@@ -418,6 +418,13 @@ class App:
                 response = Response(res, self.templates)
                 request = Request(req, response, params)
 
+                # SECURITY: The C++ Request wrapper sets this flag if >100 headers are received.
+                # Silent truncation leads to security bypasses (e.g. dropped X-Forwarded-For).
+                if getattr(request._req, "headers_truncated", False):
+                    res.write_status("431 Request Header Fields Too Large")
+                    res.end("Request Header Fields Too Large")
+                    return
+
                 # Execute middleware stack
                 await middleware_stack_entry(request, response)
 

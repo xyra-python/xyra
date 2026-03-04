@@ -103,3 +103,48 @@ def test_ratelimiter_monotonic():
     # Check reset time is positive
     assert limiter.get_reset_time("test") > 0
     assert limiter.get_reset_time("test") <= 10
+
+@pytest.mark.asyncio
+async def test_header_truncation_mitigation():
+    """Verify that requests with more than 100 headers are rejected with 431."""
+    app = App()
+
+    @app.get("/")
+    def handler(req: Request, res: Response):
+        res.send("OK")
+
+    route = app.router.routes[-1]
+    final_handler = app._create_final_handler(
+        route["handler"], route["param_names"], app.middlewares, route["parsed_path"]
+    )
+
+    # 1. Test normal headers (under limit)
+    mock_native_req_normal = Mock()
+    mock_native_req_normal.headers_truncated = False
+    mock_native_req_normal.get_parameter.return_value = ""
+
+    mock_native_res_normal = Mock()
+    mock_native_res_normal.write_status = Mock()
+    mock_native_res_normal.write_header = Mock()
+    mock_native_res_normal.end = Mock()
+
+    await final_handler(mock_native_res_normal, mock_native_req_normal)
+
+    mock_native_res_normal.end.assert_called_with("OK")
+
+    # 2. Test excessive headers (over limit)
+    mock_native_req_huge = Mock()
+    # Simulate C++ Request wrapper setting the flag
+    mock_native_req_huge.headers_truncated = True
+    mock_native_req_huge.get_parameter.return_value = ""
+
+    mock_native_res_huge = Mock()
+    mock_native_res_huge.write_status = Mock()
+    mock_native_res_huge.write_header = Mock()
+    mock_native_res_huge.end = Mock()
+
+    await final_handler(mock_native_res_huge, mock_native_req_huge)
+
+    # Should return 431 instead of "OK"
+    mock_native_res_huge.write_status.assert_called_with("431 Request Header Fields Too Large")
+    mock_native_res_huge.end.assert_called_with("Request Header Fields Too Large")
