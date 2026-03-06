@@ -394,6 +394,19 @@ class Request:
         if self._json_cache is not None:
             return self._json_cache
 
+        # SECURITY: Strictly validate Content-Type before parsing JSON
+        content_type = self.get_header("content-type", "")
+        content_type_lower = content_type.lower()
+        if not content_type_lower or not (
+            content_type_lower.startswith("application/json") or
+            "+json" in content_type_lower
+        ):
+            raise ValueError(
+                f"Invalid Content-Type for JSON parsing: '{content_type}'. "
+                f"Expected 'application/json' or similar '+json' media type. "
+                f"This prevents MIME confusion attacks."
+            )
+
         # Cache body to allow multiple reads
         if self._body_cache is None:
             self._body_cache = await self._res.get_data()
