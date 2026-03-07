@@ -1,8 +1,8 @@
 
 import threading
 import time
-
-import requests
+import urllib.error
+import urllib.request
 
 from xyra import App, Request, Response
 
@@ -29,13 +29,22 @@ def test_xss():
         url = f"http://localhost:8006/unsafe?q={payload}"
 
         print(f"Requesting {url}")
-        resp = requests.get(url)
+        req = urllib.request.Request(url)
+        try:
+            with urllib.request.urlopen(req) as response:
+                status = response.status
+                headers = response.headers
+                body = response.read().decode('utf-8', errors='replace')
+        except urllib.error.HTTPError as e:
+            status = e.code
+            headers = e.headers
+            body = e.read().decode('utf-8', errors='replace')
 
-        print(f"Status: {resp.status_code}")
-        print(f"Headers: {resp.headers}")
-        print(f"Body: {resp.text}")
+        print(f"Status: {status}")
+        print(f"Headers: {headers}")
+        print(f"Body: {body}")
 
-        ct = resp.headers.get("Content-Type")
+        ct = headers.get("Content-Type")
         print(f"Content-Type: {ct}")
 
         if not ct:

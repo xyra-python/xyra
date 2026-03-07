@@ -1,8 +1,8 @@
 
 import threading
 import time
-
-import requests
+import urllib.error
+import urllib.request
 
 from xyra import App, Request, Response
 
@@ -24,13 +24,17 @@ def test_headers_case():
     try:
         # Send mixed case headers
         headers = {"X-Custom-Header": "Value", "CONTENT-TYPE": "application/json"}
-        resp = requests.get("http://localhost:8004/api/headers", headers=headers)
+        req = urllib.request.Request("http://localhost:8004/api/headers", headers=headers)
+        with urllib.request.urlopen(req) as resp:
+            status_code = resp.status
+            body = resp.read().decode('utf-8')
 
-        print(f"Status: {resp.status_code}")
-        print(f"Body: {resp.json()}")
+        import json
+        received = json.loads(body)
+        print(f"Status: {status_code}")
+        print(f"Body: {received}")
 
         # Verify keys are lowercased
-        received = resp.json()
         if "x-custom-header" in received and "content-type" in received:
             print("Headers are correctly lowercased.")
         else:
