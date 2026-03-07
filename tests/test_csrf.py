@@ -16,14 +16,9 @@ def _sign_token(token, secret_key):
 
 
 # CSRF Tests
-def test_csrf_middleware_init():
-    middleware = CSRFMiddleware()
-    assert middleware.secret_key
-    assert middleware.cookie_name == "csrf_token"
-    assert middleware.header_name == "X-CSRF-Token"
-    assert middleware.exempt_methods == ["GET", "HEAD", "OPTIONS"]
-    assert middleware.secure is False
-    assert middleware.same_site == "Lax"
+def test_csrf_middleware_init_raises():
+    with pytest.raises(ValueError, match="CSRF secret_key not provided"):
+        CSRFMiddleware()
 
 
 def test_csrf_middleware_custom():
@@ -46,7 +41,7 @@ def test_csrf_middleware_custom():
 
 @pytest.mark.asyncio
 async def test_csrf_middleware_option():
-    middleware = CSRFMiddleware()
+    middleware = CSRFMiddleware(secret_key="my_secret")
     request = Mock()
     request.method = "OPTIONS"
     request.get_header.return_value = None  # No cookie header
@@ -58,14 +53,9 @@ async def test_csrf_middleware_option():
     assert response._ended is False
 
 
-def test_csrf_function():
-    middleware = csrf()
-    assert middleware.secret_key  # Should be generated
-    assert middleware.cookie_name == "csrf_token"
-    assert middleware.header_name == "X-CSRF-Token"
-    assert middleware.exempt_methods == ["GET", "HEAD", "OPTIONS"]
-    assert middleware.secure is False
-    assert middleware.same_site == "Lax"
+def test_csrf_function_raises():
+    with pytest.raises(ValueError, match="CSRF secret_key not provided"):
+        csrf()
 
 
 def test_csrf_custom_function():
@@ -88,7 +78,7 @@ def test_csrf_custom_function():
 
 @pytest.mark.asyncio
 async def test_csrf_middleware_post_without_token():
-    middleware = CSRFMiddleware()
+    middleware = CSRFMiddleware(secret_key="my_secret")
     request = Mock()
     request.method = "POST"
     request.get_header.return_value = None  # No cookie header
@@ -106,7 +96,7 @@ async def test_csrf_middleware_post_without_token():
 
 @pytest.mark.asyncio
 async def test_csrf_middleware_post_with_invalid_token():
-    middleware = CSRFMiddleware()
+    middleware = CSRFMiddleware(secret_key="my_secret")
     request = Mock()
     request.method = "POST"
     # Even if cookie is valid signed token, header mismatch should fail
@@ -128,7 +118,7 @@ async def test_csrf_middleware_post_with_invalid_token():
 
 @pytest.mark.asyncio
 async def test_csrf_middleware_post_with_valid_token():
-    middleware = CSRFMiddleware()
+    middleware = CSRFMiddleware(secret_key="my_secret")
     token = secrets.token_urlsafe(32)
     signed_token = _sign_token(token, middleware.secret_key)
     masked_token = middleware._mask_token(signed_token)
@@ -151,7 +141,7 @@ async def test_csrf_middleware_post_with_valid_token():
 
 @pytest.mark.asyncio
 async def test_csrf_middleware_get_sets_cookie():
-    middleware = CSRFMiddleware()
+    middleware = CSRFMiddleware(secret_key="my_secret")
     request = Mock()
     request.method = "GET"
     request.get_header.return_value = None  # No cookie header
@@ -172,7 +162,7 @@ async def test_csrf_middleware_get_sets_cookie():
 
 @pytest.mark.asyncio
 async def test_csrf_middleware_cookie_parsing():
-    middleware = CSRFMiddleware()
+    middleware = CSRFMiddleware(secret_key="my_secret")
     token = secrets.token_urlsafe(32)
     signed_token = _sign_token(token, middleware.secret_key)
     masked_token = middleware._mask_token(signed_token)
@@ -196,7 +186,7 @@ async def test_csrf_middleware_cookie_parsing():
 @pytest.mark.asyncio
 async def test_csrf_middleware_head_method():
     """Test that HEAD method is exempt by default."""
-    middleware = CSRFMiddleware()
+    middleware = CSRFMiddleware(secret_key="my_secret")
     request = Mock()
     request.method = "HEAD"
     request.get_header.return_value = None
@@ -212,7 +202,7 @@ async def test_csrf_middleware_head_method():
 async def test_csrf_middleware_custom_cookie_settings():
     """Test CSRF with custom cookie settings."""
     # When secure=True, it should use __Host- prefix
-    middleware = CSRFMiddleware(secure=True, http_only=False, same_site="Strict")
+    middleware = CSRFMiddleware(secret_key="my_secret", secure=True, http_only=False, same_site="Strict")
     assert middleware.cookie_name == "__Host-csrf_token"
 
     request = Mock()
@@ -234,7 +224,7 @@ async def test_csrf_middleware_custom_cookie_settings():
 @pytest.mark.asyncio
 async def test_csrf_middleware_multiple_cookies():
     """Test parsing CSRF token from multiple cookies."""
-    middleware = CSRFMiddleware()
+    middleware = CSRFMiddleware(secret_key="my_secret")
     token = secrets.token_urlsafe(32)
     signed_token = _sign_token(token, middleware.secret_key)
     masked_token = middleware._mask_token(signed_token)
@@ -257,7 +247,7 @@ async def test_csrf_middleware_multiple_cookies():
 @pytest.mark.asyncio
 async def test_csrf_middleware_no_cookie_header():
     """Test when there's no cookie header at all."""
-    middleware = CSRFMiddleware()
+    middleware = CSRFMiddleware(secret_key="my_secret")
     request = Mock()
     request.method = "POST"
     request.get_header.side_effect = lambda name: {
@@ -277,7 +267,7 @@ async def test_csrf_middleware_no_cookie_header():
 @pytest.mark.asyncio
 async def test_csrf_middleware_empty_cookie():
     """Test when cookie header exists but CSRF token is not present."""
-    middleware = CSRFMiddleware()
+    middleware = CSRFMiddleware(secret_key="my_secret")
     request = Mock()
     request.method = "POST"
     request.get_header.side_effect = lambda name: {
@@ -355,7 +345,7 @@ async def test_csrf_rejection_of_invalid_signature():
 @pytest.mark.asyncio
 async def test_csrf_token_on_request():
     """Test that the CSRF token is attached to the request object."""
-    middleware = CSRFMiddleware()
+    middleware = CSRFMiddleware(secret_key="my_secret")
     request = Mock()
     request.method = "GET"
     request.get_header.return_value = None
@@ -376,7 +366,7 @@ async def test_csrf_token_on_request():
 @pytest.mark.asyncio
 async def test_csrf_middleware_form_token():
     """Test CSRF protection using a token from form data."""
-    middleware = CSRFMiddleware()
+    middleware = CSRFMiddleware(secret_key="my_secret")
     token = secrets.token_urlsafe(32)
     signed_token = _sign_token(token, middleware.secret_key)
     masked_token = middleware._mask_token(signed_token)
@@ -406,7 +396,7 @@ async def test_csrf_middleware_form_token():
 @pytest.mark.asyncio
 async def test_csrf_middleware_form_token_alternative_name():
     """Test CSRF protection using 'csrf_token' field name in form data."""
-    middleware = CSRFMiddleware()
+    middleware = CSRFMiddleware(secret_key="my_secret")
     token = secrets.token_urlsafe(32)
     signed_token = _sign_token(token, middleware.secret_key)
     masked_token = middleware._mask_token(signed_token)
@@ -433,7 +423,7 @@ async def test_csrf_middleware_form_token_alternative_name():
 @pytest.mark.asyncio
 async def test_csrf_spa_raw_token():
     """Test SPA flow where client reads cookie and sends raw signed token."""
-    middleware = CSRFMiddleware(http_only=False)
+    middleware = CSRFMiddleware(secret_key="my_secret", http_only=False)
 
     # Generate a signed token (what would be in the cookie)
     # We use internal method to simulate cookie generation
@@ -462,7 +452,7 @@ async def test_csrf_spa_raw_token():
 async def test_csrf_exempt_methods_case_sensitivity():
     """Test that exempt methods are case-insensitive."""
     # User configures lowercase "get"
-    middleware = CSRFMiddleware(exempt_methods=["get"])
+    middleware = CSRFMiddleware(secret_key="my_secret", exempt_methods=["get"])
 
     assert "GET" in middleware.exempt_methods
     assert "get" not in middleware.exempt_methods  # Should be normalized

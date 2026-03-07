@@ -1,7 +1,8 @@
 import unittest
 from unittest.mock import MagicMock
+
 from xyra.request import Request
-from xyra.response import Response
+
 
 class TestRequestUtils(unittest.TestCase):
     def test_full_path(self):

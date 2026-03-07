@@ -1,5 +1,7 @@
 from unittest.mock import Mock
+
 from xyra.middleware import RateLimiter, RateLimitMiddleware
+
 
 def _setup_response_mock():
     """Helper to setup response mock with proper header method."""

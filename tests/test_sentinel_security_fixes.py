@@ -73,7 +73,7 @@ async def test_csrf_token_masking_different_each_time():
 @pytest.mark.asyncio
 async def test_csrf_host_prefix_enforcement():
     # Test that __Host- prefix is used when secure=True
-    middleware = CSRFMiddleware(cookie_name="my_token", secure=True)
+    middleware = CSRFMiddleware(secret_key="my_secret", cookie_name="my_token", secure=True)
     assert middleware.cookie_name == "__Host-my_token"
 
     request = Mock()

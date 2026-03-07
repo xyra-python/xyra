@@ -1,12 +1,9 @@
 import socket
 import threading
 import time
-import os
-import sys
 
 # Ensure xyra is importable
 # sys.path.insert(0, os.getcwd())
-
 from xyra import App
 
 stored_ws = None
@@ -44,7 +41,7 @@ def test_websocket_uaf():
 
     print("Waiting for server...")
     connected = False
-    for i in range(20):
+    for _i in range(20):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect(("127.0.0.1", port))

@@ -8,6 +8,7 @@ sys.modules["xyra.libxyra"] = mock_libxyra
 # Now import middleware
 from xyra.middleware import HTTPSRedirectMiddleware
 
+
 def test_https_redirect_bypass_regression():
     """
     Test that HTTPSRedirectMiddleware does not allow bypass via spoofed X-Forwarded-Proto
