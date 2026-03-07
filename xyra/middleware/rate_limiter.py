@@ -1,7 +1,7 @@
 import threading
 import time
 from collections import deque
-from ipaddress import ip_network, ip_address, IPv6Address
+from ipaddress import IPv6Address, ip_address, ip_network
 
 from ..request import Request
 from ..response import Response

@@ -1,8 +1,10 @@
 import sys
 from unittest.mock import MagicMock
 
-# Mock libxyra before any test imports xyra
-if "xyra.libxyra" not in sys.modules:
+# Try to import the real native extension; if it fails, mock it.
+try:
+    import xyra.libxyra  # noqa: F401
+except ImportError:
     mock_libxyra = MagicMock()
 
     # Mock parse_path to return valid tuple (native_path, param_names)

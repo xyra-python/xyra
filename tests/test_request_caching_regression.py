@@ -1,12 +1,9 @@
-import sys
 from unittest.mock import AsyncMock, Mock
+
 import pytest
 
-# Mock libxyra
-mock_libxyra = Mock()
-sys.modules["xyra.libxyra"] = mock_libxyra
-
 from xyra.request import Request
+
 
 @pytest.mark.asyncio
 async def test_request_caching_regression():

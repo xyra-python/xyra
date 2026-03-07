@@ -117,9 +117,9 @@ async def test_path_traversal_windows_drive_relative_path_blocked():
         # Mock Native Request with a Windows absolute path pointing to the secret file
         mock_native_req = Mock()
         mock_native_req.get_method.return_value = "GET"
-        mock_native_req.get_url.return_value = f"/static/C:../secret.txt"
+        mock_native_req.get_url.return_value = "/static/C:../secret.txt"
         # The wildcard parameter would get C:\temp\secret.txt or similar
-        mock_native_req.get_parameter.return_value = f"C:../secret.txt"
+        mock_native_req.get_parameter.return_value = "C:../secret.txt"
         mock_native_req.for_each_header = Mock(side_effect=lambda func: None)
 
         # Mock Native Response

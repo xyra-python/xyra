@@ -1,8 +1,9 @@
 
 import threading
 import time
-import requests
+
 from xyra import App, Request, Response
+
 
 def run_server():
     app = App()
@@ -32,25 +33,31 @@ def test_regressions():
     time.sleep(1)
 
     try:
+        import urllib.request
+        def get_header(url):
+            req = urllib.request.Request(url)
+            with urllib.request.urlopen(req) as response:
+                return response.headers.get('Content-Type')
+
         # JSON
-        r = requests.get("http://localhost:8007/json")
-        print(f"JSON Content-Type: {r.headers.get('Content-Type')}")
-        assert r.headers.get('Content-Type') == 'application/json'
+        ct = get_header("http://localhost:8007/json")
+        print(f"JSON Content-Type: {ct}")
+        assert ct == 'application/json'
 
         # HTML
-        r = requests.get("http://localhost:8007/html")
-        print(f"HTML Content-Type: {r.headers.get('Content-Type')}")
-        assert r.headers.get('Content-Type') == 'text/html; charset=utf-8'
+        ct = get_header("http://localhost:8007/html")
+        print(f"HTML Content-Type: {ct}")
+        assert ct == 'text/html; charset=utf-8'
 
         # Text
-        r = requests.get("http://localhost:8007/text")
-        print(f"Text Content-Type: {r.headers.get('Content-Type')}")
-        assert r.headers.get('Content-Type') == 'text/plain; charset=utf-8'
+        ct = get_header("http://localhost:8007/text")
+        print(f"Text Content-Type: {ct}")
+        assert ct == 'text/plain; charset=utf-8'
 
         # Custom
-        r = requests.get("http://localhost:8007/custom")
-        print(f"Custom Content-Type: {r.headers.get('Content-Type')}")
-        assert r.headers.get('Content-Type') == 'application/custom'
+        ct = get_header("http://localhost:8007/custom")
+        print(f"Custom Content-Type: {ct}")
+        assert ct == 'application/custom'
 
         print("Regression tests passed!")
 

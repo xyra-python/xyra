@@ -1,9 +1,3 @@
-import sys
-from unittest.mock import MagicMock
-
-# Mock xyra.libxyra so we can import xyra modules without building the native extension
-mock_libxyra = MagicMock()
-sys.modules["xyra.libxyra"] = mock_libxyra
 
 import pytest
 from unittest.mock import Mock

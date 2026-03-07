@@ -1,7 +1,7 @@
 import socket
 from unittest.mock import Mock
 
-from xyra.middleware.proxy_headers import ProxyHeadersMiddleware, proxy_headers
+from xyra.middleware.proxy_headers import proxy_headers
 from xyra.request import Request
 
 

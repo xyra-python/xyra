@@ -1,9 +1,11 @@
 import pytest
+
 from xyra.datastructures import Headers
+
 
 def test_headers_init_validation():
     with pytest.raises(ValueError):
-        h = Headers({"a": "b\n"})
+        Headers({"a": "b\n"})
 
 def test_headers_update_validation():
     h = Headers()

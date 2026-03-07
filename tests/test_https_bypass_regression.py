@@ -1,12 +1,8 @@
-import sys
 from unittest.mock import Mock
-
-# Mock libxyra
-mock_libxyra = Mock()
-sys.modules["xyra.libxyra"] = mock_libxyra
 
 # Now import middleware
 from xyra.middleware import HTTPSRedirectMiddleware
+
 
 def test_https_redirect_bypass_regression():
     """

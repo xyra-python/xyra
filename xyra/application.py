@@ -518,9 +518,9 @@ class App:
         from .middleware.security_headers import SecurityHeadersMiddleware
 
         # SECURITY: Set default CSP if not provided.
-        # This mitigates XSS and injection attacks by default.
+        # This mitigates XSS, injection, and Clickjacking attacks by default.
         if "content_security_policy" not in kwargs:
-            kwargs["content_security_policy"] = "object-src 'none'; base-uri 'self'"
+            kwargs["content_security_policy"] = "object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
 
         self.use(SecurityHeadersMiddleware(**kwargs))
 

@@ -1,9 +1,10 @@
-import unittest
 import time
+import unittest
 from unittest.mock import MagicMock
+
+from xyra.middleware.proxy_headers import ProxyHeadersMiddleware
 from xyra.request import Request
 from xyra.response import Response
-from xyra.middleware.proxy_headers import ProxyHeadersMiddleware
 
 print("Loading test...")
 

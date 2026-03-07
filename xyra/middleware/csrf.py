@@ -34,18 +34,13 @@ class CSRFMiddleware:
             secret_key = os.environ.get("XYRA_SECRET_KEY")
 
         if not secret_key:
-            from ..logger import get_logger
-
-            logger = get_logger("xyra")
-            logger.warning(
-                "🚨 Security Warning: CSRF secret_key not provided or empty. "
-                "Using a random key generated at startup. "
-                "This will invalidate sessions on server restart or in multi-worker environments. "
-                "Please set a persistent 'secret_key' or XYRA_SECRET_KEY environment variable."
+            raise ValueError(
+                "🚨 Security Error: CSRF secret_key not provided. "
+                "You must set a persistent 'secret_key' parameter or the XYRA_SECRET_KEY environment variable "
+                "to ensure tokens remain valid across restarts and workers."
             )
-            self.secret_key = secrets.token_hex(32)
-        else:
-            self.secret_key = secret_key
+
+        self.secret_key = secret_key
 
         self.header_name = header_name
         self.exempt_methods = exempt_methods or ["GET", "HEAD", "OPTIONS"]
