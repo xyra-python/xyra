@@ -532,6 +532,43 @@ PYBIND11_MODULE(libxyra, m) {
                     message_handler(WebSocket(ws), std::string(message), (int)opCode);
                 };
             }
+
+            if (config.contains("upgrade")) {
+                py::function upgrade_handler = config["upgrade"];
+                behavior.upgrade = [upgrade_handler](auto *res, auto *req, auto *context) {
+                    bool aborted = false;
+                    res->onAborted([&aborted]() { aborted = true; });
+
+                    py::gil_scoped_acquire acquire;
+                    py::object result = py::cast(false);
+                    try {
+                        result = upgrade_handler(Request(req));
+                    } catch (py::error_already_set &e) {
+                        e.restore();
+                        PyErr_Clear();
+                    }
+
+                    if (aborted) return;
+
+                    if (result.cast<bool>()) {
+                        std::string_view secWebSocketKey = req->getHeader("sec-websocket-key");
+                        std::string_view secWebSocketProtocol = req->getHeader("sec-websocket-protocol");
+                        std::string_view secWebSocketExtensions = req->getHeader("sec-websocket-extensions");
+
+                        res->template upgrade<WebSocketData>(
+                            {},
+                            secWebSocketKey,
+                            secWebSocketProtocol,
+                            secWebSocketExtensions,
+                            context
+                        );
+                    } else {
+                        res->writeStatus("403 Forbidden");
+                        res->end("Cross-Site WebSocket Hijacking blocked by Xyra");
+                    }
+                };
+            }
+
             // Always set close handler to manage lifecycle, even if user didn't provide one
             py::function close_handler;
             if (config.contains("close")) {

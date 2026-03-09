@@ -205,6 +205,42 @@ class App:
                 WebSocket(ws), code, message
             )
 
+        if "upgrade" in handlers:
+            ws_config["upgrade"] = handlers["upgrade"]
+        else:
+            # SECURITY: Default secure upgrade handler to prevent CSWSH
+            # Require same-origin by default. If Host is mismatched from Origin, deny.
+            def default_upgrade(req: Request) -> bool:
+                origin = req.get_header("origin")
+                if not origin:
+                    # Non-browser client, typically allow, but could be restricted further.
+                    return True
+
+                host = req.get_header("host")
+                if not host:
+                    return False
+
+                # Origin is e.g., http://localhost:8000
+                from urllib.parse import urlparse
+                try:
+                    parsed_origin = urlparse(origin)
+                    origin_host = parsed_origin.netloc
+
+                    # Ensure exact match between origin host and request host
+                    if host == origin_host:
+                        return True
+
+                    # Handle cases where host doesn't include port but origin does
+                    if ":" not in host and parsed_origin.hostname == host:
+                        return True
+                except Exception as e:
+                    req_logger = get_logger("xyra")
+                    req_logger.debug(f"Failed to parse Origin header during WebSocket upgrade: {e}")
+
+                return False
+
+            ws_config["upgrade"] = default_upgrade
+
         # Register with native App
         self._app.ws(path, ws_config)
 
