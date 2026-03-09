@@ -233,8 +233,9 @@ class App:
                     # Handle cases where host doesn't include port but origin does
                     if ":" not in host and parsed_origin.hostname == host:
                         return True
-                except Exception:
-                    pass
+                except Exception as e:
+                    req_logger = get_logger("xyra")
+                    req_logger.debug(f"Failed to parse Origin header during WebSocket upgrade: {e}")
 
                 return False
 
