@@ -298,44 +298,38 @@ class App:
 
             full_path = abs_path
 
-            # Check existence and type asynchronously
-            exists = await asyncio.to_thread(os.path.exists, full_path)
-            is_file = False
-            if exists:
-                is_file = await asyncio.to_thread(os.path.isfile, full_path)
-
-            if exists and is_file:
-                # SECURITY: Check file size to prevent DoS via memory exhaustion.
-                # Since we read the whole file into memory, we must enforce a limit.
+            # SECURITY: Prevent TOCTOU (Time-of-Check to Time-of-Use) attacks
+            # by checking file properties using the file descriptor after opening.
+            def read_file_safely():
+                import stat
                 try:
-                    file_size = await asyncio.to_thread(os.path.getsize, full_path)
-                    if file_size > MAX_BODY_SIZE:
-                        res.status(413).text("Payload Too Large")
-                        return
+                    with open(full_path, "rb") as f:
+                        st = os.fstat(f.fileno())
+                        if not stat.S_ISREG(st.st_mode):
+                            return None, 404
+                        if st.st_size > MAX_BODY_SIZE:
+                            return None, 413
+                        return f.read(), 200
                 except OSError:
-                    res.status(500).text("Internal Server Error")
-                    return
+                    return None, 404
+                except Exception:
+                    return None, 500
 
-                # Read file asynchronously
-                try:
+            content, status_code = await asyncio.to_thread(read_file_safely)
 
-                    def read_file():
-                        with open(full_path, "rb") as f:
-                            return f.read()
-
-                    content = await asyncio.to_thread(read_file)
-                except OSError:
-                    res.status(500).text("Internal Server Error")
-                    return
-
+            if status_code == 413:
+                res.status(413).text("Payload Too Large")
+            elif status_code == 404:
+                res.status(404).text("Not Found")
+            elif status_code == 500:
+                res.status(500).text("Internal Server Error")
+            elif content is not None:
                 # SECURITY: Use mimetypes for better Content-Type detection
                 content_type, _ = mimetypes.guess_type(full_path)
                 res.header("Content-Type", content_type or "application/octet-stream")
                 # SECURITY: Prevent MIME sniffing
                 res.header("X-Content-Type-Options", "nosniff")
                 res.send(content)
-            else:
-                res.status(404).text("Not Found")
 
         # Register with wildcard to support nested directories
         self.get(path + "*", static_handler)

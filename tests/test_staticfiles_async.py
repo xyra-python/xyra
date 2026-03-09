@@ -48,9 +48,9 @@ async def test_static_files_non_blocking():
                 # Execute the lambda to get the path
                 return func()
 
-            # For file reading (local function 'read_file')
-            if func.__name__ == "read_file":
-                return b"file content"
+            # For file reading (local function 'read_file' or 'read_file_safely')
+            if func.__name__ in ("read_file", "read_file_safely"):
+                return b"file content", 200
 
             return None
 
@@ -61,19 +61,17 @@ async def test_static_files_non_blocking():
         # Verify that to_thread was called for critical operations
         calls = mock_to_thread.call_args_list
 
-        # Check if os.path.exists was offloaded
-        exists_call = any(call.args[0] == os.path.exists for call in calls)
-        assert exists_call, "os.path.exists should be offloaded to thread"
+        # With TOCTOU fix we don't do exists/isfile/getsize in to_thread individually
 
-        # Check if os.path.isfile was offloaded
-        isfile_call = any(call.args[0] == os.path.isfile for call in calls)
-        assert isfile_call, "os.path.isfile should be offloaded to thread"
+        # Check if read_file_safely was offloaded
+        read_call = any(call.args[0].__name__ == "read_file_safely" for call in calls if hasattr(call.args[0], "__name__"))
+        assert read_call, "read_file_safely should be offloaded to thread"
 
-        # Check if os.path.getsize was offloaded
-        getsize_call = any(call.args[0] == os.path.getsize for call in calls)
-        assert getsize_call, "os.path.getsize should be offloaded to thread"
+        # The previous checks are commented out
+        # getsize_call = any(call.args[0] == os.path.getsize for call in calls)
+        # assert getsize_call, "os.path.getsize should be offloaded to thread"
 
         # Check if file reading was offloaded
         # The function name is 'read_file'
-        read_call = any(call.args[0].__name__ == "read_file" for call in calls)
-        assert read_call, "File reading should be offloaded to thread"
+        # read_call = any(call.args[0].__name__ == "read_file" for call in calls)
+        # assert read_call, "File reading should be offloaded to thread"
