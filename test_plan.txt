@@ -1,0 +1,71 @@
+Actually, in `xyra/middleware/csrf.py`:
+```python
+    def __init__(
+        self,
+        secret_key: str | None = None,
+        cookie_name: str = "csrf_token",
+        header_name: str = "X-CSRF-Token",
+        exempt_methods: list[str] | None = None,
+        secure: bool = False,
+        http_only: bool = True,
+        same_site: str = "Lax",
+    ):
+```
+Wait, is there any problem with timing attacks during HMAC signature verification?
+`hmac.compare_digest` is used.
+
+What about `SecurityHeadersMiddleware` Permissions-Policy validation?
+Is there a risk that it doesn't correctly reject malicious strings because of quotes?
+```python
+    def _is_safe_policy_value(self, val: str) -> bool:
+        in_quote = False
+        for char in val:
+            if char == '"':
+                in_quote = not in_quote
+            elif char == ')' and not in_quote:
+                return False
+        return True
+```
+Wait, if an attacker provides `) ; malicious=()`, this would return `False` because `)` is not in quote.
+Wait, can they just provide a payload like `"" ) malicious=() "` ?
+Yes, if `val = '"" ) malicious=() "'`:
+`"` -> in_quote = True
+`"` -> in_quote = False
+` `
+`)` -> in_quote = False, returns False!
+
+Wait! What about CSRF token unmasking:
+```python
+        # Unmask to get the signed token
+        request_token = self._unmask_token(masked_request_token)
+
+        # If unmasking failed (or wasn't masked), try using the token as-is
+        # This supports SPAs that read the cookie (if http_only=False) and send it directly
+        if request_token is None:
+            request_token = masked_request_token
+```
+Wait... if the unmasking fails, it falls back to the original token as-is!
+What if an attacker tries to exploit this fallback?
+If they send the exact `signed_cookie_token`, they can bypass masking? Yes, but to do that they must KNOW the `signed_cookie_token`, which defeats BREACH, but BREACH is an attack to steal the token. Allowing the unmasked token defeats BREACH protection if the SPA sends the unmasked token on every request, because then the token is predictable!
+Wait, if the SPA reads the cookie (which is unmasked) and sends it in the header, the token in the request header is STATIC for the life of the session!
+This completely defeats BREACH protection for the header value! (Though the cookie itself is still static).
+But BREACH relies on the token being reflected in the response body. Since the token is only reflected in the body (e.g. in HTML forms) securely via `request.csrf_token`, which is MASKED, the SPA doing `X-CSRF-Token: <static_token>` is perfectly safe, because headers are not vulnerable to BREACH in the same way (unless compressed together, but usually headers and bodies are compressed together? No, HPACK/QPACK is used for HTTP/2/3, and BREACH is specifically against the response body reflecting secrets).
+So this is a deliberate and safe feature.
+
+Let's look at `ProxyHeadersMiddleware` again.
+Is there any IP validation vulnerability in `_is_trusted`?
+```python
+    def _is_trusted(self, ip_str: str) -> bool:
+        if self.trust_all:
+            return True
+        try:
+            ip = ip_address(ip_str)
+            for network in self.trusted_networks:
+                if ip in network:
+                    return True
+            return False
+        except ValueError:
+            return False
+```
+If an attacker sends an IPv4-mapped IPv6 address (e.g. `::ffff:192.168.1.1`), `ip_address` parses it as `IPv6Address('::ffff:192.168.1.1')`.
+If the user's `trusted_networks` is configured with `192.168.1.1` (IPv4), does it match?

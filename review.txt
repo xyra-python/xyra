@@ -1,0 +1,32 @@
+Looking for vulnerabilities...
+Is there an open redirect in HTTPSRedirectMiddleware?
+No, it builds `https_url = f"https://{host}{full_path}"`. `host` is validated against `allowed_hosts` OR extracted from `Host` header.
+Wait, `host = req.get_header("host")`
+If there are no allowed_hosts, it blindly redirects. But it only changes scheme from http to https, on the same host. Not open redirect.
+
+What about path traversal in static file handler? `ntpath` is used, so pretty secure. Wait:
+```python
+stripped_path = ntpath.splitdrive(file_path.lstrip("/\\"))[1].lstrip("/\\")
+abs_path = await asyncio.to_thread(lambda: os.path.realpath(os.path.join(abs_directory, stripped_path)))
+```
+This is generally safe.
+
+What about CORS?
+```python
+    def _is_origin_allowed(self, origin: str) -> bool:
+        if origin in self.allowed_origins:
+            return True
+        if "*" in self.allowed_origins and not self.allow_credentials:
+            return True
+        return False
+```
+Safe.
+
+Wait, look at CSRF token unmasking:
+```python
+    def _mask_token(self, token: str) -> str:
+        """Mask token using XOR to prevent BREACH attacks."""
+        salt = secrets.token_bytes(32)
+        token_bytes = token.encode()
+        # Ensure token is exactly 32 bytes or pad/truncate (our token is urlsafe base64 of 32 bytes = 43 chars... wait)
+```
