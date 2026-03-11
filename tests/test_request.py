@@ -103,8 +103,8 @@ async def test_request_json_empty():
     res = Mock()
     res.get_data = AsyncMock(return_value=b"")
     res.get_json = AsyncMock(return_value={})
-    req.get_header = Mock(return_value='application/json')
-        request = Request(req, res)
+    request = Request(req, res)
+    request.get_header = Mock(return_value='application/json')
     data = await request.json()
     assert data == {}
 
@@ -115,8 +115,8 @@ async def test_request_parsing_json():
     req = Mock()
     res = Mock()
     res.get_data = AsyncMock(return_value=b'{"key": "value"}')
-    req.get_header = Mock(return_value='application/json')
-        request = Request(req, res)
+    request = Request(req, res)
+    request.get_header = Mock(return_value='application/json')
     data = await request.json()
     assert data == {"key": "value"}
 
@@ -126,8 +126,8 @@ async def async_test_request_json_invalid():
     req = Mock()
     res = Mock()
     res.get_data = AsyncMock(return_value=b"invalid json")
-    req.get_header = Mock(return_value='application/json')
-        request = Request(req, res)
+    request = Request(req, res)
+    request.get_header = Mock(return_value='application/json')
     with pytest.raises(ValueError, match="Invalid JSON"):
         await request.json()
 
@@ -147,8 +147,8 @@ async def test_request_json_invalid():
     req = Mock()
     res = Mock()
     res.get_data = AsyncMock(return_value=b"invalid json")
-    req.get_header = Mock(return_value='application/json')
-        request = Request(req, res)
+    request = Request(req, res)
+    request.get_header = Mock(return_value='application/json')
     with pytest.raises(ValueError, match="Invalid JSON"):
         await request.json()
 
