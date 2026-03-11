@@ -396,10 +396,12 @@ class Request:
 
         # SECURITY: Strictly validate Content-Type before parsing JSON
         content_type = self.get_header("content-type", "")
-        content_type_lower = content_type.lower()
-        if not content_type_lower or not (
-            content_type_lower.startswith("application/json") or
-            "+json" in content_type_lower
+        if not isinstance(content_type, str):
+            content_type = ""
+        media_type = content_type.split(";")[0].strip().lower()
+        if not media_type or not (
+            media_type == "application/json" or
+            media_type.endswith("+json")
         ):
             raise ValueError(
                 f"Invalid Content-Type for JSON parsing: '{content_type}'. "
