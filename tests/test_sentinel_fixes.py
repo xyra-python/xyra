@@ -24,6 +24,13 @@ async def test_request_uses_response_wrapper():
 
     response_wrapper = Response(native_res)
     native_req = Mock()
+
+    def mock_get_header(key):
+        if key.lower() == "content-type":
+            return "application/json"
+        return None
+    native_req.get_header.side_effect = mock_get_header
+
     request = Request(native_req, response_wrapper)
 
     with pytest.raises(ValueError, match="Request body too large"):

@@ -62,6 +62,13 @@ async def test_background_task_in_route_handler():
     mock_req = Mock()
     mock_req.get_method.return_value = "POST"
     mock_req.get_url.return_value = "http://localhost:8000/send-email"
+
+    def mock_get_header(key):
+        if key.lower() == "content-type":
+            return "application/json"
+        return None
+    mock_req.get_header.side_effect = mock_get_header
+
     mock_req.for_each_header = Mock(
         side_effect=lambda func: func("content-type", "application/json")
     )
