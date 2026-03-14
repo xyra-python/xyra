@@ -111,3 +111,21 @@ def test_set_cookie_attribute_injection_prevention():
     # Attempt to inject via domain
     with pytest.raises(ValueError, match="Invalid characters in Domain attribute"):
         res.set_cookie("session", "value", domain="example.com; Secure")
+
+def test_response_cors_wildcard_credentials(caplog):
+    import logging
+
+    mock_res = MockSocketifyResponse()
+    res = Response(mock_res)
+
+    with caplog.at_level(logging.WARNING, logger="xyra"):
+        res.cors(origin="*", credentials=True)
+
+    assert "Security Warning" in caplog.text
+    assert "Wildcard origin is not allowed when credentials are allowed" in caplog.text
+
+    # Credentials header should not be set
+    # Note: Since _header_fast adds to headers using native app (mocked here),
+    # we need to check how MockSocketifyResponse stores headers.
+    # MockSocketifyResponse uses write_header which populates self.headers.
+    assert "Access-Control-Allow-Credentials" not in mock_res.headers

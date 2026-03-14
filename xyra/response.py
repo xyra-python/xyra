@@ -265,6 +265,16 @@ class Response:
                 )
             app.use(mycors)
         """
+        if credentials and origin == "*":
+            from .logger import get_logger
+            logger = get_logger("xyra")
+            logger.warning(
+                "🚨 Security Warning: Response.cors() called with credentials=True and origin='*'. "
+                "Wildcard origin is not allowed when credentials are allowed. "
+                "The Access-Control-Allow-Credentials header will not be set."
+            )
+            credentials = False
+
         self.header("Access-Control-Allow-Origin", origin)
         self.header("Access-Control-Allow-Methods", methods)
         self.header("Access-Control-Allow-Headers", headers)
