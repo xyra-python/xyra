@@ -19,6 +19,8 @@ def test_https_redirect_bypass_regression():
     # Attacker sends spoofed header
     request.headers = {"host": "example.com", "x-forwarded-proto": "https"}
     request.get_header = request.headers.get
+    request.host = "example.com"
+    request.port = 80
 
     # IMPORTANT: Mock default scheme as "http".
     # In a real attack, ProxyHeadersMiddleware is NOT running or NOT trusting the proxy,
