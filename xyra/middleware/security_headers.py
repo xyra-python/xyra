@@ -8,7 +8,7 @@ class SecurityHeadersMiddleware:
 
     By default, it adds:
     - X-Content-Type-Options: nosniff
-    - X-Frame-Options: SAMEORIGIN
+    - X-Frame-Options: DENY
     - X-XSS-Protection: 1; mode=block
     - Referrer-Policy: strict-origin-when-cross-origin
     - X-Permitted-Cross-Domain-Policies: none
@@ -27,7 +27,7 @@ class SecurityHeadersMiddleware:
         permissions_policy: str
         | dict
         | None = "geolocation=(), camera=(), microphone=()",
-        frame_options: str = "SAMEORIGIN",
+        frame_options: str = "DENY",
         xss_protection: str = "1; mode=block",
         content_type_options: str = "nosniff",
         referrer_policy: str = "strict-origin-when-cross-origin",
@@ -153,7 +153,7 @@ def security_headers(
     hsts_preload: bool = False,
     content_security_policy: str | dict | None = None,
     permissions_policy: str | dict | None = "geolocation=(), camera=(), microphone=()",
-    frame_options: str = "SAMEORIGIN",
+    frame_options: str = "DENY",
     xss_protection: str = "1; mode=block",
     content_type_options: str = "nosniff",
     referrer_policy: str = "strict-origin-when-cross-origin",
