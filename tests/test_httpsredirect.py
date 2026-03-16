@@ -22,7 +22,8 @@ def test_https_redirect_http_request():
     request.query = ""
     # Mock scheme as http (default)
     request.scheme = "http"
-    request.headers = {"host": "example.com"}
+    request.host = "example.com"
+    request.port = 80
     request.get_header = request.headers.get
     response = Mock()
     response._ended = False
@@ -41,7 +42,8 @@ def test_https_redirect_http_request_with_query():
     request.url = "/search"
     request.query = "q=python"
     request.scheme = "http"
-    request.headers = {"host": "example.com"}
+    request.host = "example.com"
+    request.port = 80
     request.get_header = request.headers.get
     response = Mock()
     response._ended = False
@@ -64,8 +66,8 @@ def test_https_redirect_https_request():
     request.url = "/path"
     request.query = ""
     request.scheme = "https"
-    request.headers = {"host": "example.com", "x-forwarded-proto": "https"}
-    request.get_header = request.headers.get
+    request.host = "example.com"
+    request.port = 80
     response = Mock()
     response._ended = False
 
@@ -88,6 +90,8 @@ def test_https_redirect_bypass_attempt_untrusted():
     request.scheme = "http" # Default
     request.headers = {"host": "example.com", "x-forwarded-proto": "https"}
     request.get_header = request.headers.get
+    request.host = "example.com"
+    request.port = 80
     response = Mock()
     response._ended = False
 
@@ -108,6 +112,8 @@ def test_https_redirect_missing_host():
     request.scheme = "http"
     request.headers = {"x-forwarded-proto": "http"}  # Missing host
     request.get_header = request.headers.get
+    request.host = ""
+    request.port = 80
     response = Mock()
     response._ended = False
 
@@ -125,7 +131,8 @@ def test_https_redirect_custom_status_code():
     request.url = "/path"
     request.query = ""
     request.scheme = "http"
-    request.headers = {"host": "example.com"}
+    request.host = "example.com"
+    request.port = 80
     request.get_header = request.headers.get
     response = Mock()
     response._ended = False
@@ -143,7 +150,8 @@ def test_https_redirect_no_headers_assumes_http():
     request.url = "/path"
     request.query = ""
     request.scheme = "http"
-    request.headers = {"host": "example.com"}
+    request.host = "example.com"
+    request.port = 80
     request.get_header = request.headers.get
     response = Mock()
     response._ended = False
@@ -161,7 +169,8 @@ def test_https_redirect_allowed_hosts_success():
     request.url = "/path"
     request.query = ""
     request.scheme = "http"
-    request.headers = {"host": "example.com"}
+    request.host = "example.com"
+    request.port = 80
     request.get_header = request.headers.get
     response = Mock()
     response._ended = False
@@ -179,7 +188,8 @@ def test_https_redirect_allowed_hosts_failure():
     request.url = "/path"
     request.query = ""
     request.scheme = "http"
-    request.headers = {"host": "evil.com"}
+    request.host = "evil.com"
+    request.port = 80
     request.get_header = request.headers.get
     response = Mock()
     response._ended = False
@@ -198,7 +208,8 @@ def test_https_redirect_invalid_host_chars():
     request.query = ""
     request.scheme = "http"
     # Host header injection attempt
-    request.headers = {"host": "example.com/evil"}
+    request.host = "example.com/evil"
+    request.port = 80
     request.get_header = request.headers.get
     response = Mock()
     response._ended = False
@@ -216,7 +227,8 @@ def test_https_redirect_wildcard_host():
     request.url = "/path"
     request.query = ""
     request.scheme = "http"
-    request.headers = {"host": "sub.example.com"}
+    request.host = "sub.example.com"
+    request.port = 80
     request.get_header = request.headers.get
     response = Mock()
     response._ended = False
@@ -235,7 +247,8 @@ def test_https_redirect_ipv6_host_with_port():
     request.query = ""
     request.scheme = "http"
     # Headers keys are lowercase in Xyra
-    request.headers = {"host": "[::1]:8080"}
+    request.host = "[::1]"
+    request.port = 8080
     request.get_header = request.headers.get
     response = Mock()
     response._ended = False

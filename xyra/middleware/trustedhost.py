@@ -26,7 +26,7 @@ class TrustedHostMiddleware:
         # Pre-parse allowed hosts for performance
         self._patterns = [self._parse_host(host) for host in self.allowed_hosts]
 
-    def _parse_host(self, host: str) -> tuple[str, str | None]:
+    def _parse_host(self, host: str) -> tuple[str, int | None]:
         """
         Parse a host string into (domain, port).
         Handles IPv6 literals like [::1] or [::1]:8080 correctly.
@@ -38,7 +38,10 @@ class TrustedHostMiddleware:
                 domain = host[: end_bracket + 1]
                 rest = host[end_bracket + 1 :]
                 if rest.startswith(":"):
-                    return domain, rest[1:]
+                    try:
+                        return domain, int(rest[1:])
+                    except ValueError:
+                        pass
                 return domain, None
             # Malformed IPv6, treat as opaque string
             return host, None
@@ -46,14 +49,19 @@ class TrustedHostMiddleware:
         # IPv4 or domain name
         if ":" in host:
             domain, port = host.rsplit(":", 1)
-            return domain, port
+            try:
+                return domain, int(port)
+            except ValueError:
+                pass
 
         return host, None
 
     def __call__(self, req: Request, res: Response):
         """Validate the request's Host header."""
-        # Headers keys are lowercase in Xyra Request
-        host = req.get_header("host", "")
+        # Validate using parsed host and port from request
+        # This properly supports X-Forwarded-Host if ProxyHeadersMiddleware is used
+        host = req.host
+        req_port = req.port
 
         if not host:
             res.status(400)
@@ -69,10 +77,7 @@ class TrustedHostMiddleware:
             return
 
         # Lowercase host for case-insensitive matching
-        host = host.lower()
-
-        # Parse request host
-        req_domain, req_port = self._parse_host(host)
+        req_domain = host.lower()
 
         is_allowed = False
         for allowed_domain, allowed_port in self._patterns:

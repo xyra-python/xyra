@@ -50,7 +50,9 @@ class HTTPSRedirectMiddleware:
             return
 
         # If no host header, we can't redirect reliably
-        host = req.get_header("host")
+        # Validate using securely parsed host and port
+        host = req.host
+        port = req.port
         if not host:
             # If we can't determine host, we can't redirect safely.
             res.status(400)
@@ -70,16 +72,7 @@ class HTTPSRedirectMiddleware:
         if self.allowed_hosts:
             is_allowed = False
 
-            # Correctly handle IPv6 literals
-            if host.startswith("["):
-                # Find the closing bracket
-                end_index = host.find("]")
-                if end_index != -1:
-                    hostname = host[: end_index + 1]
-                else:
-                    hostname = host
-            else:
-                hostname = host.split(":")[0]
+            hostname = host
 
             for allowed in self.allowed_hosts:
                 if allowed == "*":
@@ -110,7 +103,9 @@ class HTTPSRedirectMiddleware:
         else:
             full_path = path
 
-        https_url = f"https://{host}{full_path}"
+        redirect_host = f"{host}:{port}" if port not in (80, 443) else host
+
+        https_url = f"https://{redirect_host}{full_path}"
 
         # Redirect to HTTPS
         res.status(self.redirect_status_code)
