@@ -222,6 +222,7 @@ class App:
 
                 # Origin is e.g., http://localhost:8000
                 from urllib.parse import urlparse
+
                 try:
                     parsed_origin = urlparse(origin)
                     origin_host = parsed_origin.netloc
@@ -235,7 +236,9 @@ class App:
                         return True
                 except Exception as e:
                     req_logger = get_logger("xyra")
-                    req_logger.debug(f"Failed to parse Origin header during WebSocket upgrade: {e}")
+                    req_logger.debug(
+                        f"Failed to parse Origin header during WebSocket upgrade: {e}"
+                    )
 
                 return False
 
@@ -274,11 +277,12 @@ class App:
                 # SECURITY: Use ntpath to strip Windows drive letters and both slash types
                 # to prevent absolute path injection (e.g., C:\Windows\System32\cmd.exe)
                 import ntpath
-                stripped_path = ntpath.splitdrive(file_path.lstrip("/\\"))[1].lstrip("/\\")
+
+                stripped_path = ntpath.splitdrive(file_path.lstrip("/\\"))[1].lstrip(
+                    "/\\"
+                )
                 abs_path = await asyncio.to_thread(
-                    lambda: os.path.realpath(
-                        os.path.join(abs_directory, stripped_path)
-                    )
+                    lambda: os.path.realpath(os.path.join(abs_directory, stripped_path))
                 )
 
                 # Verify the resolved path is within the static directory
@@ -302,6 +306,7 @@ class App:
             # by checking file properties using the file descriptor after opening.
             def read_file_safely():
                 import stat
+
                 try:
                     with open(full_path, "rb") as f:
                         st = os.fstat(f.fileno())
@@ -550,7 +555,9 @@ class App:
         # SECURITY: Set default CSP if not provided.
         # This mitigates XSS, injection, and Clickjacking attacks by default.
         if "content_security_policy" not in kwargs:
-            kwargs["content_security_policy"] = "object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+            kwargs["content_security_policy"] = (
+                "object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+            )
 
         self.use(SecurityHeadersMiddleware(**kwargs))
 
@@ -677,7 +684,9 @@ class App:
                     current_proc.wait()
                 env = os.environ.copy()
                 env["XYRA_RELOAD_CHILD"] = "1"
-                current_proc = subprocess.Popen([sys.executable] + sys.argv, env=env)  # nosec B603
+                current_proc = subprocess.Popen(
+                    [sys.executable] + sys.argv, env=env
+                )  # nosec B603
 
             # Watch for file changes in current directory
             def watch_and_restart():
