@@ -603,8 +603,11 @@ class App:
                             )
                 res.json(self._swagger_cache)
             except Exception as e:
+                # SECURITY: Log the actual error internally but do not leak details to the client
+                req_logger = get_logger("xyra")
+                req_logger.error(f"Failed to generate Swagger spec: {str(e)}")
                 res.status(500).json(
-                    {"error": "Failed to generate Swagger spec", "message": str(e)}
+                    {"error": "Failed to generate Swagger spec", "message": "An internal error occurred while generating the documentation."}
                 )
 
         self.get(swagger_json_path, get_swagger_json)
