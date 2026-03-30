@@ -1,4 +1,0 @@
-## 2025-03-27 - [MEDIUM] Prevent sensitive info leakage in Swagger error responses
-**Vulnerability:** When Swagger generation failed, the raw error exception string `str(e)` was passed directly in the HTTP 500 JSON response. This was a classic CWE-209 case where sensitive internal paths or stack traces could be exposed to end users.
-**Learning:** The xyra application had an error response that directly leaked internal traceback info if something went wrong inside `generate_swagger()`. This pattern is risky. The fix was applied by returning a generic error message ("An internal error occurred while generating the documentation") instead of `str(e)`.
-**Prevention:** Avoid passing raw `Exception` strings or tracebacks directly into HTTP responses. Log the exception internally using `get_logger` and return generic, safe messages to the client.

@@ -3,6 +3,9 @@ from typing import Any
 
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
+from .exceptions import TemplateException
+from .logger import get_logger
+
 
 class Templating:
     """Template rendering engine using Jinja2."""
@@ -86,9 +89,11 @@ class Templating:
                 f"Template '{template_name}' not found in directory '{self.directory}'"
             ) from None
         except Exception as e:
-            raise Exception(
-                f"Error rendering template '{template_name}': {str(e)}"
-            ) from e
+            logger = get_logger("xyra")
+            logger.error(f"Error rendering template '{template_name}': {str(e)}")
+            raise TemplateException(
+                "An internal error occurred while rendering the template.", template_name
+            ) from None
 
     async def render_async(self, template_name: str, **context) -> str:
         """
@@ -113,9 +118,14 @@ class Templating:
                 f"Template '{template_name}' not found in directory '{self.directory}'"
             ) from None
         except Exception as e:
-            raise Exception(
-                f"Error rendering template '{template_name}': {str(e)}"
-            ) from e
+            from .logger import get_logger
+            from .exceptions import TemplateException
+
+            logger = get_logger("xyra")
+            logger.error(f"Error rendering template '{template_name}': {str(e)}")
+            raise TemplateException(
+                "An internal error occurred while rendering the template.", template_name
+            ) from None
 
     def render_string(self, template_string: str, **context) -> str:
         """
@@ -132,7 +142,11 @@ class Templating:
             template = self.env.from_string(template_string)
             return template.render(**context)
         except Exception as e:
-            raise Exception(f"Error rendering template string: {str(e)}") from e
+            logger = get_logger("xyra")
+            logger.error(f"Error rendering template string: {str(e)}")
+            raise TemplateException(
+                "An internal error occurred while rendering the template string."
+            ) from None
 
     def add_global(self, name: str, value: Any):
         """Add a global variable or function to all templates."""
