@@ -70,5 +70,6 @@ def test_json_parsing_raises_exception():
 
     request = Request(req_mock, res_mock)
 
-    with pytest.raises(ValueError, match="Invalid JSON"):
+    from xyra.exceptions import HTTPException
+    with pytest.raises(HTTPException, match="Invalid JSON"):
         request.parse_json("{invalid}")

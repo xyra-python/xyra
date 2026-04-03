@@ -40,4 +40,4 @@ async def test_form_parsing_unicode_error():
 
     # Should handle safe
     form_data = await request.form()
-    assert form_data == {}, "Form data should be empty on unicode error"
+    assert form_data == {'\ufffd\ufffd': ''}, "Form data uses replace for unicode errors so some keys might be parsed"

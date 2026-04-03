@@ -373,7 +373,9 @@ class Request:
 
         body = self._body_cache
         if isinstance(body, bytes):
-            return body.decode("utf-8")
+            # SECURITY: Use errors="replace" to prevent UnicodeDecodeError DoS
+            # when handling malformed UTF-8 payloads.
+            return body.decode("utf-8", errors="replace")
         elif isinstance(body, str):
             return body
         else:
@@ -403,10 +405,10 @@ class Request:
             media_type == "application/json" or
             media_type.endswith("+json")
         ):
-            raise ValueError(
+            from .exceptions import bad_request
+            raise bad_request(
                 f"Invalid Content-Type for JSON parsing: '{content_type}'. "
                 f"Expected 'application/json' or similar '+json' media type. "
-                f"This prevents MIME confusion attacks."
             )
 
         # Cache body to allow multiple reads
@@ -443,7 +445,9 @@ class Request:
         try:
             return json_lib.loads(json_string)
         except Exception as e:
-            raise ValueError(f"Invalid JSON: {e}") from e
+            from .exceptions import bad_request
+            # SECURITY: Raise HTTP 400 Bad Request instead of ValueError to prevent 500 error logs DoS
+            raise bad_request(f"Invalid JSON: {e}") from e
 
     async def form(self) -> dict[str, str]:
         """

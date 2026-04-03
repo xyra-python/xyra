@@ -128,7 +128,8 @@ async def async_test_request_json_invalid():
     res.get_data = AsyncMock(return_value=b"invalid json")
     request = Request(req, res)
     request.get_header = Mock(return_value='application/json')
-    with pytest.raises(ValueError, match="Invalid JSON"):
+    from xyra.exceptions import HTTPException
+    with pytest.raises(HTTPException, match="Invalid JSON"):
         await request.json()
 
 
@@ -149,7 +150,8 @@ async def test_request_json_invalid():
     res.get_data = AsyncMock(return_value=b"invalid json")
     request = Request(req, res)
     request.get_header = Mock(return_value='application/json')
-    with pytest.raises(ValueError, match="Invalid JSON"):
+    from xyra.exceptions import HTTPException
+    with pytest.raises(HTTPException, match="Invalid JSON"):
         await request.json()
 
 
