@@ -50,5 +50,6 @@ async def test_strict_json_parsing_failure():
         return b'{"hello": "world"}'
     res_mock.get_data = mock_get_data
 
-    with pytest.raises(ValueError, match="Invalid Content-Type for JSON parsing"):
+    from xyra.exceptions import HTTPException
+    with pytest.raises(HTTPException, match="Invalid Content-Type for JSON parsing"):
         await request.json()
