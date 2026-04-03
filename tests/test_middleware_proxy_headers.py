@@ -304,6 +304,56 @@ def test_proxy_headers_valid_minus_one_case():
 
     assert request._host_cache == "client.com"
 
+
+def test_proxy_headers_host_with_port():
+    request, response = create_request(
+        "10.0.0.1",
+        {
+            "X-Forwarded-For": "1.2.3.4",
+            "X-Forwarded-Host": "example.com:8080",
+        },
+    )
+
+    mw = ProxyHeadersMiddleware(["10.0.0.1"])
+    mw(request, response)
+
+    assert request.host == "example.com"
+    assert request.port == 8080
+
+
+def test_proxy_headers_ipv6_host_with_port():
+    request, response = create_request(
+        "10.0.0.1",
+        {
+            "X-Forwarded-For": "1.2.3.4",
+            "X-Forwarded-Host": "[::1]:8080",
+        },
+    )
+
+    mw = ProxyHeadersMiddleware(["10.0.0.1"])
+    mw(request, response)
+
+    assert request.host == "[::1]"
+    assert request.port == 8080
+
+
+def test_proxy_headers_host_with_explicit_port_override():
+    request, response = create_request(
+        "10.0.0.1",
+        {
+            "X-Forwarded-For": "1.2.3.4",
+            "X-Forwarded-Host": "example.com:8080",
+            "X-Forwarded-Port": "9000",
+        },
+    )
+
+    mw = ProxyHeadersMiddleware(["10.0.0.1"])
+    mw(request, response)
+
+    assert request.host == "example.com"
+    # X-Forwarded-Port overrides the port in X-Forwarded-Host
+    assert request.port == 9000
+
 def test_proxy_headers_valid_chain_resolution():
     request, response = create_request(
         "10.0.0.2",

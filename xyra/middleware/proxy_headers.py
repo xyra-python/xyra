@@ -228,12 +228,33 @@ class ProxyHeadersMiddleware:
         if proto:
             req._scheme_cache = proto.lower()
 
-        # Update Host
+        # Update Host and Port (handling host strings with port, like example.com:8080)
         host = get_forwarded_value("x-forwarded-host")
         if host:
-            req._host_cache = host
+            if host.startswith("["):
+                # IPv6 literal with port [::1]:8080
+                end = host.find("]")
+                if end != -1:
+                    if len(host) > end + 1 and host[end + 1] == ":":
+                        try:
+                            req._port_cache = int(host[end + 2:])
+                        except ValueError:
+                            pass
+                    req._host_cache = host[:end + 1]
+                else:
+                    req._host_cache = host
+            elif ":" in host:
+                # IPv4 or Domain with port
+                parts = host.split(":", 1)
+                req._host_cache = parts[0]
+                try:
+                    req._port_cache = int(parts[1])
+                except ValueError:
+                    pass
+            else:
+                req._host_cache = host
 
-        # Update Port
+        # Update Port from explicit header (overrides host port if present)
         port_str = get_forwarded_value("x-forwarded-port")
         if port_str:
             try:
