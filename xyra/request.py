@@ -479,7 +479,8 @@ class Request:
         # Optimized form parsing using urllib.parse.parse_qsl for proper URL decoding
         try:
             # SECURITY: Limit max_num_fields to 1000 to prevent DoS via Hash Collision / CPU Exhaustion
-            parsed_pairs = parse_qsl(
+            from .libxyra import parse_qsl as cpp_parse_qsl
+            parsed_pairs = cpp_parse_qsl(
                 text_content, keep_blank_values=True, max_num_fields=1000
             )
             form_data = dict(parsed_pairs)
