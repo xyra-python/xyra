@@ -63,9 +63,54 @@ std::string url_decode(std::string_view str) {
     return ret;
 }
 
+py::list parse_qsl_cpp(std::string_view query, bool keep_blank_values, int max_num_fields) {
+    py::list result;
+    size_t start = 0;
+    int param_count = 0;
+
+    while (start < query.length()) {
+        size_t end = query.find('&', start);
+        if (end == std::string_view::npos) end = query.length();
+
+        if (end > start || keep_blank_values) { // if keep_blank_values is true, an empty segment is considered a parameter
+            if (++param_count > max_num_fields) {
+                throw std::invalid_argument("Too many query parameters");
+            }
+
+            std::string_view pair_view = query.substr(start, end - start);
+            size_t eq = pair_view.find('=');
+            std::string key, value;
+
+            if (eq != std::string_view::npos) {
+                key = url_decode(pair_view.substr(0, eq));
+                value = url_decode(pair_view.substr(eq + 1));
+            } else {
+                key = url_decode(pair_view);
+                value = "";
+            }
+
+            if (!key.empty() || keep_blank_values) {
+                result.append(py::make_tuple(key, value));
+            }
+        }
+        start = end + 1;
+    }
+
+    return result;
+}
+
 // Cookie helpers
 bool is_control_char(char c) {
     return (c >= 0x00 && c <= 0x1f) || c == 0x7f;
+}
+
+bool has_control_chars(std::string_view s) {
+    for (char c : s) {
+        if ((c >= 0x00 && c <= 0x08) || (c >= 0x0a && c <= 0x1f) || c == 0x7f) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool is_cookie_token_char(char c) {
@@ -421,6 +466,9 @@ private:
 };
 
 PYBIND11_MODULE(libxyra, m) {
+    m.def("has_control_chars", &has_control_chars, "Check if string has control characters except HTAB");
+    m.def("parse_qsl", &parse_qsl_cpp, "Parse URL encoded form/query string",
+          py::arg("query"), py::arg("keep_blank_values") = false, py::arg("max_num_fields") = 1000);
     m.def("parse_path", &parse_path, "Parse route path");
     m.def("format_cookie", &format_cookie,
           py::arg("name"), py::arg("value"),

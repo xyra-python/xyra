@@ -1,6 +1,7 @@
 import re
 
 from multidict import CIMultiDict
+from .libxyra import has_control_chars
 
 # SECURITY: Regex to match control characters except HTAB (\t)
 # Matches 0x00-0x08, 0x0A-0x1F, 0x7F
@@ -14,7 +15,7 @@ class Headers(CIMultiDict):
     """
 
     def _validate(self, key, value):
-        if _CONTROL_CHARS_PATTERN.search(str(key)) or _CONTROL_CHARS_PATTERN.search(str(value)):
+        if has_control_chars(str(key)) or has_control_chars(str(value)):
             raise ValueError("Invalid characters in header (injection attempt)")
 
     def __setitem__(self, key, value):
