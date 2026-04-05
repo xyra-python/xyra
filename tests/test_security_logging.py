@@ -93,12 +93,12 @@ async def test_log_injection_sanitization():
     async def dummy_handler(req, res):
         res.status(200).send("ok")
 
-    final_handler = app._create_final_handler(dummy_handler, [], [], "/test")
+    final_handler, _ = app._create_final_handler(dummy_handler, [], [], "/test")
 
     # final_handler is `async def async_final_handler(res, req):` (native interface)
     # We call it with native objects.
 
-    await final_handler(native_res, native_req)
+    await final_handler(native_res, native_req) if __import__('asyncio').iscoroutinefunction(final_handler) else final_handler(native_res, native_req)
 
     # Check logs
     # Note: logging happens only if status >= 400 or duration > 100ms
@@ -112,8 +112,8 @@ async def test_log_injection_sanitization():
     async def error_handler(req, res):
         res.status(400).send("bad")
 
-    final_handler = app._create_final_handler(error_handler, [], [], "/test")
-    await final_handler(native_res, native_req)
+    final_handler, _ = app._create_final_handler(error_handler, [], [], "/test")
+    await final_handler(native_res, native_req) if __import__('asyncio').iscoroutinefunction(final_handler) else final_handler(native_res, native_req)
 
     # Now it should log.
     assert len(log_capture) > 0

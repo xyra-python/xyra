@@ -121,7 +121,7 @@ async def test_header_truncation_mitigation():
         res.send("OK")
 
     route = app.router.routes[-1]
-    final_handler = app._create_final_handler(
+    final_handler, _ = app._create_final_handler(
         route["handler"], route["param_names"], app.middlewares, route["parsed_path"]
     )
 
@@ -135,9 +135,10 @@ async def test_header_truncation_mitigation():
     mock_native_res_normal.write_header = Mock()
     mock_native_res_normal.end = Mock()
 
-    await final_handler(mock_native_res_normal, mock_native_req_normal)
+    await final_handler(mock_native_res_normal, mock_native_req_normal) if __import__('asyncio').iscoroutinefunction(final_handler) else final_handler(mock_native_res_normal, mock_native_req_normal)
 
-    mock_native_res_normal.end.assert_called_with("OK")
+    if hasattr(mock_native_res_normal, "end_text"): mock_native_res_normal.end_text.assert_called_with("OK")
+    else: mock_native_res_normal.end.assert_called_with("OK")
 
     # 2. Test excessive headers (over limit)
     mock_native_req_huge = Mock()
@@ -150,7 +151,7 @@ async def test_header_truncation_mitigation():
     mock_native_res_huge.write_header = Mock()
     mock_native_res_huge.end = Mock()
 
-    await final_handler(mock_native_res_huge, mock_native_req_huge)
+    await final_handler(mock_native_res_huge, mock_native_req_huge) if __import__('asyncio').iscoroutinefunction(final_handler) else final_handler(mock_native_res_huge, mock_native_req_huge)
 
     # Should return 431 instead of "OK"
     mock_native_res_huge.write_status.assert_called_with("431 Request Header Fields Too Large")

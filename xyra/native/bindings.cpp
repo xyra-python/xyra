@@ -374,6 +374,39 @@ public:
         });
     }
 
+    void end_fast(std::string data, std::string content_type) {
+        if (*aborted) return;
+        loop->defer([res = res, aborted = aborted, data, content_type]() {
+            if (!*aborted) {
+                res->writeHeader("Content-Type", content_type);
+                res->end(data);
+                *aborted = true;
+            }
+        });
+    }
+
+    void end_json(std::string data) {
+        if (*aborted) return;
+        loop->defer([res = res, aborted = aborted, data]() {
+            if (!*aborted) {
+                res->writeHeader("Content-Type", "application/json");
+                res->end(data);
+                *aborted = true;
+            }
+        });
+    }
+
+    void end_text(std::string data) {
+        if (*aborted) return;
+        loop->defer([res = res, aborted = aborted, data]() {
+            if (!*aborted) {
+                res->writeHeader("Content-Type", "text/plain; charset=utf-8");
+                res->end(data);
+                *aborted = true;
+            }
+        });
+    }
+
     void close() {
         if (*aborted) return;
         loop->defer([res = res, aborted = aborted]() {
@@ -492,6 +525,9 @@ PYBIND11_MODULE(libxyra, m) {
         .def("write_status", &Response::write_status)
         .def("write_header", &Response::write_header)
         .def("end", &Response::end)
+        .def("end_fast", &Response::end_fast)
+        .def("end_json", &Response::end_json)
+        .def("end_text", &Response::end_text)
         .def("close", &Response::close)
         .def("on_data", &Response::on_data)
         .def("on_aborted", &Response::on_aborted)

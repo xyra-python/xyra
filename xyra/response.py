@@ -31,7 +31,7 @@ class Response:
 
     __slots__ = (
         "_res",
-        "headers",
+        "_headers_dict",
         "status_code",
         "templating",
         "_ended",
@@ -48,7 +48,7 @@ class Response:
             templating: Optional templating engine for rendering templates.
         """
         self._res = res
-        self.headers = Headers()
+        self._headers_dict = None
         self.status_code: int = 200
         self.templating = templating
         self._ended = False
@@ -83,6 +83,17 @@ class Response:
         self.status_code = code
         return self
 
+    @property
+    def headers(self):
+        if self._headers_dict is None:
+            from .datastructures import Headers
+            self._headers_dict = Headers()
+        return self._headers_dict
+
+    @headers.setter
+    def headers(self, value):
+        self._headers_dict = value
+
     def _header_fast(self, key: str, value: str) -> "Response":
         """Set a response header without validation (internal use only)."""
         self.headers[key] = value
@@ -95,54 +106,64 @@ class Response:
 
     def _write_headers(self) -> None:
         """Write all headers to the response."""
-        for key, value in self.headers.items():
+        for key, value in self._headers_dict.items():
             self._res.write_header(key, value)
 
     def send(self, data: str | bytes) -> None:
-        """
-        Send response data and finalize the response.
-        usage:
-            @app.get("/")
-            def hello(req: Request, res: Response):
-                res.send("Hello, Xyra!")
-        """
-        if self._ended:
+        if self._ended: return
+        if self.status_code == 200 and not self._headers_dict:
+            if hasattr(self._res, 'end_text'):
+                if isinstance(data, str):
+                    self._res.end_text(data)
+                else:
+                    self._res.end_fast(data, "application/octet-stream")
+            else:
+                if isinstance(data, str):
+                    self._res.write_header("Content-Type", "text/plain; charset=utf-8")
+                else:
+                    self._res.write_header("Content-Type", "application/octet-stream")
+                self._res.end(data)
+            self._ended = True
             return
 
-        # Write status code
-        self._res.write_status(str(self.status_code))
+        if self.status_code != 200:
+            self._res.write_status(str(self.status_code))
 
-        # SECURITY: Set default Content-Type if missing to prevent MIME sniffing/XSS.
-        # Browsers may sniff "text/html" from response body if Content-Type is missing.
-        # Default to safe types: text/plain for strings, application/octet-stream for bytes.
-        if "content-type" not in self.headers:
+        if self._headers_dict is None or "content-type" not in self._headers_dict:
             if isinstance(data, str):
-                self._header_fast("Content-Type", "text/plain; charset=utf-8")
+                self._res.write_header("Content-Type", "text/plain; charset=utf-8")
             else:
-                self._header_fast("Content-Type", "application/octet-stream")
+                self._res.write_header("Content-Type", "application/octet-stream")
 
-        # Write headers
-        self._write_headers()
+        if self._headers_dict:
+            for key, value in self._headers_dict.items():
+                self._res.write_header(key, value)
 
-        if isinstance(data, str):
-            self._res.end(data)
-        else:
-            self._res.end(data)
-
+        self._res.end(data)
         self._ended = True
 
     def json(self, data: Any) -> None:
-        """Send JSON response.
-        usage:
-            @app.get("/")
-            def hello(req: Request, res: Response):
-                res.json({"message": "Hello, Xyra!"})
-        """
-        # PERF: Use fast header setting as the key and value are trusted
-        self._header_fast("Content-Type", "application/json")
-        # PERF: json_lib (orjson) returns bytes, send them directly to avoid decode/encode overhead
+        if self._ended: return
         json_data = json_lib.dumps(data)
-        self.send(json_data)
+        if self.status_code == 200 and not self._headers_dict:
+            if hasattr(self._res, 'end_json'):
+                self._res.end_json(json_data)
+            else:
+                self._res.write_header("Content-Type", "application/json")
+                self._res.end(json_data)
+            self._ended = True
+            return
+
+        if self.status_code != 200:
+            self._res.write_status(str(self.status_code))
+
+        self._res.write_header("Content-Type", "application/json")
+        if self._headers_dict:
+            for key, value in self._headers_dict.items():
+                self._res.write_header(key, value)
+
+        self._res.end(json_data)
+        self._ended = True
 
     def html(self, html: str) -> None:
         """Send HTML response.

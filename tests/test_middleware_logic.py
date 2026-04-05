@@ -59,6 +59,7 @@ class TestConcurrency(unittest.TestCase):
             res.send("ok")
 
         # Manually trigger the handler logic (simulating what socketify does)
+        app._app = __import__('unittest').mock.Mock()
         app._register_routes()
         # The internal app structure depends on socketify.App which we can't easily mock entirely
         # without actual socketify C extension running.
@@ -90,7 +91,7 @@ class TestConcurrency(unittest.TestCase):
             res.send("ok")
 
         # Create the final handler closure
-        final_handler = app._create_final_handler(handler, [], app._middlewares, "/")
+        final_handler, _ = app._create_final_handler(handler, [], app._middlewares, "/")
 
         # Mock Req/Res
         mock_req = MockSocketifyRequest()
@@ -124,7 +125,7 @@ class TestConcurrency(unittest.TestCase):
         async def handler(req, res):
             log.append("handler")
 
-        final_handler = app._create_final_handler(handler, [], app._middlewares, "/")
+        final_handler, _ = app._create_final_handler(handler, [], app._middlewares, "/")
 
         mock_req = MockSocketifyRequest()
         mock_res = MockSocketifyResponse()

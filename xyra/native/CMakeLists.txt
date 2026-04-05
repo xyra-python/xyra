@@ -51,6 +51,8 @@ else()
 endif()
 
 target_compile_definitions(xyra_native PRIVATE LIBUS_NO_SSL)
+target_compile_options(xyra_native PRIVATE -O3 -flto -march=native)
+target_link_options(xyra_native PRIVATE -O3 -flto)
 
 target_link_libraries(xyra_native PRIVATE pybind11::module ZLIB::ZLIB)
 

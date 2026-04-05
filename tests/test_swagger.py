@@ -138,4 +138,5 @@ def test_swagger_endpoint():
     response.html("<html>Swagger UI</html>")
     request = Request(mock_req, mock_res)
     request.is_json()
-    mock_res.end.assert_called()
+    if hasattr(mock_res, "end_json"): mock_res.end.assert_called()
+    else: mock_res.end.assert_called()

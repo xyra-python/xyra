@@ -1,8 +1,11 @@
+import os
+import sys
+import platform
 import asyncio
 import inspect
 import json
 import mimetypes
-import os
+
 import socket
 import threading
 import time
@@ -44,20 +47,16 @@ class App:
         templates_directory: str = "templates",
         swagger_options: dict[str, Any] | None = None,
     ):
-        """
-        Initialize the Xyra application.
-
-        Args:
-            options: Optional configuration for the underlying native app.
-            templates_directory: Directory path for Jinja2 templates.
-            swagger_options: dictionary with Swagger configuration options.
-        """
-        self._app = libxyra.App()
+        self._app_options = options
+        self._app = None
         self._router = Router()
 
+        self._websockets_config = []
         self._middlewares: list[Callable] = []
         self.templates = Templating(templates_directory)
         self.swagger_options = swagger_options
+        self._sync_req = Request(None, None)
+        self._sync_res = Response(None, self.templates)
         self._swagger_cache: dict[str, Any] | None = None
         self._swagger_lock = threading.Lock()
         self.log_requests = True  # Will be set in run_server
@@ -244,8 +243,11 @@ class App:
 
             ws_config["upgrade"] = default_upgrade
 
-        # Register with native App
-        self._app.ws(path, ws_config)
+        # Store for lazy registration
+        if self._app is not None:
+            self._app.ws(path, ws_config)
+        else:
+            self._websockets_config.append((path, ws_config))
 
     def static_files(self, path: str, directory: str):
         """Serve static files from a directory."""
@@ -344,7 +346,36 @@ class App:
         middleware_chain: list[dict[str, Any]],
         route_handler: Callable,
         is_async_handler: bool,
-    ) -> Callable:
+    ) -> tuple[Callable, bool]:
+        has_async = is_async_handler or any(mw["is_coroutine"] for mw in middleware_chain)
+
+        if not has_async:
+            def run_route_handler_sync(req, res):
+                route_handler(req, res)
+                return res
+
+            next_call = run_route_handler_sync
+
+            for mw_info in reversed(middleware_chain):
+                middleware = mw_info["func"]
+                wants_call_next = mw_info["wants_call_next"]
+                current_next = next_call
+
+                if wants_call_next:
+                    def layer(req, res, _mw=middleware, _next=current_next):
+                        def call_next(req_obj=None):
+                            return _next(req, res)
+                        _mw(req, call_next)
+                        return res
+                else:
+                    def layer(req, res, _mw=middleware, _next=current_next):
+                        _mw(req, res)
+                        if not res._ended:
+                            _next(req, res)
+                        return res
+                next_call = layer
+            return next_call, False
+
         # Base handler
         async def run_route_handler(req, res):
             if is_async_handler:
@@ -402,7 +433,7 @@ class App:
 
             next_call = layer
 
-        return next_call
+        return next_call, True
 
     def _create_final_handler(
         self,
@@ -436,9 +467,86 @@ class App:
             )
 
         # Build the middleware stack once
-        middleware_stack_entry = self._build_middleware_stack(
+        middleware_stack_entry, is_async_stack = self._build_middleware_stack(
             middleware_chain, route_handler, is_async_handler
         )
+
+        if not is_async_stack:
+            if not param_names and not middleware_chain:
+                def sync_final_handler_fastest_noparams(res, req):
+                    if req.headers_truncated:
+                        res.write_status("431 Request Header Fields Too Large")
+                        res.end("Request Header Fields Too Large")
+                        return
+
+                    self._sync_res._res = res
+                    self._sync_res._headers_dict = None
+                    self._sync_res.status_code = 200
+                    self._sync_res._ended = False
+
+                    self._sync_req._req = req
+                    self._sync_req._res = res
+                    self._sync_req.params = {}
+                    self._sync_req._headers_cache = None
+                    self._sync_req._query_params_cache = None
+                    self._sync_req._url_cache = None
+                    self._sync_req._query_cache = None
+                    self._sync_req._remote_addr_cache = None
+                    self._sync_req._scheme_cache = None
+                    self._sync_req._host_cache = None
+                    self._sync_req._port_cache = None
+                    self._sync_req._body_cache = None
+                    self._sync_req._json_cache = None
+                    self._sync_req._form_cache = None
+
+                    try:
+                        route_handler(self._sync_req, self._sync_res)
+                    except Exception as e:
+                        try:
+                            if not self._sync_res._ended:
+                                res.write_status("500")
+                                res.end('{"error": "Internal Server Error"}')
+                        except: pass
+                return sync_final_handler_fastest_noparams, False
+            else:
+                def sync_final_handler_fastest_params(res, req):
+                    if req.headers_truncated:
+                        res.write_status("431 Request Header Fields Too Large")
+                        res.end("Request Header Fields Too Large")
+                        return
+
+                    self._sync_res._res = res
+                    self._sync_res._headers_dict = None
+                    self._sync_res.status_code = 200
+                    self._sync_res._ended = False
+
+                    self._sync_req._req = req
+                    self._sync_req._res = res
+                    self._sync_req.params = {p: req.get_parameter(i) for i, p in enumerate(param_names)} if param_names else {}
+                    self._sync_req._headers_cache = None
+                    self._sync_req._query_params_cache = None
+                    self._sync_req._url_cache = None
+                    self._sync_req._query_cache = None
+                    self._sync_req._remote_addr_cache = None
+                    self._sync_req._scheme_cache = None
+                    self._sync_req._host_cache = None
+                    self._sync_req._port_cache = None
+                    self._sync_req._body_cache = None
+                    self._sync_req._json_cache = None
+                    self._sync_req._form_cache = None
+
+                    try:
+                        if middleware_chain:
+                            middleware_stack_entry(self._sync_req, self._sync_res)
+                        else:
+                            route_handler(self._sync_req, self._sync_res)
+                    except Exception as e:
+                        try:
+                            if not self._sync_res._ended:
+                                res.write_status("500")
+                                res.end('{"error": "Internal Server Error"}')
+                        except: pass
+                return sync_final_handler_fastest_params, False
 
         async def async_final_handler(res, req):
             start_time = time.time()
@@ -493,7 +601,7 @@ class App:
                     )
                 return
 
-        return async_final_handler
+        return async_final_handler, True
 
     def _register_routes(self):
         """Register all routes with the underlying native app."""
@@ -520,7 +628,7 @@ class App:
                 method = "del"
             parsed_path = route["parsed_path"]
 
-            final_handler = self._create_final_handler(
+            final_handler, is_async = self._create_final_handler(
                 route["handler"],
                 route["param_names"],
                 self._middlewares,
@@ -529,7 +637,10 @@ class App:
 
             # Use the app methods to register routes
             if hasattr(self._app, method):
-                getattr(self._app, method)(parsed_path, wrap_async(final_handler))
+                if is_async:
+                    getattr(self._app, method)(parsed_path, wrap_async(final_handler))
+                else:
+                    getattr(self._app, method)(parsed_path, final_handler)
 
         # Add catch-all handler for unmatched routes (404)
         async def not_found_handler(req: Request, res: Response):
@@ -538,10 +649,13 @@ class App:
         # SECURITY: Wrap 404 handler with middleware stack to ensure
         # security headers (HSTS, CSP, etc.) and rate limiting are applied
         # even for non-existent routes.
-        final_handler = self._create_final_handler(
+        final_handler, is_async = self._create_final_handler(
             not_found_handler, [], self._middlewares, "/*"
         )
-        self._app.any("/*", wrap_async(final_handler))
+        if is_async:
+            self._app.any("/*", wrap_async(final_handler))
+        else:
+            self._app.any("/*", final_handler)
 
     def enable_security_headers(self, **kwargs):
         """
@@ -662,12 +776,12 @@ class App:
         host: str = "localhost",
         reload: bool = False,
         log_enabled: bool = False,
+        workers: int = 1,
     ):
         """Start the server."""
         if reload and os.environ.get("XYRA_RELOAD_CHILD") != "1":
             try:
                 import subprocess  # nosec B404
-                import sys
                 import time
 
                 import watchfiles
@@ -719,6 +833,35 @@ class App:
 
             return
 
+        if workers > 1:
+
+            if platform.system() != "Windows" and os.environ.get("XYRA_WORKER") != "1":
+                os.environ["XYRA_WORKER"] = "1"
+                children = []
+                for _ in range(workers - 1):
+                    pid = os.fork()
+                    if pid == 0:
+                        break
+                    children.append(pid)
+
+                if pid != 0:
+                    import signal
+                    def handle_sig(*args):
+                        for child in children:
+                            try:
+                                os.kill(child, signal.SIGTERM)
+                            except: pass
+                        sys.exit(0)
+                    signal.signal(signal.SIGINT, handle_sig)
+                    signal.signal(signal.SIGTERM, handle_sig)
+
+        if self._app is None:
+            import xyra.libxyra as libxyra
+            self._app = libxyra.App()
+
+        for path, ws_config in self._websockets_config:
+            self._app.ws(path, ws_config)
+
         if self.swagger_options:
             self.enable_swagger(host, port)
 
@@ -746,6 +889,7 @@ class App:
         host: str = "localhost",
         reload: bool = False,
         logger: bool = False,
+        workers: int = 1,
     ):
         """Alias for run_server method with default logger disabled."""
         # Check if port is already in use
@@ -758,7 +902,7 @@ class App:
             raise RuntimeError(
                 f"Port {port} is already in use. Only one instance of Xyra can run per port."
             ) from e
-        return self.run_server(port, host, reload, logger)
+        return self.run_server(port, host, reload, logger, workers)
 
     @property
     def router(self):

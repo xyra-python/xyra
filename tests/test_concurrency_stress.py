@@ -63,12 +63,12 @@ class TestConcurrencyStress(unittest.TestCase):
             else:
                 res.send(req_id)
 
-        final_handler = app._create_final_handler(handler, ["id"], [], "/test/{id}")
+        final_handler, _ = app._create_final_handler(handler, ["id"], [], "/test/{id}")
 
         async def run_req(i):
             mock_req = MockSocketifyRequest(f"/test/{i}", params={"id": str(i)})
             mock_res = MockSocketifyResponse()
-            await final_handler(mock_res, mock_req)
+            await final_handler(mock_res, mock_req) if __import__('asyncio').iscoroutinefunction(final_handler) else final_handler(mock_res, mock_req)
             return mock_res.body
 
         async def main():

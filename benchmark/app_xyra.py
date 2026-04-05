@@ -11,4 +11,4 @@ def text_endpoint(req, res):
     res.send("Hello, World!")
 
 if __name__ == "__main__":
-    app.listen(8000)
+    app.listen(8000, workers=1)
