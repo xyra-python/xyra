@@ -1,5 +1,7 @@
+import glob
 import os
 import platform
+import sys
 
 from cffi import FFI
 
@@ -31,14 +33,19 @@ extra_libs = ["z"]
 if platform.system() == "Windows":
     extra_libs.append("libuv")
 
+# Ensure CFFI finds the library wherever setuptools decides to put it, or fall back
+version = f"{sys.version_info.major}{sys.version_info.minor}"
+build_temp_dirs = glob.glob(os.path.abspath("build/temp.*"))
+library_dirs = [os.path.abspath("xyra"), os.path.abspath("xyra/native")] + build_temp_dirs
+
 ffi.set_source(
     "xyra._libxyra",
     '#include "c_api.h"',
     include_dirs=[
         os.path.abspath("xyra/native")
     ],
-    library_dirs=[os.path.abspath("xyra")],
-    libraries=["xyra"] + extra_libs
+    library_dirs=library_dirs,
+    libraries=["xyra", "xyra_native"] + extra_libs
 )
 
 def build_cffi(output_path):
