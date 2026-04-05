@@ -1,10 +1,15 @@
 import sys
 from robyn import Robyn
+import json
 
 app = Robyn(__file__)
 
 @app.get("/")
 def h():
+    return {"message": "Hello, World!"}
+
+@app.get("/text")
+def text_endpoint():
     return "Hello, World!"
 
 if __name__ == "__main__":
