@@ -215,3 +215,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 Made with ❤️ for the Python community
+## 📊 Benchmark
+
+We run weekly benchmarks against other popular Python web frameworks. See the full [Benchmark Report](benchmark/benchmark_report.md) for details.
