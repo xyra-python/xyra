@@ -8,5 +8,5 @@ def home(res, req):
 app.get("/", home)
 
 if __name__ == "__main__":
-    app.listen(3000, lambda config: print("Listening on port http://localhost:%d now\n" % config.port))
+    app.listen(3000, lambda config: print(f"Listening on port http://localhost:{config.port} now\n"))
     app.run()
