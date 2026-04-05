@@ -1,6 +1,6 @@
 [project]
 name = "xyra"
-version = "0.2.4"
+version = "0.2.5"
 description = "High Performance Frameworks, Easy to learn and Ready for Production"
 readme = "README.md"
 license = "MIT"
