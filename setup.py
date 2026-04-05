@@ -34,25 +34,33 @@ class CMakeBuild(build_ext):
                 if cmake_version < (3, 1, 0):
                     raise RuntimeError("CMake >= 3.1.0 is required on Windows")
 
-        for ext in self.extensions:
-            self.build_extension(ext)
+        # Initialize the compiler for CFFI
+        from setuptools.command.build_ext import build_ext as _build_ext
+        _build_ext.run(self)
+
+        # for ext in self.extensions:
+        #     self.build_extension(ext)
 
     def build_extension(self, ext):
+        if not hasattr(ext, "sourcedir"):
+            # We are inside CMakeBuild but trying to build a CFFI extension.
+            # setuptools build_ext hasn't initialized the compiler correctly yet
+            # because we override run(). We need to explicitly call super().run()
+            # for the CFFI extension. To do that, we'll let the standard build_ext
+            # handle it by calling the parent class implementation.
+            from setuptools.command.build_ext import build_ext as _build_ext
+            _build_ext.build_extension(self, ext)
+            return
+
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
 
         # Ensure output directory exists
         if not os.path.exists(extdir):
             os.makedirs(extdir)
 
-        # Retrieve pybind11 cmake directory
-        import pybind11
-
-        pybind11_cmake_dir = pybind11.get_cmake_dir()
-
         cmake_args = [
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
             "-DPYTHON_EXECUTABLE=" + sys.executable,
-            "-Dpybind11_DIR=" + pybind11_cmake_dir,
         ]
 
         if "CMAKE_TOOLCHAIN_FILE" in os.environ:
@@ -87,6 +95,11 @@ class CMakeBuild(build_ext):
             ["cmake", "--build", "."] + build_args, cwd=self.build_temp
         )
 
+        # Generate CFFI C code
+        sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+        import xyra.native.cffi_build
+        xyra.native.cffi_build.build_cffi(os.path.join(ext.sourcedir, "xyra_cffi.c"))
+
 
 setup(
     name="xyra",
@@ -95,8 +108,9 @@ setup(
     author_email="team@xyra.dev",
     description="High Performance Frameworks, Easy to learn and Ready for Production",
     long_description="",
-    ext_modules=[CMakeExtension("xyra.libxyra", sourcedir="xyra/native")],
-    cmdclass={"build_ext": CMakeBuild},
+    # ext_modules=[CMakeExtension("xyra.libxyra", sourcedir="xyra/native")],
+    cffi_modules=["xyra/native/cffi_build.py:ffi"],
+    # cmdclass={"build_ext": CMakeBuild},
     include_package_data=True,
     zip_safe=False,
 )

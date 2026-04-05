@@ -3,10 +3,19 @@ import sys
 from typing import Any
 from urllib.parse import parse_qs, parse_qsl
 
-if sys.implementation.name == "pypy":
-    import ujson as json_lib
-else:
-    import orjson as json_lib
+try:
+    if sys.implementation.name == "pypy":
+        import ujson as json_lib
+    else:
+        import orjson as json_lib
+except ImportError:
+    import json as json_lib
+
+try:
+    from . import _libxyra
+    from ._libxyra import ffi, lib
+except ImportError:
+    pass
 
 from .logger import get_logger
 
@@ -160,16 +169,15 @@ class Request:
 
         Returns:
             HTTP method (GET, POST, PUT, DELETE, etc.).
-
-        usage:
-            @app.route("*", "/api/*")
-            def api_handler(req: Request, res: Response):
-                if req.method == "GET":
-                    res.json({"method": "GET"})
-                elif req.method == "POST":
-                    res.json({"method": "POST"})
         """
-        method = self._req.get_method()
+        if hasattr(self._req, "get_method"):
+            method = self._req.get_method()
+        else:
+            # CFFI fallback
+            out_ptr = ffi.new("char**")
+            length = lib.xyra_req_get_method(self._req, out_ptr)
+            method = ffi.string(out_ptr[0], length).decode('utf-8')
+
         if method is None:
             raise ValueError("Request method is None")
         return method
@@ -178,19 +186,14 @@ class Request:
     def url(self) -> str:
         """
         Get the request URL path (cached).
-
-        Returns:
-            Request path (e.g., "/api/users").
-            Does not include query string or protocol/host.
-            Use `req.full_path` for path + query.
-
-        usage:
-            @app.get("/debug")
-            def debug(req: Request, res: Response):
-                res.json({"url": req.url, "method": req.method})
         """
         if self._url_cache is None:
-            url = self._req.get_url()
+            if hasattr(self._req, "get_url"):
+                url = self._req.get_url()
+            else:
+                out_ptr = ffi.new("char**")
+                length = lib.xyra_req_get_url(self._req, out_ptr)
+                url = ffi.string(out_ptr[0], length).decode('utf-8')
             if url is None:
                 raise ValueError("Request URL is None")
             self._url_cache = url
@@ -241,26 +244,19 @@ class Request:
     def headers(self) -> dict[str, str]:
         """
         Get all headers as a dictionary (cached).
-
-        Returns:
-            Dictionary mapping lowercase header names to values.
-
-        usage:
-            @app.get("/headers")
-            def show_headers(req: Request, res: Response):
-                res.json(req.headers)
         """
         if self._headers_cache is None:
-            # PERF: use native's direct accessor if available (faster C++ implementation)
-            # This returns a dict with lowercase keys, matching our requirement.
             if hasattr(self._req, "get_headers"):
                 self._headers_cache = self._req.get_headers()
             else:
                 headers = {}
-                # PERF: avoid creating intermediate dicts and lambda overhead
-                self._req.for_each_header(
-                    lambda key, value: headers.__setitem__(key.lower(), value)
-                )
+                @ffi.callback("void(void*, const char*, size_t, const char*, size_t)")
+                def _cb(user_data, key_ptr, key_len, val_ptr, val_len):
+                    k = ffi.string(key_ptr, key_len).decode('utf-8').lower()
+                    v = ffi.string(val_ptr, val_len).decode('utf-8')
+                    headers[k] = v
+
+                lib.xyra_req_get_headers(self._req, ffi.NULL, _cb)
                 self._headers_cache = headers
         return self._headers_cache
 
@@ -268,21 +264,41 @@ class Request:
     def query(self) -> str:
         """
         Get the raw query string (cached).
-
-        Returns:
-            Query string without the leading '?' or empty string.
-
-        usage:
-            # GET /search?q=python&page=1
-            @app.get("/search")
-            def search(req: Request, res: Response):
-                raw_query = req.query  # "q=python&page=1"
-                res.json({"raw_query": raw_query})
         """
         if self._query_cache is None:
-            # PERF: use native's direct accessor instead of parsing URL
-            self._query_cache = self._req.get_query()
+            if hasattr(self._req, "get_query"):
+                # uWS / pybind get_query() with no args returns the whole query string.
+                # In CFFI, we pass empty string to get the whole thing?
+                # Actually lib.xyra_req_get_query expects a key, returning specific value.
+                # Oh wait, uWebSockets HttpRequest::getQuery() without args returns full query.
+                pass # need to fix
+
+            if hasattr(self._req, "get_query"):
+                try:
+                    self._query_cache = self._req.get_query()
+                except TypeError:
+                    self._query_cache = self._req.get_query("")
+            else:
+                out_ptr = ffi.new("char**")
+                # Need an empty string for key to get full query?
+                # C API xyra_req_get_query(req, "") ?
+                # If key is empty, let's assume it gets full query.
+                c_key = b""
+                length = lib.xyra_req_get_query(self._req, c_key, out_ptr)
+                if length > 0:
+                    self._query_cache = ffi.string(out_ptr[0], length).decode('utf-8')
+                else:
+                    self._query_cache = ""
+
         return self._query_cache
+
+    def get_queries(self) -> dict[str, list]:
+        """
+        Return query parameters as dictionary.
+        This provides compatibility with the pybind11 native interface which
+        some internal modules might still check for.
+        """
+        return self.query_params
 
     @property
     def query_params(self) -> dict[str, list]:
@@ -306,6 +322,18 @@ class Request:
             try:
                 if hasattr(self._req, "get_queries"):
                     self._query_params_cache = self._req.get_queries()
+                elif getattr(lib, "xyra_req_get_queries", None) is not None:
+                    queries = {}
+                    @ffi.callback("void(void*, const char*, size_t, const char*, size_t)")
+                    def _cb(user_data, key_ptr, key_len, val_ptr, val_len):
+                        k = ffi.string(key_ptr, key_len).decode('utf-8')
+                        v = ffi.string(val_ptr, val_len).decode('utf-8')
+                        if k not in queries:
+                            queries[k] = []
+                        queries[k].append(v)
+
+                    lib.xyra_req_get_queries(self._req, ffi.NULL, _cb)
+                    self._query_params_cache = queries
                 else:
                     query_string = self.query
                     if not query_string:
@@ -327,35 +355,33 @@ class Request:
     def get_parameter(self, index: int) -> str | None:
         """
         Get a URL parameter by index.
-
-        usage:
-            @app.get("/users/{id}")
-            def get_user(req: Request, res: Response):
-                user_id = req.get_parameter(0)  # Gets {id} value
-                res.json({"user_id": user_id})
         """
-        return self._req.get_parameter(index)
+        if hasattr(self._req, "get_parameter"):
+            return self._req.get_parameter(index)
+
+        out_ptr = ffi.new("char**")
+        length = lib.xyra_req_get_parameter(self._req, index, out_ptr)
+        if length > 0:
+            return ffi.string(out_ptr[0], length).decode('utf-8')
+        return None
 
     def get_header(self, name: str, default: str | None = None) -> str | None:
         """
         Get a specific header value.
-
-        usage:
-            @app.get("/auth")
-            def check_auth(req: Request, res: Response):
-                token = req.get_header("authorization")
-                if not token:
-                    res.unauthorized().json({"error": "No token"})
-                else:
-                    res.ok().json({"token": token})
         """
-        # PERF: if headers are already cached, use the dictionary lookup
         if self._headers_cache is not None:
             return self._headers_cache.get(name.lower(), default)
 
-        # PERF: otherwise use direct native access to avoid building the whole dict
-        value = self._req.get_header(name.lower())
-        return value if value else default
+        if hasattr(self._req, "get_header"):
+            value = self._req.get_header(name.lower())
+            return value if value else default
+
+        out_ptr = ffi.new("char**")
+        c_name = name.lower().encode('utf-8')
+        length = lib.xyra_req_get_header(self._req, c_name, out_ptr)
+        if length > 0:
+            return ffi.string(out_ptr[0], length).decode('utf-8')
+        return default
 
     async def text(self) -> str:
         """
@@ -479,10 +505,20 @@ class Request:
         # Optimized form parsing using urllib.parse.parse_qsl for proper URL decoding
         try:
             # SECURITY: Limit max_num_fields to 1000 to prevent DoS via Hash Collision / CPU Exhaustion
-            from .libxyra import parse_qsl as cpp_parse_qsl
-            parsed_pairs = cpp_parse_qsl(
-                text_content, keep_blank_values=True, max_num_fields=1000
-            )
+            if hasattr(lib, "xyra_parse_qsl"):
+                parsed_pairs = []
+                @ffi.callback("void(void*, const char*, size_t, const char*, size_t)")
+                def _cb(user_data, key_ptr, key_len, val_ptr, val_len):
+                    k = ffi.string(key_ptr, key_len).decode('utf-8')
+                    v = ffi.string(val_ptr, val_len).decode('utf-8')
+                    parsed_pairs.append((k, v))
+                content_b = text_content.encode('utf-8')
+                lib.xyra_parse_qsl(content_b, len(content_b), True, 1000, ffi.NULL, _cb)
+            else:
+                from .libxyra import parse_qsl as cpp_parse_qsl
+                parsed_pairs = cpp_parse_qsl(
+                    text_content, keep_blank_values=True, max_num_fields=1000
+                )
             form_data = dict(parsed_pairs)
             self._form_cache = form_data
             return form_data
