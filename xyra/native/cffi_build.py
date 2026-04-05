@@ -1,4 +1,5 @@
 import os
+import platform
 
 from cffi import FFI
 
@@ -25,7 +26,7 @@ ffi.cdef("\n".join(filtered_lines))
 
 # Use CMake's built static library
 # (This ensures all USOCKETS definitions and system libs are properly handled)
-import platform
+
 extra_libs = ["z"]
 if platform.system() == "Windows":
     extra_libs.append("libuv")

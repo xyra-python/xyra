@@ -1,7 +1,7 @@
 from typing import Any
 
 try:
-    from . import _libxyra
+
     from ._libxyra import ffi, lib
 except ImportError:
     pass

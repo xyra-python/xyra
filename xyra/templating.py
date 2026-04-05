@@ -122,8 +122,8 @@ class Templating:
                 f"Template '{template_name}' not found in directory '{self.directory}'"
             ) from None
         except Exception as e:
-            from .logger import get_logger
             from .exceptions import TemplateException
+            from .logger import get_logger
 
             logger = get_logger("xyra")
             logger.error(f"Error rendering template '{template_name}': {str(e)}")

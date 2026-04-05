@@ -1,11 +1,26 @@
 import sys
 from typing import Any
 
-try:
-    from . import _libxyra
-    from ._libxyra import ffi, lib
+from .datastructures import Headers
 
-    def format_cookie(name, value, max_age=None, expires=None, path="/", domain=None, secure=False, http_only=True, same_site="Lax"):
+try:
+    if sys.implementation.name == "pypy":
+        import ujson as json_lib
+    else:
+        import orjson as json_lib
+except ImportError:
+    import json as json_lib
+
+import asyncio
+
+try:
+    from ._libxyra import ffi, lib
+except ImportError:
+    ffi = None
+    lib = None
+
+def format_cookie(name, value, max_age=None, expires=None, path="/", domain=None, secure=False, http_only=True, same_site="Lax"):
+    if lib and hasattr(lib, "xyra_format_cookie"):
         out_buf = ffi.new("char[]", 1024)
         out_len = ffi.new("size_t*", 1024)
 
@@ -67,21 +82,51 @@ try:
                 return ffi.string(out_buf, val_int).decode('utf-8')
 
         return ""
-except ImportError:
-    def format_cookie(*args, **kwargs):
-        return ""
-
-from .datastructures import Headers
-
-try:
-    if sys.implementation.name == "pypy":
-        import ujson as json_lib
     else:
-        import orjson as json_lib
-except ImportError:
-    import json as json_lib
+        from .datastructures import has_control_chars
 
-import asyncio
+        name = str(name)
+        value = str(value)
+
+        if has_control_chars(name) or has_control_chars(value):
+            raise ValueError("Invalid characters in cookie")
+        if "=" in name or ";" in name:
+            raise ValueError("Invalid cookie name")
+        if ";" in value:
+            raise ValueError("Cookie value cannot contain ';'")
+        if path and (has_control_chars(path) or ";" in path):
+            raise ValueError("Invalid characters in Path attribute")
+        if domain and (has_control_chars(domain) or ";" in domain):
+            raise ValueError("Invalid characters in Domain attribute")
+        if same_site and (has_control_chars(same_site) or ";" in same_site):
+            raise ValueError("Invalid characters in SameSite attribute")
+        if same_site == "None" and not secure:
+            raise ValueError("SameSite=None requires Secure=True")
+
+        # Quote values that have spaces, commas, etc.
+        def _quote(v):
+            if any(c in v for c in ' ",;\t\n\r\x0b\x0c'):
+                v = v.replace('"', '\\"')
+                return f'"{v}"'
+            return v
+
+        parts = [f"{name}={_quote(value)}"]
+        if expires:
+            parts.append(f"Expires={expires}")
+        if max_age is not None:
+            parts.append(f"Max-Age={max_age}")
+        if domain:
+            parts.append(f"Domain={domain}")
+        if path:
+            parts.append(f"Path={path}")
+        if secure:
+            parts.append("Secure")
+        if http_only:
+            parts.append("HttpOnly")
+        if same_site:
+            parts.append(f"SameSite={same_site}")
+
+        return "; ".join(parts)
 
 # Security: Limit maximum request body size to 10MB to prevent DoS
 MAX_BODY_SIZE = 10 * 1024 * 1024
@@ -447,23 +492,95 @@ class Response:
         # Flag to prevent multiple close calls or scheduling unnecessary callbacks
         aborted = [False]
 
-        # Use closure capturing correctly for CFFI
-        @ffi.callback("void(const char*, size_t, bool, void*)")
-        def cffi_on_data(chunk_ptr, chunk_len, is_last, user_data):
-            chunk = ffi.buffer(chunk_ptr, chunk_len)[:]
+        # Ensure ffi is available (it might not be if native is missing)
+        try:
+            import sys
+            if 'xyra.libxyra' in sys.modules and sys.modules['xyra.libxyra'] is None:
+                ffi = None
+                lib = None
+            else:
+                from ._libxyra import ffi, lib
+        except (ImportError, Exception):
+            ffi = None
+            lib = None
 
+        if ffi:
+            # Use closure capturing correctly for CFFI
+            @ffi.callback("void(const char*, size_t, bool, void*)")
+            def cffi_on_data(chunk_ptr, chunk_len, is_last, user_data):
+                chunk = ffi.buffer(chunk_ptr, chunk_len)[:]
+
+                if aborted[0]:
+                    return
+
+                # SECURITY: Track total size immediately to prevent DoS via buffering
+                received_bytes[0] += chunk_len
+
+                if received_bytes[0] > MAX_BODY_SIZE:
+                    aborted[0] = True
+                    # Abort immediately to stop memory growth
+                    if hasattr(self._res, "close"):
+                        self._res.close()
+                    else:
+                        lib.xyra_res_close(self._res)
+
+                    # Signal error to the future (thread-safe)
+                    def fail():
+                        if self._body_future and not self._body_future.done():
+                            self._body_future.set_exception(
+                                ValueError(
+                                    f"Request body too large (max {MAX_BODY_SIZE} bytes)"
+                                )
+                            )
+
+                    loop.call_soon_threadsafe(fail)
+                    return
+
+                def resolve():
+                    if self._body_future is None or self._body_future.done():
+                        return
+
+                    chunks.append(chunk)
+
+                    if is_last:
+                        result = b"".join(chunks)
+                        self._body_cache = result
+                        self._body_future.set_result(result)
+
+                loop.call_soon_threadsafe(resolve)
+
+            @ffi.callback("void(void*)")
+            def cffi_on_abort(user_data):
+                loop.call_soon_threadsafe(
+                    lambda: (self._body_future and self._body_future.done())
+                    or (
+                        self._body_future
+                        and self._body_future.set_exception(
+                            RuntimeError("Connection aborted")
+                        )
+                    )
+                )
+
+        else:
+            # Fallback for mocking/testing without CFFI
+            def cffi_on_data(chunk_ptr, chunk_len, is_last, user_data=None):
+                pass
+            def cffi_on_abort(user_data=None):
+                pass
+
+        def sync_on_data(chunk, is_last):
             if aborted[0]:
                 return
 
             # SECURITY: Track total size immediately to prevent DoS via buffering
-            received_bytes[0] += chunk_len
+            received_bytes[0] += len(chunk)
 
             if received_bytes[0] > MAX_BODY_SIZE:
                 aborted[0] = True
                 # Abort immediately to stop memory growth
                 if hasattr(self._res, "close"):
                     self._res.close()
-                else:
+                elif ffi:
                     lib.xyra_res_close(self._res)
 
                 # Signal error to the future (thread-safe)
@@ -491,11 +608,7 @@ class Response:
 
             loop.call_soon_threadsafe(resolve)
 
-        def sync_on_data(chunk, is_last):
-            cffi_on_data(chunk, len(chunk), is_last, ffi.NULL)
-
-        @ffi.callback("void(void*)")
-        def cffi_on_abort(user_data):
+        def sync_on_abort():
             loop.call_soon_threadsafe(
                 lambda: (self._body_future and self._body_future.done())
                 or (
@@ -506,13 +619,10 @@ class Response:
                 )
             )
 
-        def sync_on_abort():
-            cffi_on_abort(ffi.NULL)
-
         if hasattr(self._res, "on_data"):
             self._res.on_data(sync_on_data)
             self._res.on_aborted(sync_on_abort)
-        else:
+        elif ffi:
             # Need to prevent GC collection of these callbacks
             self._cffi_data_cb = cffi_on_data
             self._cffi_abort_cb = cffi_on_abort
