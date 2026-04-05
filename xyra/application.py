@@ -11,7 +11,15 @@ from collections.abc import Callable
 from typing import Any, Union, overload
 from urllib.parse import unquote
 
-from . import libxyra
+# We will temporarily mock or ignore libxyra import during build
+# if the extension isn't fully compiled yet.
+try:
+    from . import _libxyra
+    from ._libxyra import ffi, lib
+except ImportError:
+    lib = None
+    ffi = None
+
 from .logger import get_logger, setup_logging
 from .request import Request
 from .response import MAX_BODY_SIZE, Response
@@ -52,10 +60,23 @@ class App:
             templates_directory: Directory path for Jinja2 templates.
             swagger_options: dictionary with Swagger configuration options.
         """
-        self._app = libxyra.App()
+        if getattr(lib, "xyra_app_create", None) is not None:
+            self._app = lib.xyra_app_create()
+            self._is_cffi = True
+        else:
+            try:
+                from . import libxyra
+            except ImportError:
+                import libxyra
+            self._app = libxyra.App()
+            self._is_cffi = False
+
         self._router = Router()
 
         self._middlewares: list[Callable] = []
+
+        # Keep references to callbacks to prevent garbage collection
+        self._cffi_callbacks = []
         self.templates = Templating(templates_directory)
         self.swagger_options = swagger_options
         self._swagger_cache: dict[str, Any] | None = None
@@ -245,7 +266,44 @@ class App:
             ws_config["upgrade"] = default_upgrade
 
         # Register with native App
-        self._app.ws(path, ws_config)
+        if self._is_cffi:
+            # We need to adapt the handlers to CFFI callbacks
+
+            @ffi.callback("void(xyra_websocket_t*, void*)")
+            def _open_cb(ws_ptr, user_data):
+                if "open" in ws_config:
+                    ws_config["open"](ws_ptr)
+            self._cffi_callbacks.append(_open_cb)
+
+            @ffi.callback("void(xyra_websocket_t*, const char*, size_t, int, void*)")
+            def _msg_cb(ws_ptr, msg_ptr, msg_len, opcode, user_data):
+                if "message" in ws_config:
+                    msg = ffi.buffer(msg_ptr, msg_len)[:]
+                    if opcode == 1: # TEXT
+                        msg = msg.decode('utf-8')
+                    ws_config["message"](ws_ptr, msg, opcode)
+            self._cffi_callbacks.append(_msg_cb)
+
+            @ffi.callback("bool(xyra_response_t*, xyra_request_t*, void*)")
+            def _upgrade_cb(res_ptr, req_ptr, user_data):
+                if "upgrade" in ws_config:
+                    # Create temporary wrappers for the upgrade check
+                    req = Request(req_ptr, None)
+                    return ws_config["upgrade"](req)
+                return True
+            self._cffi_callbacks.append(_upgrade_cb)
+
+            @ffi.callback("void(xyra_websocket_t*, int, const char*, size_t, void*)")
+            def _close_cb(ws_ptr, code, msg_ptr, msg_len, user_data):
+                if "close" in ws_config:
+                    msg = ffi.buffer(msg_ptr, msg_len)[:] if msg_ptr else b""
+                    ws_config["close"](ws_ptr, code, msg)
+            self._cffi_callbacks.append(_close_cb)
+
+            path_b = path.encode('utf-8')
+            lib.xyra_app_ws(self._app, path_b, _open_cb, _msg_cb, _upgrade_cb, _close_cb, ffi.NULL)
+        else:
+            self._app.ws(path, ws_config)
 
     def static_files(self, path: str, directory: str):
         """Serve static files from a directory."""
@@ -528,8 +586,29 @@ class App:
             )
 
             # Use the app methods to register routes
-            if hasattr(self._app, method):
-                getattr(self._app, method)(parsed_path, wrap_async(final_handler))
+            if self._is_cffi:
+                cb_wrapper = wrap_async(final_handler)
+
+                @ffi.callback("void(xyra_response_t*, xyra_request_t*, void*)")
+                def _route_cb(res_ptr, req_ptr, user_data, _cb=cb_wrapper):
+                    # We pass the raw pointers to the final_handler wrapper, which expects Request/Response
+                    # The final_handler in application.py wraps them:
+                    #     response = Response(res_ptr, self.templates)
+                    #     request = Request(req_ptr, response, params)
+                    # Wait, final_handler does:
+                    #     response = Response(res, self.templates)
+                    #     request = Request(req, response, params)
+                    # So _cb expects raw `res`, `req` as its arguments!
+                    _cb(res_ptr, req_ptr)
+                self._cffi_callbacks.append(_route_cb)
+
+                c_method_name = f"xyra_app_{method}"
+                if hasattr(lib, c_method_name):
+                    c_method = getattr(lib, c_method_name)
+                    c_method(self._app, parsed_path.encode('utf-8'), _route_cb, ffi.NULL)
+            else:
+                if hasattr(self._app, method):
+                    getattr(self._app, method)(parsed_path, wrap_async(final_handler))
 
         # Add catch-all handler for unmatched routes (404)
         async def not_found_handler(req: Request, res: Response):
@@ -541,7 +620,15 @@ class App:
         final_handler = self._create_final_handler(
             not_found_handler, [], self._middlewares, "/*"
         )
-        self._app.any("/*", wrap_async(final_handler))
+        if self._is_cffi:
+            cb_wrapper = wrap_async(final_handler)
+            @ffi.callback("void(xyra_response_t*, xyra_request_t*, void*)")
+            def _any_cb(res_ptr, req_ptr, user_data, _cb=cb_wrapper):
+                _cb(res_ptr, req_ptr)
+            self._cffi_callbacks.append(_any_cb)
+            lib.xyra_app_any(self._app, b"/*", _any_cb, ffi.NULL)
+        else:
+            self._app.any("/*", wrap_async(final_handler))
 
     def enable_security_headers(self, **kwargs):
         """
@@ -737,8 +824,19 @@ class App:
             swagger_ui_path = self.swagger_options.get("swagger_ui_path", "/docs")
             logger.info(f"API docs available at http://{host}:{port}{swagger_ui_path}")
 
-        self._app.listen(port, lambda config: logger.info(f"Listening on port {port}"))
-        self._app.run()
+        if self._is_cffi:
+            @ffi.callback("void(bool, void*)")
+            def _listen_cb(success, user_data):
+                if success:
+                    logger.info(f"Listening on port {port}")
+                else:
+                    logger.error(f"Failed to listen on port {port}")
+            self._cffi_callbacks.append(_listen_cb)
+            lib.xyra_app_listen(self._app, port, _listen_cb, ffi.NULL)
+            lib.xyra_app_run(self._app)
+        else:
+            self._app.listen(port, lambda config: logger.info(f"Listening on port {port}"))
+            self._app.run()
 
     def listen(
         self,

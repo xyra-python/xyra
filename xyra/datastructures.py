@@ -1,7 +1,31 @@
 import re
 
-from multidict import CIMultiDict
-from .libxyra import has_control_chars
+try:
+    from multidict import CIMultiDict
+except ImportError:
+    # Used only during cffi build before requirements are available
+    class CIMultiDict(dict):
+        pass
+
+try:
+    from . import _libxyra
+    from ._libxyra import lib
+    def has_control_chars(s: str) -> bool:
+        b = s.encode('utf-8')
+        return lib.xyra_has_control_chars(b, len(b))
+except ImportError:
+    def has_control_chars(s: str) -> bool:
+        # Fallback for tests if CFFI fails to load
+        if not s:
+            return False
+        for c in s:
+            if (0 <= ord(c) <= 8) or (10 <= ord(c) <= 31) or ord(c) == 127:
+                return True
+        return False
+
+# SECURITY: Regex to match control characters except HTAB (\t)
+# Matches 0x00-0x08, 0x0A-0x1F, 0x7F
+_CONTROL_CHARS_PATTERN = re.compile(r"[\x00-\x08\x0a-\x1f\x7f]")
 
 # SECURITY: Regex to match control characters except HTAB (\t)
 # Matches 0x00-0x08, 0x0A-0x1F, 0x7F

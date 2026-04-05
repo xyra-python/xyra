@@ -1,7 +1,11 @@
 from collections.abc import Callable
 from typing import Any
 
-from jinja2 import Environment, FileSystemLoader, TemplateNotFound
+try:
+    from jinja2 import Environment, FileSystemLoader, TemplateNotFound
+except ImportError:
+    class TemplateNotFound(Exception):
+        pass
 
 from .exceptions import TemplateException
 from .logger import get_logger

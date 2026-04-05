@@ -153,4 +153,4 @@ Thumbs.db
 
 # Benchmark artifacts
 benchmark/benchmark/*
-benchmark/benchmark/
+benchmark/benchmark/xyra/_libxyra.c
