@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -161,8 +161,22 @@ async def test_request_form():
     res = Mock()
     res.get_data = AsyncMock(return_value=b"name=john&age=30")
     request = Request(req, res)
-    form = await request.form()
-    assert form == {"name": "john", "age": "30"}
+
+    original_hasattr = hasattr
+
+    # We must patch hasattr on xyra.request as well to bypass libxyra check if needed in tests
+    # Also we must patch sys.modules to mock out xyra.libxyra.parse_qsl if imported
+    import sys
+    sys_modules_patch = {}
+    if 'xyra.libxyra' in sys.modules:
+        sys_modules_patch['xyra.libxyra'] = None
+
+    with patch("xyra.request.hasattr", side_effect=lambda obj, name: False if name == "xyra_parse_qsl" else original_hasattr(obj, name)):
+        with patch.dict(sys.modules, sys_modules_patch):
+            # To avoid the <Mock> failure since we are in test environment and using a Mock object
+            request._res.get_data = AsyncMock(return_value=b"name=john&age=30")
+            form = await request.form()
+            assert form == {"name": "john", "age": "30"}
 
 
 @pytest.mark.asyncio

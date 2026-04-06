@@ -1,4 +1,5 @@
 from .application import App
+
 try:
     from .application import App
     from .request import Request

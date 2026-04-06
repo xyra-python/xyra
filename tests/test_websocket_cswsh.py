@@ -1,6 +1,7 @@
-import pytest
-from xyra.request import Request
 from unittest.mock import Mock
+
+from xyra.request import Request
+
 
 def create_request(headers):
     req = Mock()

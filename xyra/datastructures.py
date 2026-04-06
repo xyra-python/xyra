@@ -8,7 +8,7 @@ except ImportError:
         pass
 
 try:
-    from . import _libxyra
+
     from ._libxyra import lib
     def has_control_chars(s: str) -> bool:
         b = s.encode('utf-8')

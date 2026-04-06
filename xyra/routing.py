@@ -1,5 +1,5 @@
 try:
-    from . import _libxyra
+
     from ._libxyra import ffi, lib
 
     def parse_path(path_str):

@@ -95,6 +95,23 @@ class CMakeBuild(build_ext):
             ["cmake", "--build", "."] + build_args, cwd=self.build_temp
         )
 
+        # In xyra/native/CMakeLists.txt it might build libxyra.a
+        import shutil
+
+        for libname in ("libxyra.a", "xyra.lib", "xyra.a"):
+            lib_path = os.path.join(self.build_temp, libname)
+            if os.path.exists(lib_path):
+                shutil.copy(lib_path, "xyra/")
+                # also copy to ext.sourcedir just in case cffi needs it
+                shutil.copy(lib_path, ext.sourcedir)
+
+                # Copy with different names to be completely safe during CFFI linking
+                if libname == "libxyra.a":
+                    shutil.copy(lib_path, "xyra/libxyra_native.a")
+                    shutil.copy(lib_path, os.path.join(ext.sourcedir, "libxyra_native.a"))
+
+                print(f"Copied {lib_path} to xyra/ and {ext.sourcedir}")
+
         # Generate CFFI C code
         sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
         import xyra.native.cffi_build

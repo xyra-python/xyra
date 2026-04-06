@@ -14,7 +14,7 @@ from urllib.parse import unquote
 # We will temporarily mock or ignore libxyra import during build
 # if the extension isn't fully compiled yet.
 try:
-    from . import _libxyra
+
     from ._libxyra import ffi, lib
 except ImportError:
     lib = None
