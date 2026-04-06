@@ -34,9 +34,10 @@ jobs:
       run: |
         mkdir -p xyra/native/build
         cd xyra/native/build
-        cmake -Dpybind11_DIR=$(uv run python3 -c "import pybind11; print(pybind11.get_cmake_dir())") -DPYTHON_EXECUTABLE=$(which python3) ..
+        cmake -DPYTHON_EXECUTABLE=$(which python3) ..
         make
-        cp libxyra.so ../../
+        cp libxyra.a ../../xyra/
+        cp libxyra.a ../
     - name: Run tests
       run: python3 scripts/smart_test.py
     - name: Run ruff check
