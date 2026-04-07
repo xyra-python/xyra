@@ -1,6 +1,4 @@
-import sys
 from robyn import Robyn
-import json
 
 app = Robyn(__file__)
 

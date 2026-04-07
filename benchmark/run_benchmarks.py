@@ -1,7 +1,8 @@
+import os
+import re
 import subprocess
 import time
-import re
-import os
+
 
 def run_benchmark(name, start_cmd, port, path="/"):
     # Kill any process listening on the target port
