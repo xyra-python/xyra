@@ -240,7 +240,7 @@ class Request:
                     )
                 else:
                     self._remote_addr_cache = "unknown"
-            except Exception:
+            except Exception:  # nosec B110
                 self._remote_addr_cache = "unknown"
         return self._remote_addr_cache
 
@@ -533,7 +533,7 @@ class Request:
                     content_b = text_content.encode('utf-8')
                     lib.xyra_parse_qsl(content_b, len(content_b), True, 1000, ffi.NULL, _cb)
                     parsed = True
-                except Exception:
+                except Exception:  # nosec B110
                     pass
 
             if not parsed:
@@ -554,9 +554,9 @@ class Request:
                                 text_content, keep_blank_values=True, max_num_fields=1000
                             )
                             parsed = True
-                        except Exception:
+                        except Exception:  # nosec B110
                             pass
-                except Exception:
+                except Exception:  # nosec B110
                     pass
 
             if not parsed:

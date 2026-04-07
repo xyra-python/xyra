@@ -36,7 +36,7 @@ jobs:
         cd xyra/native/build
         cmake -DPYTHON_EXECUTABLE=$(which python3) ..
         make
-        cp libxyra.a ../../xyra/
+        cp libxyra.a ../../
         cp libxyra.a ../
     - name: Run tests
       run: python3 scripts/smart_test.py
