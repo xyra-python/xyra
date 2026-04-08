@@ -125,7 +125,7 @@ setup(
     author_email="team@xyra.dev",
     description="High Performance Frameworks, Easy to learn and Ready for Production",
     long_description="",
-    ext_modules=[CMakeExtension("xyra.libxyra", sourcedir="xyra/native")],
+    ext_modules=[CMakeExtension("xyra._libxyra", sourcedir="xyra/native")],
     cffi_modules=["xyra/native/cffi_build.py:ffi"],
     cmdclass={"build_ext": CMakeBuild},
     include_package_data=True,
