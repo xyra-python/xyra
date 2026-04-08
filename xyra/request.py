@@ -486,8 +486,11 @@ class Request:
             return json_lib.loads(json_string)
         except Exception as e:
             from .exceptions import bad_request
+            logger = get_logger("xyra")
+            logger.warning(f"Failed to parse JSON: {e}")
             # SECURITY: Raise HTTP 400 Bad Request instead of ValueError to prevent 500 error logs DoS
-            raise bad_request(f"Invalid JSON: {e}") from e
+            # SECURITY: Do not leak exception details to the client
+            raise bad_request("Invalid JSON format") from None
 
     async def form(self) -> dict[str, str]:
         """
