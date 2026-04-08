@@ -448,6 +448,15 @@ async def test_csrf_spa_raw_token():
     assert response._ended is False
 
 
+def test_csrf_mask_token_empty():
+    """Test that masking an empty token falls back to an empty string."""
+    middleware = CSRFMiddleware(secret_key="my_secret")
+    # Empty string should return empty string
+    assert middleware._mask_token("") == ""
+    # None should also return empty string
+    assert middleware._mask_token(None) == ""
+
+
 @pytest.mark.asyncio
 async def test_csrf_exempt_methods_case_sensitivity():
     """Test that exempt methods are case-insensitive."""

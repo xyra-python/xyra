@@ -92,6 +92,9 @@ class CSRFMiddleware:
         Mask a token using a random 32-byte salt (BREACH protection).
         Returns base64(salt + XOR(token, salt)).
         """
+        if not token:
+            return ""
+
         salt = secrets.token_bytes(32)
         token_bytes = token.encode()
         # XOR token with salt (repeating salt if necessary)
