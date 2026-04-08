@@ -190,3 +190,39 @@ def test_gzip_middleware_lowercase_header():
 
     original_send.assert_called_once()
     assert response.headers["Content-Encoding"] == "gzip"
+
+
+def test_gzip_middleware_exact_minimum_size():
+    """Test that data exactly equal to minimum_size is compressed."""
+    middleware = GzipMiddleware(minimum_size=100)
+    request = _setup_request_mock({"Accept-Encoding": "gzip"})
+    response = _setup_response_mock()
+
+    original_send = response.send
+    middleware(request, response)
+
+    # Create data exactly equal to minimum_size
+    data = "x" * 100
+    response.send(data)
+
+    original_send.assert_called_once()
+    compressed_data = original_send.call_args[0][0]
+    assert isinstance(compressed_data, bytes)
+    assert response.headers["Content-Encoding"] == "gzip"
+
+
+def test_gzip_middleware_just_below_minimum_size():
+    """Test that data just below minimum_size is not compressed."""
+    middleware = GzipMiddleware(minimum_size=100)
+    request = _setup_request_mock({"Accept-Encoding": "gzip"})
+    response = _setup_response_mock()
+
+    original_send = response.send
+    middleware(request, response)
+
+    # Create data one byte less than minimum_size
+    data = "x" * 99
+    response.send(data)
+
+    original_send.assert_called_once_with(data)
+    assert "Content-Encoding" not in response.headers
