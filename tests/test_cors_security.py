@@ -86,3 +86,21 @@ def test_cors_wildcard_without_credentials():
     assert res.headers_dict.get("Access-Control-Allow-Origin") == "*"
     # Credentials should not be true (default is False, but we didn't check header presence)
     assert res.headers_dict.get("Access-Control-Allow-Credentials") is None
+
+def test_cors_insecure_reflection_mitigation():
+    # Misconfigured allowed_origins with an object that matches everything
+    class AllowAll:
+        def __eq__(self, other):
+            return True
+        def __str__(self):
+            return "AllowAllObject"
+
+    middleware = CorsMiddleware(allowed_origins=[AllowAll()], allow_credentials=True)
+
+    req = MockRequest(headers={"origin": "http://evil.com"})
+    res = MockResponse()
+
+    middleware(req, res)
+
+    # Make sure it didn't reflect the arbitrary malicious origin string 'http://evil.com'
+    assert res.headers_dict.get("Access-Control-Allow-Origin") == "AllowAllObject"
