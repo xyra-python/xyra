@@ -349,8 +349,8 @@ class App:
                     lambda: os.path.join(os.path.realpath(directory), "")
                 )
                 # Normalize file_path and join securely
-                import posixpath
                 import ntpath
+                import posixpath
 
                 # First, normalize Windows slashes to POSIX slashes to prevent traversal
                 # techniques like `..\` on non-Windows platforms.
@@ -771,6 +771,9 @@ class App:
 
         self.get(swagger_json_path, get_swagger_json)
 
+        # SECURITY: Escape HTML characters to prevent XSS when interpolated in inline script tag
+        safe_swagger_url = json.dumps(swagger_json_path).replace('<', '\\u003c')
+
         swagger_ui_html = f"""
         <!DOCTYPE html>
         <html lang="en">
@@ -791,7 +794,7 @@ class App:
             <script>
             window.onload = function() {{
                 const ui = SwaggerUIBundle({{
-                    url: {json.dumps(swagger_json_path)},
+                    url: {safe_swagger_url},
                     dom_id: '#swagger-ui',
                     deepLinking: true,
                     presets: [
