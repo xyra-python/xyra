@@ -126,22 +126,15 @@ class ProxyHeadersMiddleware:
             # SECURITY: If trusting all, we rely on trusted_proxy_count to limit recursion.
             # Without this, we would trust every IP in the chain, allowing spoofing.
             # We trust 'remote_addr' (the immediate proxy) plus (trusted_proxy_count - 1) proxies in the header.
-            hops = 0
             # trusted_proxy_count is at least 1.
-            # max_hops = trusted_proxy_count - 1
             max_hops = self.trusted_proxy_count - 1  # type: ignore
 
-            for i in range(len(ips) - 1, -1, -1):
-                if hops < max_hops:
-                    hops += 1
-                    continue
-                else:
-                    client_ip = ips[i]
-                    client_index = i
-                    break
+            target_index = len(ips) - 1 - max_hops
+            if target_index >= 0:
+                client_ip = ips[target_index]
+                client_index = target_index
             else:
-                # If we exhausted the list without finding an untrusted IP (within count limits),
-                # it means the chain is shorter than expected or fully trusted.
+                # If the target_index is negative, the chain is shorter than expected.
                 # We default to the first IP (originator).
                 if ips:
                     client_ip = ips[0]
@@ -149,7 +142,7 @@ class ProxyHeadersMiddleware:
         else:
             # Standard logic using IP whitelist
             # Iterate right to left
-            for i in range(len(ips) - 1, -1, -1):
+            for i in reversed(range(len(ips))):
                 if self._is_trusted(ips[i]):
                     continue
                 else:
