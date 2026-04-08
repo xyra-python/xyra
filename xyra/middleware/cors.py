@@ -95,8 +95,15 @@ class CorsMiddleware:
                 response.header("Vary", "Origin")
 
             if origin and self._is_origin_allowed(origin):
-                # Reflect the origin only if it's explicitly allowed
-                response.header("Access-Control-Allow-Origin", origin)
+                # Reflect the exact configured origin, mitigating reflection of user-controlled strings
+                # if allowed_origins is populated with loosely matched dynamic objects
+                matched_origin = origin
+                try:
+                    if hasattr(self.allowed_origins, "index"):
+                        matched_origin = str(self.allowed_origins[self.allowed_origins.index(origin)])
+                except ValueError:
+                    pass
+                response.header("Access-Control-Allow-Origin", matched_origin)
                 is_allowed = True
 
         # Set other CORS headers ONLY if origin is allowed
