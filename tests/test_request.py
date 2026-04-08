@@ -283,7 +283,10 @@ def test_request_headers_fallback():
     req.for_each_header.assert_called_once()
 
 
-def test_request_query_params_fallback():
+@patch("sys.modules")
+@patch("xyra.request.lib", new=None)
+@patch("xyra.request.ffi", new=None)
+def test_request_query_params_fallback(mock_sys_modules):
     """Test fallback when get_queries is not available."""
     # Use spec to ensure get_queries is not available
     req = Mock(spec=["get_query"])

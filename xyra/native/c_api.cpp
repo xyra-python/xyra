@@ -341,6 +341,12 @@ size_t xyra_req_get_query(xyra_request_t* req, const char* key, const char** out
     return val.length();
 }
 
+size_t xyra_req_get_full_query(xyra_request_t* req, const char** out_value) {
+    std::string_view val = req->req->getQuery();
+    *out_value = val.data();
+    return val.length();
+}
+
 void xyra_req_get_headers(xyra_request_t* req, void* user_data, void (*cb)(void*, const char*, size_t, const char*, size_t)) {
     int count = 0;
     for (auto [key, value] : *req->req) {
