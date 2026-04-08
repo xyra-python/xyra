@@ -12,16 +12,16 @@ A performance comparison between FastAPI, Robyn, Socketify, and Xyra.
 
 | Framework | Requests/sec | Avg Latency |
 |-----------|--------------|-------------|
-| FastAPI | 1,963.01 | 64.80ms |
-| Robyn | 11,546.91 | 8.63ms |
-| Socketify | 16,523.74 | 6.04ms |
-| Xyra | 2,377.38 | 449.78us |
+| FastAPI | 1,987.32 | 76.30ms |
+| Robyn | 10,838.03 | 9.18ms |
+| Socketify | 14,015.36 | 7.11ms |
+| Xyra | 20,953.00 | 4.75ms |
 
 ## Results (Plain Text)
 
 | Framework | Requests/sec | Avg Latency |
 |-----------|--------------|-------------|
-| FastAPI | 2,181.59 | 61.02ms |
-| Robyn | 11,264.70 | 8.84ms |
-| Socketify | 20,795.48 | 4.79ms |
-| Xyra | 7.08 | 12.33ms |
+| FastAPI | 2,100.50 | 61.79ms |
+| Robyn | 11,352.08 | 8.79ms |
+| Socketify | 19,870.91 | 5.03ms |
+| Xyra | 25,174.21 | 3.96ms |
