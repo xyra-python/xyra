@@ -543,22 +543,11 @@ class Request:
                 # The tests mock parse_qsl in xyra.request, so we need to fallback correctly
                 # if we hit a mocked exception
                 try:
-                    import sys
-                    if 'xyra.libxyra' in sys.modules:
-                        from .libxyra import parse_qsl as cpp_parse_qsl
-                        parsed_pairs = cpp_parse_qsl(
-                            text_content, keep_blank_values=True, max_num_fields=1000
-                        )
-                        parsed = True
-                    else:
-                        try:
-                            from .libxyra import parse_qsl as cpp_parse_qsl
-                            parsed_pairs = cpp_parse_qsl(
-                                text_content, keep_blank_values=True, max_num_fields=1000
-                            )
-                            parsed = True
-                        except Exception:  # nosec B110
-                            pass
+                    from .libxyra import parse_qsl as cpp_parse_qsl
+                    parsed_pairs = cpp_parse_qsl(
+                        text_content, keep_blank_values=True, max_num_fields=1000
+                    )
+                    parsed = True
                 except Exception:  # nosec B110
                     pass
 
