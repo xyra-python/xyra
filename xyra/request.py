@@ -279,13 +279,6 @@ class Request:
         """
         if self._query_cache is None:
             if hasattr(self._req, "get_query"):
-                # uWS / pybind get_query() with no args returns the whole query string.
-                # In CFFI, we pass empty string to get the whole thing?
-                # Actually lib.xyra_req_get_query expects a key, returning specific value.
-                # Oh wait, uWebSockets HttpRequest::getQuery() without args returns full query.
-                pass # need to fix
-
-            if hasattr(self._req, "get_query"):
                 try:
                     self._query_cache = self._req.get_query()
                 except TypeError:
@@ -378,6 +371,32 @@ class Request:
         if length > 0:
             return ffi.string(out_ptr[0], length).decode('utf-8')
         return None
+
+    def get_query(self, key: str, default: str | None = None) -> str | None:
+        """
+        Get a specific query parameter value by key.
+        """
+        if self._query_params_cache is not None:
+            values = self._query_params_cache.get(key)
+            if values:
+                return values[0]
+            return default
+
+        if hasattr(self._req, "get_query"):
+            try:
+                value = self._req.get_query(key)
+                return value if value else default
+            except TypeError:
+                pass
+
+        if ffi:
+            out_ptr = ffi.new("char**")
+            c_key = key.encode('utf-8')
+            length = lib.xyra_req_get_query(self._req, c_key, out_ptr)
+            if length > 0:
+                return ffi.string(out_ptr[0], length).decode('utf-8')
+
+        return default
 
     def get_header(self, name: str, default: str | None = None) -> str | None:
         """
