@@ -98,7 +98,7 @@ class CMakeBuild(build_ext):
         # In xyra/native/CMakeLists.txt it might build libxyra.a
         import shutil
 
-        for libname in ("libxyra.a", "xyra.lib", "xyra.a"):
+        for libname in ("libxyra.a", "xyra.lib", "libxyra.lib", "xyra.a"):
             lib_path = os.path.join(self.build_temp, libname)
             if os.path.exists(lib_path):
                 shutil.copy(lib_path, "xyra/")
@@ -109,6 +109,13 @@ class CMakeBuild(build_ext):
                 if libname == "libxyra.a":
                     shutil.copy(lib_path, "xyra/libxyra_native.a")
                     shutil.copy(lib_path, os.path.join(ext.sourcedir, "libxyra_native.a"))
+                elif libname in ("xyra.lib", "libxyra.lib"):
+                    # CFFI expects xyra.lib and xyra_native.lib on Windows
+                    if libname == "libxyra.lib":
+                        shutil.copy(lib_path, "xyra/xyra.lib")
+                        shutil.copy(lib_path, os.path.join(ext.sourcedir, "xyra.lib"))
+                    shutil.copy(lib_path, "xyra/xyra_native.lib")
+                    shutil.copy(lib_path, os.path.join(ext.sourcedir, "xyra_native.lib"))
 
                 print(f"Copied {lib_path} to xyra/ and {ext.sourcedir}")
 
