@@ -3,6 +3,7 @@ import inspect
 import json
 import mimetypes
 import os
+import re
 import socket
 import threading
 import time
@@ -27,6 +28,12 @@ from .routing import Router
 from .swagger import generate_swagger
 from .templating import Templating
 from .websockets import WebSocket
+
+# SECURITY: Pre-compile regex for dotfile validation in static files
+# Blocks access to hidden files/directories (dotfiles), except .well-known
+DOTFILE_RE = re.compile(
+    rf"(^|{re.escape(os.sep)})\.(?!well-known({re.escape(os.sep)}|$))"
+)
 
 
 class App:
@@ -367,10 +374,9 @@ class App:
 
                 # SECURITY: Block access to hidden files/directories (dotfiles), except .well-known
                 rel_path = os.path.relpath(abs_path, abs_directory)
-                for part in rel_path.split(os.sep):
-                    if part.startswith(".") and part != ".well-known":
-                        res.status(403).text("Forbidden")
-                        return
+                if DOTFILE_RE.search(rel_path):
+                    res.status(403).text("Forbidden")
+                    return
             except Exception:
                 res.status(400).text("Bad Request")
                 return
