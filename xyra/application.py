@@ -828,7 +828,7 @@ class App:
                 env = os.environ.copy()
                 env["XYRA_RELOAD_CHILD"] = "1"
                 current_proc = subprocess.Popen(
-                    [sys.executable] + sys.argv, env=env
+                    [sys.executable, "-E"] + sys.argv, env=env
                 )  # nosec B603
 
             # Watch for file changes in current directory
