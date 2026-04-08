@@ -1,4 +1,23 @@
-from xyra.datastructures import Headers, QueryParams
+from xyra.datastructures import Headers, QueryParams, has_control_chars
+
+
+def test_has_control_chars():
+    # Empty string
+    assert has_control_chars("") is False
+
+    # Normal strings without control characters
+    assert has_control_chars("hello") is False
+    assert has_control_chars("application/json") is False
+    assert has_control_chars("some value with spaces") is False
+
+    # Control characters
+    assert has_control_chars("hello\nworld") is True  # LF (ord 10)
+    assert has_control_chars("hello\rworld") is True  # CR (ord 13)
+    assert has_control_chars("hello\x00world") is True  # NUL (ord 0)
+    assert has_control_chars("hello\x1fworld") is True  # US (ord 31)
+    assert has_control_chars("hello\x7fworld") is True  # DEL (ord 127)
+    assert has_control_chars("\x08") is True  # BS (ord 8)
+    assert has_control_chars("\x0b") is True  # VT (ord 11)
 
 
 def test_headers_creation():
