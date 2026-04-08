@@ -572,6 +572,25 @@ class Response:
             ffi = None
             lib = None
 
+        def _handle_max_body_size():
+            aborted[0] = True
+            # Abort immediately to stop memory growth
+            if hasattr(self._res, "close"):
+                self._res.close()
+            elif ffi:
+                lib.xyra_res_close(self._res)
+
+            # Signal error to the future (thread-safe)
+            def fail():
+                if self._body_future and not self._body_future.done():
+                    self._body_future.set_exception(
+                        ValueError(
+                            f"Request body too large (max {MAX_BODY_SIZE} bytes)"
+                        )
+                    )
+
+            loop.call_soon_threadsafe(fail)
+
         if ffi:
             # Use closure capturing correctly for CFFI
             @ffi.callback("void(const char*, size_t, bool, void*)")
@@ -585,23 +604,7 @@ class Response:
                 received_bytes[0] += chunk_len
 
                 if received_bytes[0] > MAX_BODY_SIZE:
-                    aborted[0] = True
-                    # Abort immediately to stop memory growth
-                    if hasattr(self._res, "close"):
-                        self._res.close()
-                    else:
-                        lib.xyra_res_close(self._res)
-
-                    # Signal error to the future (thread-safe)
-                    def fail():
-                        if self._body_future and not self._body_future.done():
-                            self._body_future.set_exception(
-                                ValueError(
-                                    f"Request body too large (max {MAX_BODY_SIZE} bytes)"
-                                )
-                            )
-
-                    loop.call_soon_threadsafe(fail)
+                    _handle_max_body_size()
                     return
 
                 def resolve():
@@ -644,23 +647,7 @@ class Response:
             received_bytes[0] += len(chunk)
 
             if received_bytes[0] > MAX_BODY_SIZE:
-                aborted[0] = True
-                # Abort immediately to stop memory growth
-                if hasattr(self._res, "close"):
-                    self._res.close()
-                elif ffi:
-                    lib.xyra_res_close(self._res)
-
-                # Signal error to the future (thread-safe)
-                def fail():
-                    if self._body_future and not self._body_future.done():
-                        self._body_future.set_exception(
-                            ValueError(
-                                f"Request body too large (max {MAX_BODY_SIZE} bytes)"
-                            )
-                        )
-
-                loop.call_soon_threadsafe(fail)
+                _handle_max_body_size()
                 return
 
             def resolve():
