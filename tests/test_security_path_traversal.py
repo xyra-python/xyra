@@ -159,46 +159,120 @@ async def test_path_traversal_blocked():
         assert route is not None, "Static file route not found"
         handler = route["handler"]
 
-        # Mock Native Request
-        mock_native_req = Mock()
-        mock_native_req.get_method.return_value = "GET"
-        mock_native_req.get_url.return_value = "/static/../secret.txt"
-        # In the new implementation, we use get_parameter(0) for the wildcard
-        mock_native_req.get_parameter.return_value = "../secret.txt"
-        mock_native_req.for_each_header = Mock(side_effect=lambda func: None)
+        payloads = [
+            "../secret.txt",
+            "..\\secret.txt",
+            "%2e%2e%2fsecret.txt",
+            "..%2fsecret.txt",
+            "....//secret.txt",
+            "....\\\\secret.txt",
+        ]
 
-        # Mock Native Response
-        mock_native_res = Mock()
-        mock_native_res.write_status = Mock()
-        mock_native_res.write_header = Mock()
-        mock_native_res.end = Mock()
+        for payload in payloads:
+            # Mock Native Request
+            mock_native_req = Mock()
+            mock_native_req.get_method.return_value = "GET"
+            mock_native_req.get_url.return_value = f"/static/{payload}"
+            # In the new implementation, we use get_parameter(0) for the wildcard
+            mock_native_req.get_parameter.return_value = payload
+            mock_native_req.for_each_header = Mock(side_effect=lambda func: None)
 
-        # Create Xyra Response wrapper
-        res = Response(mock_native_res)
-        # Create Request using the wrapper as _res (to match current implementation)
-        req = Request(mock_native_req, res)
+            # Mock Native Response
+            mock_native_res = Mock()
+            mock_native_res.write_status = Mock()
+            mock_native_res.write_header = Mock()
+            mock_native_res.end = Mock()
 
-        # Run handler
-        await handler(req, res)
+            # Create Xyra Response wrapper
+            res = Response(mock_native_res)
+            # Create Request using the wrapper as _res (to match current implementation)
+            req = Request(mock_native_req, res)
 
-        # Check what was sent
-        args = mock_native_res.end.call_args
-        sent_data = b""
-        if args:
-            sent_data = args[0][0]
-            if isinstance(sent_data, str):
-                sent_data = sent_data.encode()
+            # Run handler
+            await handler(req, res)
 
-        # Expectation: Should NOT return "SECRET". Should return 404 or similar.
-        assert b"SECRET" not in sent_data, (
-            "Path Traversal Vulnerability: Secret file content leaked!"
-        )
+            # Check what was sent
+            args = mock_native_res.end.call_args
+            sent_data = b""
+            if args:
+                sent_data = args[0][0]
+                if isinstance(sent_data, str):
+                    sent_data = sent_data.encode()
 
-        # Verify status code is 404 or 403
-        status_args = mock_native_res.write_status.call_args
-        assert status_args is not None, "write_status was never called"
-        status = status_args[0][0]
-        assert status in ["404", "403"], f"Expected 404/403, got {status}"
+            # Expectation: Should NOT return "SECRET". Should return 404 or similar.
+            assert b"SECRET" not in sent_data, (
+                f"Path Traversal Vulnerability: Secret file content leaked with payload {payload}!"
+            )
+
+            # Verify status code is 404 or 403
+            status_args = mock_native_res.write_status.call_args
+            assert status_args is not None, "write_status was never called"
+            status = status_args[0][0]
+            assert status in ["404", "403"], f"Expected 404/403 for {payload}, got {status}"
+
+    finally:
+        shutil.rmtree(temp_dir)
+
+@pytest.mark.asyncio
+async def test_path_traversal_null_byte_blocked():
+    """Test that null byte injection attempts are blocked in static file serving."""
+    # Setup directories
+    temp_dir = tempfile.mkdtemp()
+    try:
+        static_dir = os.path.join(temp_dir, "static")
+        os.makedirs(static_dir)
+
+        # Create safe file
+        with open(os.path.join(static_dir, "index.html"), "w") as f:
+            f.write("SAFE")
+
+        app = App()
+        app.static_files("/static", static_dir)
+
+        # Find the route handler
+        route = next(r for r in app.router.routes if r["path"].endswith("*"))
+        handler = route["handler"]
+
+        payloads = [
+            "\x00../secret.txt",
+            "index.html\x00",
+        ]
+
+        for payload in payloads:
+            # Mock Native Request
+            mock_native_req = Mock()
+            mock_native_req.get_method.return_value = "GET"
+            mock_native_req.get_url.return_value = f"/static/{payload}"
+            mock_native_req.get_parameter.return_value = payload
+            mock_native_req.for_each_header = Mock(side_effect=lambda func: None)
+
+            # Mock Native Response
+            mock_native_res = Mock()
+            mock_native_res.write_status = Mock()
+            mock_native_res.write_header = Mock()
+            mock_native_res.end = Mock()
+
+            # Create Xyra Response wrapper
+            res = Response(mock_native_res)
+            # Create Request using the wrapper as _res (to match current implementation)
+            req = Request(mock_native_req, res)
+
+            # Run handler
+            await handler(req, res)
+
+            # Check what was sent
+            args = mock_native_res.end.call_args
+            sent_data = b""
+            if args:
+                sent_data = args[0][0]
+                if isinstance(sent_data, str):
+                    sent_data = sent_data.encode()
+
+            # Verify status code is 400 Bad Request
+            status_args = mock_native_res.write_status.call_args
+            assert status_args is not None, "write_status was never called"
+            status = status_args[0][0]
+            assert status == "400", f"Expected 400 Bad Request for {payload}, got {status}"
 
     finally:
         shutil.rmtree(temp_dir)
