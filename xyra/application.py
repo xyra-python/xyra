@@ -569,9 +569,9 @@ class App:
                         res.end('{"error": "Internal Server Error"}')
                 except Exception:
                     # FIX BANDIT B110: Avoid silent pass. Log the failure to debug.
-                    # If we can't even send the error response, just close.
                     req_logger.debug(
-                        "Failed to send 500 error response (connection likely closed)"
+                        "Failed to send 500 Internal Server Error response",
+                        exc_info=True,
                     )
                 return
 
