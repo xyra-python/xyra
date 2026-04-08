@@ -329,6 +329,11 @@ class App:
             # and to ensure path traversal checks apply to the fully-decoded path.
             file_path = unquote(file_path)
 
+            # SECURITY: Prevent Null Byte Injection
+            if "\x00" in file_path:
+                res.status(400).text("Bad Request")
+                return
+
             # SECURITY: Prevent Path Traversal
             try:
                 # Ensure directory path ends with a separator to prevent partial name match
@@ -337,13 +342,20 @@ class App:
                     lambda: os.path.join(os.path.realpath(directory), "")
                 )
                 # Normalize file_path and join securely
-                # SECURITY: Use ntpath to strip Windows drive letters and both slash types
-                # to prevent absolute path injection (e.g., C:\Windows\System32\cmd.exe)
+                import posixpath
                 import ntpath
 
-                stripped_path = ntpath.splitdrive(file_path.lstrip("/\\"))[1].lstrip(
-                    "/\\"
-                )
+                # First, normalize Windows slashes to POSIX slashes to prevent traversal
+                # techniques like `..\` on non-Windows platforms.
+                normalized_path = file_path.replace("\\", "/")
+
+                # Remove Windows drive letters to prevent absolute path injection (e.g. C:)
+                stripped_path = ntpath.splitdrive(normalized_path.lstrip("/"))[1]
+
+                # Strip leading slashes to prevent absolute path interpretation,
+                # then use posixpath.normpath to resolve `.` and `..` consistently.
+                stripped_path = posixpath.normpath(stripped_path.lstrip("/")).lstrip("/")
+
                 abs_path = await asyncio.to_thread(
                     lambda: os.path.realpath(os.path.join(abs_directory, stripped_path))
                 )
