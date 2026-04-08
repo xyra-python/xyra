@@ -305,6 +305,17 @@ def test_proxy_headers_valid_minus_one_case():
     assert request._host_cache == "client.com"
 
 
+def test_proxy_headers_parsing_exception():
+    # Test the try-except block when parsing X-Forwarded-For fails
+    # E.g., when the header is an integer instead of a string, which raises AttributeError on rsplit
+    request, response = create_request("10.0.0.1", {"X-Forwarded-For": 12345})
+    mw = ProxyHeadersMiddleware(["10.0.0.1"])
+    mw(request, response)
+
+    # It should fail safely, return early, and keep the remote_addr unchanged
+    assert request.remote_addr == "10.0.0.1"
+
+
 def test_proxy_headers_host_with_port():
     request, response = create_request(
         "10.0.0.1",
