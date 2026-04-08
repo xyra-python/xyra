@@ -176,6 +176,9 @@ def generate_swagger(
     Returns:
         OpenAPI specification dictionary
     """
+    if getattr(app, "_swagger_cache", None) is not None:
+        return app._swagger_cache
+
     # Base OpenAPI structure
     swagger_spec = {
         "openapi": "3.0.0",
@@ -257,6 +260,9 @@ def generate_swagger(
     for key, value in kwargs.items():
         if key not in swagger_spec:
             swagger_spec[key] = value
+
+    # Update the cache
+    app._swagger_cache = swagger_spec
 
     return swagger_spec
 
