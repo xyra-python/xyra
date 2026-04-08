@@ -1891,6 +1891,59 @@ _cffi_f_xyra_parse_qsl(PyObject *self, PyObject *args)
 #  define _cffi_f_xyra_parse_qsl _cffi_d_xyra_parse_qsl
 #endif
 
+static size_t _cffi_d_xyra_req_get_full_query(xyra_request_t * x0, char const * * x1)
+{
+  return xyra_req_get_full_query(x0, x1);
+}
+#ifndef PYPY_VERSION
+static PyObject *
+_cffi_f_xyra_req_get_full_query(PyObject *self, PyObject *args)
+{
+  xyra_request_t * x0;
+  char const * * x1;
+  Py_ssize_t datasize;
+  struct _cffi_freeme_s *large_args_free = NULL;
+  size_t result;
+  PyObject *pyresult;
+  PyObject *arg0;
+  PyObject *arg1;
+
+  if (!PyArg_UnpackTuple(args, "xyra_req_get_full_query", 2, 2, &arg0, &arg1))
+    return NULL;
+
+  datasize = _cffi_prepare_pointer_call_argument(
+      _cffi_type(5), arg0, (char **)&x0);
+  if (datasize != 0) {
+    x0 = ((size_t)datasize) <= 640 ? (xyra_request_t *)alloca((size_t)datasize) : NULL;
+    if (_cffi_convert_array_argument(_cffi_type(5), arg0, (char **)&x0,
+            datasize, &large_args_free) < 0)
+      return NULL;
+  }
+
+  datasize = _cffi_prepare_pointer_call_argument(
+      _cffi_type(14), arg1, (char **)&x1);
+  if (datasize != 0) {
+    x1 = ((size_t)datasize) <= 640 ? (char const * *)alloca((size_t)datasize) : NULL;
+    if (_cffi_convert_array_argument(_cffi_type(14), arg1, (char **)&x1,
+            datasize, &large_args_free) < 0)
+      return NULL;
+  }
+
+  Py_BEGIN_ALLOW_THREADS
+  _cffi_restore_errno();
+  { result = xyra_req_get_full_query(x0, x1); }
+  _cffi_save_errno();
+  Py_END_ALLOW_THREADS
+
+  (void)self; /* unused */
+  pyresult = _cffi_from_c_int(result, size_t);
+  if (large_args_free != NULL) _cffi_free_array_arguments(large_args_free);
+  return pyresult;
+}
+#else
+#  define _cffi_f_xyra_req_get_full_query _cffi_d_xyra_req_get_full_query
+#endif
+
 static size_t _cffi_d_xyra_req_get_header(xyra_request_t * x0, char const * x1, char const * * x2)
 {
   return xyra_req_get_header(x0, x1, x2);
@@ -2433,6 +2486,177 @@ _cffi_f_xyra_res_end(PyObject *self, PyObject *args)
 }
 #else
 #  define _cffi_f_xyra_res_end _cffi_d_xyra_res_end
+#endif
+
+static void _cffi_d_xyra_res_end_fast(xyra_response_t * x0, char const * x1, size_t x2)
+{
+  xyra_res_end_fast(x0, x1, x2);
+}
+#ifndef PYPY_VERSION
+static PyObject *
+_cffi_f_xyra_res_end_fast(PyObject *self, PyObject *args)
+{
+  xyra_response_t * x0;
+  char const * x1;
+  size_t x2;
+  Py_ssize_t datasize;
+  struct _cffi_freeme_s *large_args_free = NULL;
+  PyObject *arg0;
+  PyObject *arg1;
+  PyObject *arg2;
+
+  if (!PyArg_UnpackTuple(args, "xyra_res_end_fast", 3, 3, &arg0, &arg1, &arg2))
+    return NULL;
+
+  datasize = _cffi_prepare_pointer_call_argument(
+      _cffi_type(8), arg0, (char **)&x0);
+  if (datasize != 0) {
+    x0 = ((size_t)datasize) <= 640 ? (xyra_response_t *)alloca((size_t)datasize) : NULL;
+    if (_cffi_convert_array_argument(_cffi_type(8), arg0, (char **)&x0,
+            datasize, &large_args_free) < 0)
+      return NULL;
+  }
+
+  datasize = _cffi_prepare_pointer_call_argument(
+      _cffi_type(1), arg1, (char **)&x1);
+  if (datasize != 0) {
+    x1 = ((size_t)datasize) <= 640 ? (char const *)alloca((size_t)datasize) : NULL;
+    if (_cffi_convert_array_argument(_cffi_type(1), arg1, (char **)&x1,
+            datasize, &large_args_free) < 0)
+      return NULL;
+  }
+
+  x2 = _cffi_to_c_int(arg2, size_t);
+  if (x2 == (size_t)-1 && PyErr_Occurred())
+    return NULL;
+
+  Py_BEGIN_ALLOW_THREADS
+  _cffi_restore_errno();
+  { xyra_res_end_fast(x0, x1, x2); }
+  _cffi_save_errno();
+  Py_END_ALLOW_THREADS
+
+  (void)self; /* unused */
+  if (large_args_free != NULL) _cffi_free_array_arguments(large_args_free);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+#else
+#  define _cffi_f_xyra_res_end_fast _cffi_d_xyra_res_end_fast
+#endif
+
+static void _cffi_d_xyra_res_end_json(xyra_response_t * x0, char const * x1, size_t x2)
+{
+  xyra_res_end_json(x0, x1, x2);
+}
+#ifndef PYPY_VERSION
+static PyObject *
+_cffi_f_xyra_res_end_json(PyObject *self, PyObject *args)
+{
+  xyra_response_t * x0;
+  char const * x1;
+  size_t x2;
+  Py_ssize_t datasize;
+  struct _cffi_freeme_s *large_args_free = NULL;
+  PyObject *arg0;
+  PyObject *arg1;
+  PyObject *arg2;
+
+  if (!PyArg_UnpackTuple(args, "xyra_res_end_json", 3, 3, &arg0, &arg1, &arg2))
+    return NULL;
+
+  datasize = _cffi_prepare_pointer_call_argument(
+      _cffi_type(8), arg0, (char **)&x0);
+  if (datasize != 0) {
+    x0 = ((size_t)datasize) <= 640 ? (xyra_response_t *)alloca((size_t)datasize) : NULL;
+    if (_cffi_convert_array_argument(_cffi_type(8), arg0, (char **)&x0,
+            datasize, &large_args_free) < 0)
+      return NULL;
+  }
+
+  datasize = _cffi_prepare_pointer_call_argument(
+      _cffi_type(1), arg1, (char **)&x1);
+  if (datasize != 0) {
+    x1 = ((size_t)datasize) <= 640 ? (char const *)alloca((size_t)datasize) : NULL;
+    if (_cffi_convert_array_argument(_cffi_type(1), arg1, (char **)&x1,
+            datasize, &large_args_free) < 0)
+      return NULL;
+  }
+
+  x2 = _cffi_to_c_int(arg2, size_t);
+  if (x2 == (size_t)-1 && PyErr_Occurred())
+    return NULL;
+
+  Py_BEGIN_ALLOW_THREADS
+  _cffi_restore_errno();
+  { xyra_res_end_json(x0, x1, x2); }
+  _cffi_save_errno();
+  Py_END_ALLOW_THREADS
+
+  (void)self; /* unused */
+  if (large_args_free != NULL) _cffi_free_array_arguments(large_args_free);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+#else
+#  define _cffi_f_xyra_res_end_json _cffi_d_xyra_res_end_json
+#endif
+
+static void _cffi_d_xyra_res_end_text(xyra_response_t * x0, char const * x1, size_t x2)
+{
+  xyra_res_end_text(x0, x1, x2);
+}
+#ifndef PYPY_VERSION
+static PyObject *
+_cffi_f_xyra_res_end_text(PyObject *self, PyObject *args)
+{
+  xyra_response_t * x0;
+  char const * x1;
+  size_t x2;
+  Py_ssize_t datasize;
+  struct _cffi_freeme_s *large_args_free = NULL;
+  PyObject *arg0;
+  PyObject *arg1;
+  PyObject *arg2;
+
+  if (!PyArg_UnpackTuple(args, "xyra_res_end_text", 3, 3, &arg0, &arg1, &arg2))
+    return NULL;
+
+  datasize = _cffi_prepare_pointer_call_argument(
+      _cffi_type(8), arg0, (char **)&x0);
+  if (datasize != 0) {
+    x0 = ((size_t)datasize) <= 640 ? (xyra_response_t *)alloca((size_t)datasize) : NULL;
+    if (_cffi_convert_array_argument(_cffi_type(8), arg0, (char **)&x0,
+            datasize, &large_args_free) < 0)
+      return NULL;
+  }
+
+  datasize = _cffi_prepare_pointer_call_argument(
+      _cffi_type(1), arg1, (char **)&x1);
+  if (datasize != 0) {
+    x1 = ((size_t)datasize) <= 640 ? (char const *)alloca((size_t)datasize) : NULL;
+    if (_cffi_convert_array_argument(_cffi_type(1), arg1, (char **)&x1,
+            datasize, &large_args_free) < 0)
+      return NULL;
+  }
+
+  x2 = _cffi_to_c_int(arg2, size_t);
+  if (x2 == (size_t)-1 && PyErr_Occurred())
+    return NULL;
+
+  Py_BEGIN_ALLOW_THREADS
+  _cffi_restore_errno();
+  { xyra_res_end_text(x0, x1, x2); }
+  _cffi_save_errno();
+  Py_END_ALLOW_THREADS
+
+  (void)self; /* unused */
+  if (large_args_free != NULL) _cffi_free_array_arguments(large_args_free);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+#else
+#  define _cffi_f_xyra_res_end_text _cffi_d_xyra_res_end_text
 #endif
 
 static size_t _cffi_d_xyra_res_get_remote_address_bytes(xyra_response_t * x0, char const * * x1)
@@ -3103,6 +3327,7 @@ static const struct _cffi_global_s _cffi_globals[] = {
   { "xyra_has_control_chars", (void *)_cffi_f_xyra_has_control_chars, _CFFI_OP(_CFFI_OP_CPYTHON_BLTN_V, 0), (void *)_cffi_d_xyra_has_control_chars },
   { "xyra_parse_path", (void *)_cffi_f_xyra_parse_path, _CFFI_OP(_CFFI_OP_CPYTHON_BLTN_V, 66), (void *)_cffi_d_xyra_parse_path },
   { "xyra_parse_qsl", (void *)_cffi_f_xyra_parse_qsl, _CFFI_OP(_CFFI_OP_CPYTHON_BLTN_V, 52), (void *)_cffi_d_xyra_parse_qsl },
+  { "xyra_req_get_full_query", (void *)_cffi_f_xyra_req_get_full_query, _CFFI_OP(_CFFI_OP_CPYTHON_BLTN_V, 12), (void *)_cffi_d_xyra_req_get_full_query },
   { "xyra_req_get_header", (void *)_cffi_f_xyra_req_get_header, _CFFI_OP(_CFFI_OP_CPYTHON_BLTN_V, 16), (void *)_cffi_d_xyra_req_get_header },
   { "xyra_req_get_headers", (void *)_cffi_f_xyra_req_get_headers, _CFFI_OP(_CFFI_OP_CPYTHON_BLTN_V, 106), (void *)_cffi_d_xyra_req_get_headers },
   { "xyra_req_get_headers_truncated", (void *)_cffi_f_xyra_req_get_headers_truncated, _CFFI_OP(_CFFI_OP_CPYTHON_BLTN_O, 4), (void *)_cffi_d_xyra_req_get_headers_truncated },
@@ -3113,6 +3338,9 @@ static const struct _cffi_global_s _cffi_globals[] = {
   { "xyra_req_get_url", (void *)_cffi_f_xyra_req_get_url, _CFFI_OP(_CFFI_OP_CPYTHON_BLTN_V, 12), (void *)_cffi_d_xyra_req_get_url },
   { "xyra_res_close", (void *)_cffi_f_xyra_res_close, _CFFI_OP(_CFFI_OP_CPYTHON_BLTN_O, 111), (void *)_cffi_d_xyra_res_close },
   { "xyra_res_end", (void *)_cffi_f_xyra_res_end, _CFFI_OP(_CFFI_OP_CPYTHON_BLTN_V, 119), (void *)_cffi_d_xyra_res_end },
+  { "xyra_res_end_fast", (void *)_cffi_f_xyra_res_end_fast, _CFFI_OP(_CFFI_OP_CPYTHON_BLTN_V, 114), (void *)_cffi_d_xyra_res_end_fast },
+  { "xyra_res_end_json", (void *)_cffi_f_xyra_res_end_json, _CFFI_OP(_CFFI_OP_CPYTHON_BLTN_V, 114), (void *)_cffi_d_xyra_res_end_json },
+  { "xyra_res_end_text", (void *)_cffi_f_xyra_res_end_text, _CFFI_OP(_CFFI_OP_CPYTHON_BLTN_V, 114), (void *)_cffi_d_xyra_res_end_text },
   { "xyra_res_get_remote_address_bytes", (void *)_cffi_f_xyra_res_get_remote_address_bytes, _CFFI_OP(_CFFI_OP_CPYTHON_BLTN_V, 26), (void *)_cffi_d_xyra_res_get_remote_address_bytes },
   { "xyra_res_on_aborted", (void *)_cffi_f_xyra_res_on_aborted, _CFFI_OP(_CFFI_OP_CPYTHON_BLTN_V, 137), (void *)_cffi_d_xyra_res_on_aborted },
   { "xyra_res_on_data", (void *)_cffi_f_xyra_res_on_data, _CFFI_OP(_CFFI_OP_CPYTHON_BLTN_V, 132), (void *)_cffi_d_xyra_res_on_data },
@@ -3159,7 +3387,7 @@ static const struct _cffi_type_context_s _cffi_type_context = {
   _cffi_struct_unions,
   NULL,  /* no enums */
   _cffi_typenames,
-  38,  /* num_globals */
+  42,  /* num_globals */
   4,  /* num_struct_unions */
   0,  /* num_enums */
   12,  /* num_typenames */
