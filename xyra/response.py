@@ -12,6 +12,9 @@ except ImportError:
     import json as json_lib
 
 import asyncio
+import re
+
+_COOKIE_QUOTE_RE = re.compile(r'["\s,;]')
 
 try:
     from ._libxyra import ffi, lib
@@ -105,7 +108,7 @@ def format_cookie(name, value, max_age=None, expires=None, path="/", domain=None
 
         # Quote values that have spaces, commas, etc.
         def _quote(v):
-            if any(c in v for c in ' ",;\t\n\r\x0b\x0c'):
+            if _COOKIE_QUOTE_RE.search(v):
                 v = v.replace('"', '\\"')
                 return f'"{v}"'
             return v
