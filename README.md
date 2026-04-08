@@ -6,6 +6,8 @@
 
 A high-performance, asynchronous web framework for Python, built on top of `socketify.py`. Xyra is designed to be fast, easy to use, and feature-rich, making it an excellent choice for building modern web applications, APIs, and real-time applications.
 
+> **Note**: This project is 100% created by AI. 🤖
+
 ## ✨ Key Features
 
 - 🚀 **High Performance**: Built on `socketify.py` for exceptional speed and low latency

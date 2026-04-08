@@ -89,6 +89,9 @@
         <p class="mt-6 text-lg md:text-xl text-gray-400 max-w-3xl leading-relaxed">
           Xyra is a lightweight and fast Python web framework built on socketify for high-performance applications. It offers flexible routing, WebSocket support, and automatic API documentation.
         </p>
+        <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 text-blue-400 font-medium">
+          🤖 100% Created by AI
+        </div>
         <div class="mt-10 flex flex-wrap gap-4">
           <a href="getting-started.html" class="btn-primary px-8 py-4 text-white font-semibold rounded-xl inline-flex items-center gap-2">
             Get Started
@@ -172,6 +175,46 @@
               <p class="text-gray-400">Full type hints support</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- Benchmark Section -->
+      <section class="content-card mb-20">
+        <h2 class="text-3xl font-bold text-white mb-6">📊 Benchmark</h2>
+        <p class="text-gray-400 mb-6 text-lg">Performance comparison between FastAPI, Robyn, Socketify, and Xyra (Requests/sec).</p>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-gray-700">
+                <th class="py-4 px-6 text-white font-semibold">Framework</th>
+                <th class="py-4 px-6 text-white font-semibold">JSON (Req/sec)</th>
+                <th class="py-4 px-6 text-white font-semibold">Plain Text (Req/sec)</th>
+              </tr>
+            </thead>
+            <tbody class="text-gray-400">
+              <tr class="border-b border-gray-800">
+                <td class="py-4 px-6">FastAPI</td>
+                <td class="py-4 px-6">1,987.32</td>
+                <td class="py-4 px-6">2,100.50</td>
+              </tr>
+              <tr class="border-b border-gray-800">
+                <td class="py-4 px-6">Robyn</td>
+                <td class="py-4 px-6">10,838.03</td>
+                <td class="py-4 px-6">11,352.08</td>
+              </tr>
+              <tr class="border-b border-gray-800">
+                <td class="py-4 px-6">Socketify</td>
+                <td class="py-4 px-6">14,015.36</td>
+                <td class="py-4 px-6">19,870.91</td>
+              </tr>
+              <tr class="border-b border-gray-800 bg-blue-500/5">
+                <td class="py-4 px-6 font-semibold text-blue-400">Xyra</td>
+                <td class="py-4 px-6 font-semibold text-blue-400">20,953.00</td>
+                <td class="py-4 px-6 font-semibold text-blue-400">25,174.21</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
