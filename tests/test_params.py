@@ -81,3 +81,44 @@ def test_parse_path_mixed():
     path, params = parse_path("/api/v1/users/{id}/profile")
     assert path == "/api/v1/users/:id/profile"
     assert params == ["id"]
+
+
+def test_parse_path_root():
+    path, params = parse_path("/")
+    assert path == "/"
+    assert params == []
+
+
+def test_parse_path_empty():
+    path, params = parse_path("")
+    assert path == "/"
+    assert params == []
+
+
+def test_parse_path_multiple_slashes():
+    path, params = parse_path("///")
+    assert path == "/"
+    assert params == []
+
+
+def test_parse_path_regex_behavior():
+    path, params = parse_path("/users/{id:[0-9]+}/posts/{post_id}")
+    assert path == "/users/:id:[0-9]+/posts/:post_id"
+    assert params == ["id:[0-9]+", "post_id"]
+
+
+def test_parse_path_with_trailing_slash():
+    path, params = parse_path("/users/{id}/")
+    assert path == "/users/:id"
+    assert params == ["id"]
+
+
+def test_param_struct():
+    param = Param(name="id", type="int")
+    assert param.name == "id"
+    assert param.type == "int"
+    assert repr(param) == "<Param id>"
+
+    param_default = Param(name="slug")
+    assert param_default.name == "slug"
+    assert param_default.type == "string"
