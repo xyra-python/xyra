@@ -1,8 +1,10 @@
 
 import time
 from unittest.mock import Mock
+
 from xyra.middleware.proxy_headers import ProxyHeadersMiddleware
 from xyra.request import Request
+
 
 def test_large_xff_dos():
     req = Mock()
