@@ -148,7 +148,7 @@ class Response:
 
     __slots__ = (
         "_res",
-        "headers",
+        "_headers_dict",
         "status_code",
         "templating",
         "_ended",
@@ -168,12 +168,18 @@ class Response:
             templating: Optional templating engine for rendering templates.
         """
         self._res = res
-        self.headers = Headers()
+        self._headers_dict = None
         self.status_code: int = 200
         self.templating = templating
         self._ended = False
         self._body_cache: bytes | None = None
         self._body_future: asyncio.Future[bytes] | None = None
+
+    @property
+    def headers(self) -> Headers:
+        if self._headers_dict is None:
+            self._headers_dict = Headers()
+        return self._headers_dict
 
     def render(self, template_name: str, **kwargs) -> None:
         """Render a template with the given context.
@@ -205,21 +211,28 @@ class Response:
 
     def _header_fast(self, key: str, value: str) -> "Response":
         """Set a response header without validation (internal use only)."""
-        self.headers[key] = value
+        if self._headers_dict is None:
+            self._headers_dict = Headers()
+        self._headers_dict[key] = value
         return self
 
     def header(self, key: str, value: str) -> "Response":
         """Set a response header."""
-        self.headers[key] = value
+        if self._headers_dict is None:
+            self._headers_dict = Headers()
+        self._headers_dict[key] = value
         return self
 
     def _write_headers(self) -> None:
         """Write all headers to the response."""
+        if not self._headers_dict:
+            return
+
         if hasattr(self._res, "write_header"):
-            for key, value in self.headers.items():
+            for key, value in self._headers_dict.items():
                 self._res.write_header(key, value)
         else:
-            for key, value in self.headers.items():
+            for key, value in self._headers_dict.items():
                 lib.xyra_res_write_header(self._res, key.encode('utf-8'), len(key.encode('utf-8')), value.encode('utf-8'), len(value.encode('utf-8')))
 
     def send(self, data: str | bytes) -> None:
@@ -234,7 +247,7 @@ class Response:
             return
 
         # PERF: Fast path for simple 200 OK responses
-        if self.status_code == 200 and not self.headers:
+        if self.status_code == 200 and not self._headers_dict:
             if hasattr(self._res, "end_fast"):
                 self._res.end_fast(data)
                 self._ended = True
@@ -260,7 +273,7 @@ class Response:
         # SECURITY: Set default Content-Type if missing to prevent MIME sniffing/XSS.
         # Browsers may sniff "text/html" from response body if Content-Type is missing.
         # Default to safe types: text/plain for strings, application/octet-stream for bytes.
-        if "content-type" not in self.headers:
+        if self._headers_dict is None or "content-type" not in self._headers_dict:
             if isinstance(data, str):
                 self._header_fast("Content-Type", "text/plain; charset=utf-8")
             else:
@@ -303,7 +316,7 @@ class Response:
             return
 
         # PERF: Fast path for simple 200 OK json responses
-        if self.status_code == 200 and not self.headers:
+        if self.status_code == 200 and not self._headers_dict:
             if hasattr(self._res, "end_json"):
                 self._res.end_json(json_data)
                 self._ended = True
@@ -315,7 +328,7 @@ class Response:
                 self._ended = True
                 return
 
-        if "content-type" not in self.headers:
+        if self._headers_dict is None or "content-type" not in self._headers_dict:
             self._header_fast("Content-Type", "application/json")
         self.send(json_data)
 
@@ -341,7 +354,7 @@ class Response:
             return
 
         # PERF: Fast path for simple 200 OK text responses
-        if self.status_code == 200 and not self.headers:
+        if self.status_code == 200 and not self._headers_dict:
             if hasattr(self._res, "end_text"):
                 self._res.end_text(text)
                 self._ended = True
@@ -355,7 +368,7 @@ class Response:
                 return
 
         # PERF: Use fast header setting as the key and value are trusted
-        if "content-type" not in self.headers:
+        if self._headers_dict is None or "content-type" not in self._headers_dict:
             self._header_fast("Content-Type", "text/plain; charset=utf-8")
         self.send(text)
 
