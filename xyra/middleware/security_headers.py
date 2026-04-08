@@ -13,6 +13,9 @@ class SecurityHeadersMiddleware:
     - Referrer-Policy: strict-origin-when-cross-origin
     - X-Permitted-Cross-Domain-Policies: none
     - Cross-Origin-Opener-Policy: same-origin
+    - Cross-Origin-Resource-Policy: same-origin
+    - X-DNS-Prefetch-Control: off
+    - X-Download-Options: noopen
     - Permissions-Policy: geolocation=(), camera=(), microphone=()
 
     PERF: Headers are pre-calculated in __init__ to avoid overhead on every request.
@@ -33,6 +36,9 @@ class SecurityHeadersMiddleware:
         referrer_policy: str = "strict-origin-when-cross-origin",
         cross_domain_policy: str = "none",
         opener_policy: str = "same-origin",
+        resource_policy: str = "same-origin",
+        dns_prefetch_control: str = "off",
+        download_options: str = "noopen",
     ):
         self.headers: list[tuple[str, str]] = []
 
@@ -123,6 +129,15 @@ class SecurityHeadersMiddleware:
         if opener_policy:
             self.headers.append(("Cross-Origin-Opener-Policy", opener_policy))
 
+        if resource_policy:
+            self.headers.append(("Cross-Origin-Resource-Policy", resource_policy))
+
+        if dns_prefetch_control:
+            self.headers.append(("X-DNS-Prefetch-Control", dns_prefetch_control))
+
+        if download_options:
+            self.headers.append(("X-Download-Options", download_options))
+
         # SECURITY:
         # Risk: Missing or weak security headers expose users to XSS, Clickjacking, and other attacks.
         # Attack: Attacker exploits lack of COOP/CSP to perform cross-origin attacks.
@@ -159,6 +174,9 @@ def security_headers(
     referrer_policy: str = "strict-origin-when-cross-origin",
     cross_domain_policy: str = "none",
     opener_policy: str = "same-origin",
+    resource_policy: str = "same-origin",
+    dns_prefetch_control: str = "off",
+    download_options: str = "noopen",
 ):
     """
     Create a SecurityHeaders middleware function.
@@ -175,4 +193,7 @@ def security_headers(
         referrer_policy=referrer_policy,
         cross_domain_policy=cross_domain_policy,
         opener_policy=opener_policy,
+        resource_policy=resource_policy,
+        dns_prefetch_control=dns_prefetch_control,
+        download_options=download_options,
     )

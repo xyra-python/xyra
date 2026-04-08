@@ -110,6 +110,9 @@ def test_security_headers_default():
     assert res._headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
     assert res._headers.get("X-Permitted-Cross-Domain-Policies") == "none"
     assert res._headers.get("Cross-Origin-Opener-Policy") == "same-origin"
+    assert res._headers.get("Cross-Origin-Resource-Policy") == "same-origin"
+    assert res._headers.get("X-DNS-Prefetch-Control") == "off"
+    assert res._headers.get("X-Download-Options") == "noopen"
 
 
 def test_security_headers_hsts():

@@ -78,6 +78,9 @@ async def test_security_headers_defaults():
     assert headers["Permissions-Policy"] == "geolocation=(), camera=(), microphone=()"
     assert headers["X-Permitted-Cross-Domain-Policies"] == "none"
     assert headers["Cross-Origin-Opener-Policy"] == "same-origin"
+    assert headers["Cross-Origin-Resource-Policy"] == "same-origin"
+    assert headers["X-DNS-Prefetch-Control"] == "off"
+    assert headers["X-Download-Options"] == "noopen"
 
 
 @pytest.mark.asyncio
