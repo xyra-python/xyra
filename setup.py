@@ -120,7 +120,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name="xyra",
-    version="0.2.5",
+    version="0.2.6",
     author="Xyra Team",
     author_email="team@xyra.dev",
     description="High Performance Frameworks, Easy to learn and Ready for Production",
