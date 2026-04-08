@@ -508,10 +508,11 @@ class App:
             try:
                 # Optimized parameter extraction
                 params = {}
-                for i, param_name in enumerate(param_names):
-                    val = req.get_parameter(i)
-                    if val != "":
-                        params[param_name] = val
+                if param_names:
+                    for i, param_name in enumerate(param_names):
+                        val = req.get_parameter(i)
+                        if val:
+                            params[param_name] = val
 
                 response = Response(res, self.templates)
                 request = Request(req, response, params)
