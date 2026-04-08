@@ -563,7 +563,6 @@ class Request:
                     pass
 
             if not parsed:
-                from urllib.parse import parse_qs
                 parsed_qs = parse_qs(
                     text_content, keep_blank_values=True, max_num_fields=1000
                 )
