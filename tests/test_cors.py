@@ -1,5 +1,7 @@
 from unittest.mock import Mock
 
+import pytest
+
 from xyra.middleware import CorsMiddleware, cors
 
 
@@ -160,3 +162,18 @@ def test_cors_middleware_custom_max_age():
     middleware(request, response)
 
     response.header.assert_any_call("Access-Control-Max-Age", "7200")
+
+
+def test_cors_middleware_invalid_max_age():
+    """Test that CorsMiddleware raises appropriate errors for invalid max_age."""
+    with pytest.raises(TypeError, match="max_age must be an integer"):
+        CorsMiddleware(max_age="3600")
+
+    with pytest.raises(TypeError, match="max_age must be an integer"):
+        CorsMiddleware(max_age=True)
+
+    with pytest.raises(TypeError, match="max_age must be an integer"):
+        CorsMiddleware(max_age=3600.0)
+
+    with pytest.raises(ValueError, match="max_age must be a non-negative integer"):
+        CorsMiddleware(max_age=-1)

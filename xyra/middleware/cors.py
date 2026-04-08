@@ -44,6 +44,10 @@ class CorsMiddleware:
             ]
 
         self.allow_credentials = allow_credentials
+        if not isinstance(max_age, int) or isinstance(max_age, bool):
+            raise TypeError("max_age must be an integer")
+        if max_age < 0:
+            raise ValueError("max_age must be a non-negative integer")
         self.max_age = max_age
 
         if self.allow_credentials and "*" in self.allowed_origins:
