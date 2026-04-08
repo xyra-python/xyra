@@ -791,7 +791,8 @@ class App:
             <script>
             window.onload = function() {{
                 const ui = SwaggerUIBundle({{
-                    url: {json.dumps(swagger_json_path)},
+                    // SECURITY: Escape HTML characters to prevent XSS when interpolated in inline script tag
+                    url: {json.dumps(swagger_json_path).replace('<', '\\u003c')},
                     dom_id: '#swagger-ui',
                     deepLinking: true,
                     presets: [
