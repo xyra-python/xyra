@@ -62,6 +62,11 @@ def test_extract_path_parameters_typed():
     assert params[0]["name"] == "id"
 
 
+def test_extract_path_parameters_empty():
+    params = extract_path_parameters("/health")
+    assert params == []
+
+
 def test_extract_tag_from_path():
     assert extract_tag_from_path("/users") == "Users"
     assert extract_tag_from_path("/api/users") == "Api"
