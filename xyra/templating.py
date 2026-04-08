@@ -4,6 +4,15 @@ from typing import Any
 try:
     from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 except ImportError:
+    class Environment:
+        def __init__(self, *args, **kwargs):
+            self.filters = {}
+            self.globals = {}
+        def __getattr__(self, name):
+            return lambda *args, **kwargs: None
+    class FileSystemLoader:
+        def __init__(self, *args, **kwargs):
+            pass
     class TemplateNotFound(Exception):
         pass
 
