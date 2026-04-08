@@ -99,6 +99,12 @@ class ProxyHeadersMiddleware:
         if not xff:
             return
 
+        # SECURITY: Reject overly long headers to prevent DoS via CPU/Memory exhaustion.
+        # 2048 characters is enough for ~50 IPv6 addresses, which is far beyond
+        # any reasonable architecture.
+        if len(xff) > 2048:
+            return
+
         # Parse XFF list
         try:
             # Split by comma and strip whitespace
@@ -197,6 +203,11 @@ class ProxyHeadersMiddleware:
             header_val = req.get_header(header_name)
             if not header_val:
                 return None
+
+            # SECURITY: Reject overly long headers to prevent DoS.
+            if len(header_val) > 2048:
+                return None
+
             try:
                 # Split by comma, limit similar to XFF
                 values = [v.strip() for v in header_val.rsplit(",", 20)]
