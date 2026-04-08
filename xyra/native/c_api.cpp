@@ -380,6 +380,23 @@ void xyra_res_end(xyra_response_t* res, const char* data, size_t len, bool close
     res->res->end(std::string_view(data, len), close_connection);
 }
 
+void xyra_res_end_fast(xyra_response_t* res, const char* data, size_t len) {
+    if (*res->aborted) return;
+    res->res->end(std::string_view(data, len));
+}
+
+void xyra_res_end_json(xyra_response_t* res, const char* data, size_t len) {
+    if (*res->aborted) return;
+    res->res->writeHeader("Content-Type", "application/json");
+    res->res->end(std::string_view(data, len));
+}
+
+void xyra_res_end_text(xyra_response_t* res, const char* data, size_t len) {
+    if (*res->aborted) return;
+    res->res->writeHeader("Content-Type", "text/plain; charset=utf-8");
+    res->res->end(std::string_view(data, len));
+}
+
 void xyra_res_close(xyra_response_t* res) {
     if (*res->aborted) return;
     res->res->close();

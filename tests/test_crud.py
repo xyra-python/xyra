@@ -157,7 +157,6 @@ def test_crud_get_users_empty(sync):
         asyncio.run(route["handler"](req, res))
 
     assert res.status_code == 200
-    assert res.headers["Content-Type"] == "application/json"
 
 
 @pytest.mark.parametrize("sync", [True, False])

@@ -110,4 +110,7 @@ def test_dependency_injection_simulation() -> None:
     # Check response
     assert response.status_code == 200  # type: ignore
     # Assuming json method sets some internal data
-    mock_res.end.assert_called()  # Or whatever response.json does
+    if hasattr(mock_res, "end_json"):
+        mock_res.end_json.assert_called()
+    else:
+        mock_res.end.assert_called()
