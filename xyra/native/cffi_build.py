@@ -45,7 +45,7 @@ ffi.set_source(
         os.path.abspath("xyra/native")
     ],
     library_dirs=library_dirs,
-    libraries=["xyra", "xyra_native"] + extra_libs
+    libraries=["xyra", "xyra_native", "stdc++"] + extra_libs
 )
 
 def build_cffi(output_path):

@@ -68,6 +68,7 @@ size_t xyra_req_get_method(xyra_request_t* req, const char** out_method);
 size_t xyra_req_get_header(xyra_request_t* req, const char* key, const char** out_value);
 size_t xyra_req_get_parameter(xyra_request_t* req, int index, const char** out_param);
 size_t xyra_req_get_query(xyra_request_t* req, const char* key, const char** out_value);
+size_t xyra_req_get_full_query(xyra_request_t* req, const char** out_value);
 void xyra_req_get_headers(xyra_request_t* req, void* user_data, void (*cb)(void*, const char*, size_t, const char*, size_t));
 void xyra_req_get_queries(xyra_request_t* req, void* user_data, void (*cb)(void*, const char*, size_t, const char*, size_t));
 bool xyra_req_get_headers_truncated(xyra_request_t* req);
