@@ -89,14 +89,14 @@ class ProxyHeadersMiddleware:
         5. If an IP is trusted, move to the previous one.
         6. The first untrusted IP found (from right to left) is the real client IP.
         """
+        xff = req.get_header("x-forwarded-for")
+        if not xff:
+            return
+
         remote_addr = req.remote_addr
 
         # If the immediate connection is not trusted, do nothing
         if not self._is_trusted(remote_addr):
-            return
-
-        xff = req.get_header("x-forwarded-for")
-        if not xff:
             return
 
         # SECURITY: Reject overly long headers to prevent DoS via CPU/Memory exhaustion.
