@@ -305,6 +305,15 @@ def test_proxy_headers_valid_minus_one_case():
     assert request._host_cache == "client.com"
 
 
+def test_proxy_headers_trusted_proxy_count_reset():
+    # If trust_all is True and trusted_proxy_count is < 1, it should be reset to 1
+    mw1 = ProxyHeadersMiddleware(["*"], trusted_proxy_count=0)
+    assert mw1.trusted_proxy_count == 1
+
+    mw2 = ProxyHeadersMiddleware(["*"], trusted_proxy_count=-5)
+    assert mw2.trusted_proxy_count == 1
+
+
 def test_proxy_headers_host_with_port():
     request, response = create_request(
         "10.0.0.1",
