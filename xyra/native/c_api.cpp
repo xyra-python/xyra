@@ -336,7 +336,12 @@ size_t xyra_req_get_parameter(xyra_request_t* req, int index, const char** out_p
 }
 
 size_t xyra_req_get_query(xyra_request_t* req, const char* key, const char** out_value) {
-    std::string_view val = req->req->getQuery(key);
+    std::string_view val;
+    if (key == nullptr || key[0] == '\0') {
+        val = req->req->getQuery();
+    } else {
+        val = req->req->getQuery(key);
+    }
     *out_value = val.data();
     return val.length();
 }
