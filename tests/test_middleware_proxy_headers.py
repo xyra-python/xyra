@@ -363,6 +363,45 @@ def test_proxy_headers_host_with_explicit_port_override():
     # X-Forwarded-Port overrides the port in X-Forwarded-Host
     assert request.port == 9000
 
+def test_proxy_headers_depth_protection_fallback():
+    # Scenario: target_index < -1
+    # We have multiple trusted proxies, but the X-Forwarded-Proto, X-Forwarded-Host,
+    # and X-Forwarded-Port headers don't have enough values (they were not appended
+    # by all trusted proxies in the chain).
+    # XFF: Client, P1, P2
+    # XFH: ClientHost (len 1)
+    # peeled_count = 2 (P1, P2 peeled)
+    # target_index = 1 - 1 - 2 = -2
+    # Should ignore forwarded headers and fallback to connection properties.
+
+    request, response = create_request(
+        "10.0.0.3",
+        {
+            "X-Forwarded-For": "1.2.3.4, 10.0.0.1, 10.0.0.2",
+            "X-Forwarded-Proto": "https",
+            "X-Forwarded-Host": "attacker.com",
+            "X-Forwarded-Port": "443",
+        },
+    )
+
+    # Pre-set some "connection" properties on the mock request
+    # To simulate default behavior if headers are ignored.
+    request._scheme_cache = "http"
+    request._host_cache = "internal-service"
+    request._port_cache = 80
+
+    mw = ProxyHeadersMiddleware(["10.0.0.1", "10.0.0.2", "10.0.0.3"])
+    mw(request, response)
+
+    # Remote addr is correctly resolved from XFF
+    assert request.remote_addr == "1.2.3.4"
+
+    # But proto, host, port are ignored and fallback to connection defaults
+    assert request._scheme_cache == "http"
+    assert request._host_cache == "internal-service"
+    assert request._port_cache == 80
+
+
 def test_proxy_headers_valid_chain_resolution():
     request, response = create_request(
         "10.0.0.2",
