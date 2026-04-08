@@ -109,6 +109,9 @@ class CMakeBuild(build_ext):
                 if libname == "libxyra.a":
                     shutil.copy(lib_path, "xyra/libxyra_native.a")
                     shutil.copy(lib_path, os.path.join(ext.sourcedir, "libxyra_native.a"))
+                elif libname == "xyra.lib":
+                    shutil.copy(lib_path, "xyra/xyra_native.lib")
+                    shutil.copy(lib_path, os.path.join(ext.sourcedir, "xyra_native.lib"))
 
                 print(f"Copied {lib_path} to xyra/ and {ext.sourcedir}")
 

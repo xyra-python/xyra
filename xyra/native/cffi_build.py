@@ -38,6 +38,10 @@ version = f"{sys.version_info.major}{sys.version_info.minor}"
 build_temp_dirs = glob.glob(os.path.abspath("build/temp.*"))
 library_dirs = [os.path.abspath("xyra"), os.path.abspath("xyra/native")] + build_temp_dirs
 
+cffi_libs = ["xyra", "xyra_native"]
+if platform.system() != "Windows":
+    cffi_libs.append("stdc++")
+
 ffi.set_source(
     "xyra._libxyra",
     '#include "c_api.h"',
@@ -45,7 +49,7 @@ ffi.set_source(
         os.path.abspath("xyra/native")
     ],
     library_dirs=library_dirs,
-    libraries=["xyra", "xyra_native", "stdc++"] + extra_libs
+    libraries=cffi_libs + extra_libs
 )
 
 def build_cffi(output_path):
