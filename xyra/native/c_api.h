@@ -76,6 +76,9 @@ bool xyra_req_get_headers_truncated(xyra_request_t* req);
 void xyra_res_write_status(xyra_response_t* res, const char* status, size_t len);
 void xyra_res_write_header(xyra_response_t* res, const char* key, size_t key_len, const char* value, size_t value_len);
 void xyra_res_end(xyra_response_t* res, const char* data, size_t len, bool close_connection);
+void xyra_res_end_fast(xyra_response_t* res, const char* data, size_t len);
+void xyra_res_end_json(xyra_response_t* res, const char* data, size_t len);
+void xyra_res_end_text(xyra_response_t* res, const char* data, size_t len);
 void xyra_res_close(xyra_response_t* res);
 
 typedef void (*xyra_res_on_data_cb)(const char* chunk, size_t len, bool is_end, void* user_data);

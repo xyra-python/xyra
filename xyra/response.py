@@ -233,6 +233,23 @@ class Response:
         if self._ended:
             return
 
+        # PERF: Fast path for simple 200 OK responses
+        if self.status_code == 200 and not self.headers:
+            if hasattr(self._res, "end_fast"):
+                self._res.end_fast(data)
+                self._ended = True
+                return
+            elif lib and hasattr(lib, "xyra_res_end_fast"):
+                if isinstance(data, str):
+                    c_data = data.encode('utf-8')
+                else:
+                    c_data = data
+                self._temp_data_cache = c_data
+                buf = ffi.from_buffer("char[]", self._temp_data_cache)
+                lib.xyra_res_end_fast(self._res, buf, len(self._temp_data_cache))
+                self._ended = True
+                return
+
         # Write status code
         status_str = str(self.status_code)
         if hasattr(self._res, "write_status"):
@@ -279,10 +296,27 @@ class Response:
             def hello(req: Request, res: Response):
                 res.json({"message": "Hello, Xyra!"})
         """
-        # PERF: Use fast header setting as the key and value are trusted
-        self._header_fast("Content-Type", "application/json")
         # PERF: json_lib (orjson) returns bytes, send them directly to avoid decode/encode overhead
         json_data = json_lib.dumps(data)
+
+        if self._ended:
+            return
+
+        # PERF: Fast path for simple 200 OK json responses
+        if self.status_code == 200 and not self.headers:
+            if hasattr(self._res, "end_json"):
+                self._res.end_json(json_data)
+                self._ended = True
+                return
+            elif lib and hasattr(lib, "xyra_res_end_json"):
+                self._temp_data_cache = json_data
+                buf = ffi.from_buffer("char[]", self._temp_data_cache)
+                lib.xyra_res_end_json(self._res, buf, len(self._temp_data_cache))
+                self._ended = True
+                return
+
+        if "content-type" not in self.headers:
+            self._header_fast("Content-Type", "application/json")
         self.send(json_data)
 
     def html(self, html: str) -> None:
@@ -303,8 +337,26 @@ class Response:
             def hello(req: Request, res: Response):
                 res.text("Hello Xyra!")
         """
+        if self._ended:
+            return
+
+        # PERF: Fast path for simple 200 OK text responses
+        if self.status_code == 200 and not self.headers:
+            if hasattr(self._res, "end_text"):
+                self._res.end_text(text)
+                self._ended = True
+                return
+            elif lib and hasattr(lib, "xyra_res_end_text"):
+                c_data = text.encode('utf-8')
+                self._temp_data_cache = c_data
+                buf = ffi.from_buffer("char[]", self._temp_data_cache)
+                lib.xyra_res_end_text(self._res, buf, len(self._temp_data_cache))
+                self._ended = True
+                return
+
         # PERF: Use fast header setting as the key and value are trusted
-        self._header_fast("Content-Type", "text/plain; charset=utf-8")
+        if "content-type" not in self.headers:
+            self._header_fast("Content-Type", "text/plain; charset=utf-8")
         self.send(text)
 
     def redirect(self, url: str, status_code: int = 302) -> None:
