@@ -23,7 +23,7 @@ class SecurityHeadersMiddleware:
 
     def __init__(
         self,
-        hsts_seconds: int = 0,
+        hsts_seconds: int = 31536000,
         hsts_include_subdomains: bool = True,
         hsts_preload: bool = False,
         content_security_policy: str | dict | None = None,
@@ -163,7 +163,7 @@ class SecurityHeadersMiddleware:
 
 
 def security_headers(
-    hsts_seconds: int = 0,
+    hsts_seconds: int = 31536000,
     hsts_include_subdomains: bool = True,
     hsts_preload: bool = False,
     content_security_policy: str | dict | None = None,
