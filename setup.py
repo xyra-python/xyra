@@ -100,24 +100,33 @@ class CMakeBuild(build_ext):
 
         for libname in ("libxyra.a", "xyra.lib", "libxyra.lib", "xyra.a"):
             lib_path = os.path.join(self.build_temp, libname)
+            # On Windows, CMake outputs to a subdirectory based on config (e.g. Release/xyra.lib)
+            lib_path_cfg = os.path.join(self.build_temp, cfg, libname)
+
+            actual_lib_path = None
             if os.path.exists(lib_path):
-                shutil.copy(lib_path, "xyra/")
+                actual_lib_path = lib_path
+            elif os.path.exists(lib_path_cfg):
+                actual_lib_path = lib_path_cfg
+
+            if actual_lib_path:
+                shutil.copy(actual_lib_path, "xyra/")
                 # also copy to ext.sourcedir just in case cffi needs it
-                shutil.copy(lib_path, ext.sourcedir)
+                shutil.copy(actual_lib_path, ext.sourcedir)
 
                 # Copy with different names to be completely safe during CFFI linking
                 if libname == "libxyra.a":
-                    shutil.copy(lib_path, "xyra/libxyra_native.a")
-                    shutil.copy(lib_path, os.path.join(ext.sourcedir, "libxyra_native.a"))
+                    shutil.copy(actual_lib_path, "xyra/libxyra_native.a")
+                    shutil.copy(actual_lib_path, os.path.join(ext.sourcedir, "libxyra_native.a"))
                 elif libname in ("xyra.lib", "libxyra.lib"):
                     # CFFI expects xyra.lib and xyra_native.lib on Windows
                     if libname == "libxyra.lib":
-                        shutil.copy(lib_path, "xyra/xyra.lib")
-                        shutil.copy(lib_path, os.path.join(ext.sourcedir, "xyra.lib"))
-                    shutil.copy(lib_path, "xyra/xyra_native.lib")
-                    shutil.copy(lib_path, os.path.join(ext.sourcedir, "xyra_native.lib"))
+                        shutil.copy(actual_lib_path, "xyra/xyra.lib")
+                        shutil.copy(actual_lib_path, os.path.join(ext.sourcedir, "xyra.lib"))
+                    shutil.copy(actual_lib_path, "xyra/xyra_native.lib")
+                    shutil.copy(actual_lib_path, os.path.join(ext.sourcedir, "xyra_native.lib"))
 
-                print(f"Copied {lib_path} to xyra/ and {ext.sourcedir}")
+                print(f"Copied {actual_lib_path} to xyra/ and {ext.sourcedir}")
 
         # Generate CFFI C code
         sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
