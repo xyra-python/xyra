@@ -1,12 +1,11 @@
 from robyn import Robyn
+from robyn.robyn import Response
 
 app = Robyn(__file__)
 
 @app.get("/")
 def h():
     return {"message": "Hello, World!"}
-
-from robyn.robyn import Response
 
 @app.get("/text")
 def text_endpoint():
