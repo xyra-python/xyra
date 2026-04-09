@@ -4,6 +4,7 @@ Proxy Headers Middleware for Xyra Framework
 Safely resolves the client IP address when running behind trusted proxies.
 """
 
+from functools import lru_cache
 from ipaddress import ip_address, ip_network
 
 from ..logger import get_logger
@@ -37,6 +38,7 @@ class ProxyHeadersMiddleware:
         self.trust_all = "*" in trusted_proxies
         self.trusted_networks = []
         self.trusted_proxy_count = trusted_proxy_count
+        self._is_trusted_cached = lru_cache(maxsize=1024)(self._is_trusted_impl)
 
         if self.trust_all:
             if self.trusted_proxy_count is None:
@@ -63,7 +65,7 @@ class ProxyHeadersMiddleware:
                     # Invalid IP/CIDR, skip it
                     continue
 
-    def _is_trusted(self, ip_str: str) -> bool:
+    def _is_trusted_impl(self, ip_str: str) -> bool:
         """Check if an IP address is trusted."""
         if self.trust_all:
             return True
@@ -76,6 +78,10 @@ class ProxyHeadersMiddleware:
             return False
         except ValueError:
             return False
+
+    def _is_trusted(self, ip_str: str) -> bool:
+        """Cached wrapper for IP trust checking."""
+        return self._is_trusted_cached(ip_str)
 
     def __call__(self, req: Request, res: Response) -> None:
         """
