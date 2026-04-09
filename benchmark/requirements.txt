@@ -3,3 +3,5 @@ uvicorn
 robyn
 socketify
 requests
+flask
+gunicorn
