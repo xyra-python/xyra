@@ -314,6 +314,8 @@ class Response:
         """
         # PERF: json_lib (orjson) returns bytes, send them directly to avoid decode/encode overhead
         json_data = json_lib.dumps(data)
+        if isinstance(json_data, str):
+            json_data = json_data.encode("utf-8")
 
         if self._ended:
             return
