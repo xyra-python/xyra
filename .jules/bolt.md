@@ -1,0 +1,3 @@
+## 2024-04-09 - IP Address Validation Caching in Middleware
+**Learning:** Parsing IP addresses and checking CIDR containment via Python's `ipaddress` module is surprisingly slow (~4.6 microseconds per call). When done synchronously on the hot path (like in `ProxyHeadersMiddleware._is_trusted` for every request), this becomes a measurable bottleneck, especially since load balancers and proxies reuse a very small set of IPs.
+**Action:** Always consider using `functools.lru_cache` (or a similar caching mechanism) for operations like IP validation or network containment checks in middleware, ensuring the cache is bound to the instance (via an `_impl` method wrapper) rather than the class to prevent leaking `self` references.
