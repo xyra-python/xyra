@@ -1,4 +1,5 @@
 from xyra.swagger import (
+    add_common_responses,
     convert_path_to_openapi,
     extract_parameter_info,
     extract_path_parameters,
@@ -144,3 +145,26 @@ def test_swagger_endpoint():
     request = Request(mock_req, mock_res)
     request.is_json()
     mock_res.end.assert_called()
+
+
+def test_add_common_responses():
+    spec = {
+        "openapi": "3.0.0",
+        "info": {"title": "Test API", "version": "1.0.0"},
+        "paths": {},
+        "components": {
+            "responses": {},
+        },
+    }
+    updated_spec = add_common_responses(spec)
+
+    assert "400" in updated_spec["components"]["responses"]
+    assert "401" in updated_spec["components"]["responses"]
+    assert "404" in updated_spec["components"]["responses"]
+    assert "500" in updated_spec["components"]["responses"]
+
+    assert updated_spec["components"]["responses"]["400"]["description"] == "Bad Request"
+    assert (
+        updated_spec["components"]["responses"]["500"]["description"]
+        == "Internal Server Error"
+    )
