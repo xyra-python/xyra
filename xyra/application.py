@@ -522,7 +522,7 @@ class App:
         )
 
         async def async_final_handler(res, req):
-            start_time = time.time()
+            start_time = time.perf_counter()
             try:
                 # Optimized parameter extraction
                 params = {}
@@ -547,7 +547,7 @@ class App:
 
                 # Log request if enabled (only for non-2xx status codes or slow requests)
                 if self.log_requests:
-                    duration = int((time.time() - start_time) * 1000)
+                    duration = int((time.perf_counter() - start_time) * 1000)
                     # Only log errors, redirects, or slow requests (>100ms)
                     if response.status_code >= 400 or duration > 100:
                         req_logger = get_logger("xyra")
