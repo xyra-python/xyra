@@ -29,6 +29,8 @@ class HTTPSRedirectMiddleware:
         self.redirect_status_code = redirect_status_code
         self.trust_proxy = trust_proxy
         self.allowed_hosts = allowed_hosts
+        # SECURITY: Invalid characters for host headers
+        self._invalid_chars = {"/", "?", "#", "\\", "@"}
 
         if self.trust_proxy:
             from ..logger import get_logger
@@ -62,7 +64,7 @@ class HTTPSRedirectMiddleware:
 
         # SECURITY: Validate Host header to prevent Host Header Injection
         # 1. Sanity check for invalid characters that could alter the URL structure
-        if any(char in host for char in ["/", "?", "#", "\\", "@"]):
+        if not self._invalid_chars.isdisjoint(host):
             res.status(400)
             res.send("Bad Request: Invalid Host header")
             res._ended = True

@@ -25,6 +25,8 @@ class TrustedHostMiddleware:
         self.allowed_hosts = [host.lower() for host in allowed_hosts]
         # Pre-parse allowed hosts for performance
         self._patterns = [self._parse_host(host) for host in self.allowed_hosts]
+        # SECURITY: Invalid characters for host headers
+        self._invalid_chars = {"/", "?", "#", "\\", "@"}
 
     def _parse_host(self, host: str) -> tuple[str, int | None]:
         """
@@ -70,7 +72,7 @@ class TrustedHostMiddleware:
             return
 
         # SECURITY: Sanity check for invalid characters that could alter the URL structure
-        if any(char in host for char in ["/", "?", "#", "\\", "@"]):
+        if not self._invalid_chars.isdisjoint(host):
             res.status(400)
             res.json({"error": "Bad Request", "message": "Invalid Host header"})
             res._ended = True
