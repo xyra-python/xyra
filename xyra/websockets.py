@@ -80,19 +80,3 @@ class WebSocket:
         except Exception:
             return True
 
-    def get_remote_address(self) -> str | None:
-        """Get the remote address of the WebSocket connection."""
-        try:
-            if hasattr(self._ws, "get_remote_address_bytes"):
-                addr = self._ws.get_remote_address_bytes()
-                if isinstance(addr, bytes):
-                    return addr.decode()
-                return str(addr) if addr else None
-
-            out_ptr = ffi.new("char**")
-            length = lib.xyra_ws_get_remote_address_bytes(self._ws, out_ptr)
-            if length > 0:
-                return ffi.string(out_ptr[0], length).decode('utf-8')
-            return None
-        except Exception:
-            return None

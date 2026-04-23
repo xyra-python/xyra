@@ -76,13 +76,6 @@ def test_websocket_closed(mock_socketify_ws):
     assert ws.closed is True
 
 
-def test_websocket_get_remote_address(mock_socketify_ws):
-    ws = WebSocket(mock_socketify_ws)
-    address = ws.get_remote_address()
-    assert address == "127.0.0.1:12345"
-    mock_socketify_ws.get_remote_address_bytes.assert_called_once()
-
-
 def test_websocket_api_stability():
     """Test that WebSocket class has expected public methods and properties to prevent accidental renaming."""
     expected_methods = [
@@ -93,7 +86,6 @@ def test_websocket_api_stability():
         "subscribe",
         "unsubscribe",
         "close",
-        "get_remote_address",
     ]
     expected_properties = ["closed"]
 
