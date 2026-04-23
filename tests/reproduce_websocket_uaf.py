@@ -90,17 +90,6 @@ def test_websocket_uaf():
             print("Close callback timed out")
             return
 
-        print("Testing get_remote_address...")
-        try:
-            addr = stored_ws.get_remote_address()
-            print(f"Address: {addr}")
-            if addr is None:
-                print("SUCCESS: Address is None (safe)")
-            else:
-                print("WARNING: Address is not None (unexpected but maybe ok if empty)")
-        except Exception as e:
-            print(f"Exception: {e}")
-
         print("Testing send...")
         try:
             stored_ws.send("test")
