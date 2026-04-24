@@ -58,18 +58,17 @@ def test_cors_wildcard_with_credentials_does_not_reflect_origin():
         assert name != "Access-Control-Allow-Credentials"
 
 
-def test_json_parsing_raises_exception():
-    """Test that Request.parse_json raises ValueError on invalid JSON."""
-    # We need a real Request object or mock enough of it
-    # But parse_json is a method on Request that uses orjson directly.
-    # We can just check the method behavior if we can instantiate Request.
-
+@pytest.mark.asyncio
+async def test_json_parsing_raises_exception():
+    """Test that Request.json() raises HTTPException on invalid JSON."""
     # Mocking socketify request/response
     req_mock = Mock()
     res_mock = Mock()
+    res_mock.get_data = pytest.importorskip("unittest.mock").AsyncMock(return_value=b"{invalid}")
 
     request = Request(req_mock, res_mock)
+    request.get_header = Mock(return_value="application/json")
 
     from xyra.exceptions import HTTPException
     with pytest.raises(HTTPException, match="Invalid JSON"):
-        request.parse_json("{invalid}")
+        await request.json()

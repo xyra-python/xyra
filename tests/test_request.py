@@ -133,15 +133,6 @@ async def async_test_request_json_invalid():
         await request.json()
 
 
-def test_request_parse_json():
-    """Test synchronous JSON string parsing."""
-    req = Mock()
-    res = Mock()
-    request = Request(req, res)
-    data = request.parse_json('{"key": "value"}')
-    assert data == {"key": "value"}
-
-
 @pytest.mark.asyncio
 async def test_request_json_invalid():
     """Test invalid JSON."""
@@ -296,12 +287,3 @@ def test_request_query_params_fallback(mock_sys_modules):
     request = Request(req, res)
 
     assert request.query_params == {"key": ["value"]}
-
-
-def test_request_parse_json_bytes():
-    """Test synchronous JSON bytes parsing."""
-    req = Mock()
-    res = Mock()
-    request = Request(req, res)
-    data = request.parse_json(b'{"key": "value"}')
-    assert data == {"key": "value"}

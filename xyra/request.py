@@ -476,29 +476,12 @@ class Request:
             return {}
 
         parsed = None
-        if isinstance(body, bytes):
-            parsed = self.parse_json(body)
-        elif isinstance(body, str):
-            parsed = self.parse_json(body)
-        else:
-            # Fallback for other types
-            parsed = self.parse_json(str(body))
-
-        # Cache parsed JSON
-        self._json_cache = parsed
-        return parsed
-
-    def parse_json(self, json_string: str | bytes) -> Any:
-        """
-        Parse a JSON string or bytes synchronously.
-
-        usage:
-            json_str = '{"name": "John"}'
-            data = req.parse_json(json_str)
-            print(data["name"])  # "John"
-        """
         try:
-            return json_lib.loads(json_string)
+            if isinstance(body, (bytes, str)):
+                parsed = json_lib.loads(body)
+            else:
+                # Fallback for other types
+                parsed = json_lib.loads(str(body))
         except Exception as e:
             from .exceptions import bad_request
             logger = get_logger("xyra")
@@ -506,6 +489,10 @@ class Request:
             # SECURITY: Raise HTTP 400 Bad Request instead of ValueError to prevent 500 error logs DoS
             # SECURITY: Do not leak exception details to the client
             raise bad_request("Invalid JSON format") from None
+
+        # Cache parsed JSON
+        self._json_cache = parsed
+        return parsed
 
     async def form(self) -> dict[str, str]:
         """
