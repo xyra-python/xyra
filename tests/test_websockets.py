@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -152,3 +152,30 @@ def test_websocket_message_handling():
     # Test binary message
     on_message(b"binary", True)
     assert received_messages[1] == (b"binary", True)
+
+
+@patch("xyra.websockets.lib")
+@patch("xyra.websockets.ffi")
+def test_websocket_closed_fallback(mock_ffi, mock_lib):
+    """Test the CFFI fallback path for checking if a WebSocket is closed."""
+    # Create a mock that intentionally lacks get_remote_address_bytes
+    mock_ws = Mock(spec=[])
+    ws = WebSocket(mock_ws)
+
+    mock_ptr = Mock()
+    mock_ffi.new.return_value = mock_ptr
+
+    # Test when length > 0 (not closed)
+    mock_lib.xyra_ws_get_remote_address_bytes.return_value = 10
+
+    assert ws.closed is False
+    mock_ffi.new.assert_called_with("char**")
+    mock_lib.xyra_ws_get_remote_address_bytes.assert_called_with(mock_ws, mock_ptr)
+
+    # Test when length == 0 (closed)
+    mock_lib.xyra_ws_get_remote_address_bytes.return_value = 0
+    assert ws.closed is True
+
+    # Test exception block
+    mock_lib.xyra_ws_get_remote_address_bytes.side_effect = Exception("error")
+    assert ws.closed is True
