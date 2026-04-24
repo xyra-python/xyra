@@ -77,6 +77,33 @@ def test_request_get_parameter(mock_socketify_request, mock_socketify_response):
     assert request.get_parameter(0) == "param_value"
 
 
+def test_request_get_query(mock_socketify_request, mock_socketify_response):
+    request = Request(mock_socketify_request, mock_socketify_response)
+
+    # Test existing key via mock_socketify_request (returns "key=value" string,
+    # but let's override to match get_query(key) behavior)
+    def mock_get_query(key):
+        if key == "test_key":
+            return "test_value"
+        return ""
+
+    mock_socketify_request.get_query.side_effect = mock_get_query
+
+    # Test with existing key
+    assert request.get_query("test_key") == "test_value"
+
+    # Test with non-existent key, no default
+    assert request.get_query("nonexistent") is None
+
+    # Test with non-existent key, with default
+    assert request.get_query("nonexistent", default="default_val") == "default_val"
+
+    # Test with _query_params_cache populated
+    request._query_params_cache = {"cached_key": ["cached_value"]}
+    assert request.get_query("cached_key") == "cached_value"
+    assert request.get_query("nonexistent_cached", default="def") == "def"
+
+
 def test_request_get_header(mock_socketify_request, mock_socketify_response):
     request = Request(mock_socketify_request, mock_socketify_response)
     assert request.get_header("content-type") == "application/json"
