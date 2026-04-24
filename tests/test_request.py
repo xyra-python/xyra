@@ -264,6 +264,45 @@ def test_request_is_form():
     assert request.is_form() is True
 
 
+def test_request_scheme():
+    # Test 1: Default scheme is http
+    req_mock = Mock()
+    res_mock = Mock()
+    req_mock.get_header.return_value = None
+    request = Request(req_mock, res_mock)
+    assert request.scheme == "http"
+
+    # Test 2: Scheme extracted from X-Forwarded-Proto
+    req_mock_proto = Mock()
+    def get_header_proto(key, default=None):
+        if key == "x-forwarded-proto":
+            return "https, http"
+        return default
+    req_mock_proto.get_header.side_effect = get_header_proto
+    request_proto = Request(req_mock_proto, res_mock)
+    assert request_proto.scheme == "https"
+
+    # Test 3: Scheme extracted from X-Forwarded-Ssl
+    req_mock_ssl = Mock()
+    def get_header_ssl(key, default=None):
+        if key == "x-forwarded-ssl":
+            return "on"
+        return default
+    req_mock_ssl.get_header.side_effect = get_header_ssl
+    request_ssl = Request(req_mock_ssl, res_mock)
+    assert request_ssl.scheme == "https"
+
+    # Test 4: X-Forwarded-Ssl is off (falls back to http)
+    req_mock_ssl_off = Mock()
+    def get_header_ssl_off(key, default=None):
+        if key == "x-forwarded-ssl":
+            return "off"
+        return default
+    req_mock_ssl_off.get_header.side_effect = get_header_ssl_off
+    request_ssl_off = Request(req_mock_ssl_off, res_mock)
+    assert request_ssl_off.scheme == "http"
+
+
 def test_request_api_stability():
     """Test that Request class has expected public methods and properties to prevent accidental renaming."""
     expected_attributes = [
@@ -281,6 +320,7 @@ def test_request_api_stability():
         "content_length",
         "is_json",
         "is_form",
+        "scheme",
     ]
     for attr in expected_attributes:
         assert hasattr(Request, attr), f"Request is missing attribute: {attr}"
