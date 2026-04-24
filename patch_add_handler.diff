@@ -1,0 +1,36 @@
+<<<<<<< SEARCH
+    void addPostHandler(void *key, MoveOnlyFunction<void(Loop *)> &&handler) {
+        LoopData *loopData = (LoopData *) us_loop_ext((us_loop_t *) this);
+
+        loopData->postHandlers.emplace(key, std::move(handler));
+    }
+=======
+    void addPostHandler(void *key, MoveOnlyFunction<void(Loop *)> &&handler) {
+        LoopData *loopData = (LoopData *) us_loop_ext((us_loop_t *) this);
+
+        auto it = loopData->postHandlers.find(key);
+        if (it != loopData->postHandlers.end()) {
+            it->second = std::move(handler);
+        } else {
+            loopData->postHandlers.emplace(key, std::move(handler));
+        }
+    }
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    void addPreHandler(void *key, MoveOnlyFunction<void(Loop *)> &&handler) {
+        LoopData *loopData = (LoopData *) us_loop_ext((us_loop_t *) this);
+
+        loopData->preHandlers.emplace(key, std::move(handler));
+    }
+=======
+    void addPreHandler(void *key, MoveOnlyFunction<void(Loop *)> &&handler) {
+        LoopData *loopData = (LoopData *) us_loop_ext((us_loop_t *) this);
+
+        auto it = loopData->preHandlers.find(key);
+        if (it != loopData->preHandlers.end()) {
+            it->second = std::move(handler);
+        } else {
+            loopData->preHandlers.emplace(key, std::move(handler));
+        }
+    }
+>>>>>>> REPLACE

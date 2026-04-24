@@ -1,0 +1,13 @@
+<<<<<<< SEARCH
+    /* Map from void ptr to handler */
+    std::map<void *, MoveOnlyFunction<void(Loop *)>> postHandlers, preHandlers;
+
+public:
+=======
+    /* Map from void ptr to handler */
+    std::map<void *, MoveOnlyFunction<void(Loop *)>> postHandlers, preHandlers;
+    bool isIteratingPostHandlers = false;
+    bool isIteratingPreHandlers = false;
+
+public:
+>>>>>>> REPLACE

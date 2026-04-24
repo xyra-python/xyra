@@ -1,0 +1,108 @@
+<<<<<<< SEARCH
+    static void preCb(us_loop_t *loop) {
+        LoopData *loopData = (LoopData *) us_loop_ext(loop);
+
+        for (auto &p : loopData->preHandlers) {
+            p.second((Loop *) loop);
+        }
+    }
+
+    static void postCb(us_loop_t *loop) {
+        LoopData *loopData = (LoopData *) us_loop_ext(loop);
+
+        for (auto &p : loopData->postHandlers) {
+            p.second((Loop *) loop);
+        }
+
+        /* After every event loop iteration, we must not hold the cork buffer */
+=======
+    static void preCb(us_loop_t *loop) {
+        LoopData *loopData = (LoopData *) us_loop_ext(loop);
+
+        loopData->isIteratingPreHandlers = true;
+        for (auto it = loopData->preHandlers.begin(); it != loopData->preHandlers.end(); ) {
+            if (it->second) {
+                it->second((Loop *) loop);
+            }
+
+            if (!it->second) {
+                it = loopData->preHandlers.erase(it);
+            } else {
+                ++it;
+            }
+        }
+        loopData->isIteratingPreHandlers = false;
+    }
+
+    static void postCb(us_loop_t *loop) {
+        LoopData *loopData = (LoopData *) us_loop_ext(loop);
+
+        loopData->isIteratingPostHandlers = true;
+        for (auto it = loopData->postHandlers.begin(); it != loopData->postHandlers.end(); ) {
+            if (it->second) {
+                it->second((Loop *) loop);
+            }
+
+            if (!it->second) {
+                it = loopData->postHandlers.erase(it);
+            } else {
+                ++it;
+            }
+        }
+        loopData->isIteratingPostHandlers = false;
+
+        /* After every event loop iteration, we must not hold the cork buffer */
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    /* Bug: what if you remove a handler while iterating them? */
+    void removePostHandler(void *key) {
+        LoopData *loopData = (LoopData *) us_loop_ext((us_loop_t *) this);
+
+        loopData->postHandlers.erase(key);
+    }
+
+    void addPreHandler(void *key, MoveOnlyFunction<void(Loop *)> &&handler) {
+        LoopData *loopData = (LoopData *) us_loop_ext((us_loop_t *) this);
+
+        loopData->preHandlers.emplace(key, std::move(handler));
+    }
+
+    /* Bug: what if you remove a handler while iterating them? */
+    void removePreHandler(void *key) {
+        LoopData *loopData = (LoopData *) us_loop_ext((us_loop_t *) this);
+
+        loopData->preHandlers.erase(key);
+    }
+=======
+    void removePostHandler(void *key) {
+        LoopData *loopData = (LoopData *) us_loop_ext((us_loop_t *) this);
+
+        if (loopData->isIteratingPostHandlers) {
+            auto it = loopData->postHandlers.find(key);
+            if (it != loopData->postHandlers.end()) {
+                it->second = nullptr;
+            }
+        } else {
+            loopData->postHandlers.erase(key);
+        }
+    }
+
+    void addPreHandler(void *key, MoveOnlyFunction<void(Loop *)> &&handler) {
+        LoopData *loopData = (LoopData *) us_loop_ext((us_loop_t *) this);
+
+        loopData->preHandlers.emplace(key, std::move(handler));
+    }
+
+    void removePreHandler(void *key) {
+        LoopData *loopData = (LoopData *) us_loop_ext((us_loop_t *) this);
+
+        if (loopData->isIteratingPreHandlers) {
+            auto it = loopData->preHandlers.find(key);
+            if (it != loopData->preHandlers.end()) {
+                it->second = nullptr;
+            }
+        } else {
+            loopData->preHandlers.erase(key);
+        }
+    }
+>>>>>>> REPLACE
