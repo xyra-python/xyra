@@ -120,3 +120,52 @@ def test_templating_get_template_source_no_loader():
     templating.env.loader = None
     with pytest.raises(ValueError, match="Template loader is not set"):
         templating.get_template_source("test.html")
+
+@pytest.mark.asyncio
+async def test_templating_render_async(temp_templates_dir):
+    templating = Templating(temp_templates_dir)
+    result = await templating.render_async("test.html", name="Async World")
+    assert result == "<h1>Hello Async World!</h1>"
+
+@pytest.mark.asyncio
+async def test_templating_render_async_not_found(temp_templates_dir):
+    templating = Templating(temp_templates_dir)
+    with pytest.raises(TemplateNotFound):
+        await templating.render_async("nonexistent.html")
+
+@pytest.mark.asyncio
+async def test_templating_render_async_error(temp_templates_dir):
+    from xyra.exceptions import TemplateException
+    templating = Templating(temp_templates_dir)
+
+    # Create a mock for get_template that raises an Exception
+    def mock_get_template(*args, **kwargs):
+        raise Exception("Mock error")
+
+    templating.env.get_template = mock_get_template
+    with pytest.raises(TemplateException, match="An internal error occurred while rendering the template."):
+        await templating.render_async("test.html")
+
+def test_templating_render_error(temp_templates_dir):
+    from xyra.exceptions import TemplateException
+    templating = Templating(temp_templates_dir)
+
+    # Create a mock for get_template that raises an Exception
+    def mock_get_template(*args, **kwargs):
+        raise Exception("Mock error")
+
+    templating.env.get_template = mock_get_template
+    with pytest.raises(TemplateException, match="An internal error occurred while rendering the template."):
+        templating.render("test.html")
+
+def test_templating_render_string_error():
+    from xyra.exceptions import TemplateException
+    templating = Templating()
+
+    # Create a mock for from_string that raises an Exception
+    def mock_from_string(*args, **kwargs):
+        raise Exception("Mock error")
+
+    templating.env.from_string = mock_from_string
+    with pytest.raises(TemplateException, match="An internal error occurred while rendering the template string."):
+        templating.render_string("Hello {{ name }}!", name="Test")
