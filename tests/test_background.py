@@ -102,3 +102,62 @@ async def test_multiple_background_tasks():
     tasks = [create_background_task(task1), create_background_task(task2)]
     await asyncio.gather(*tasks)
     assert set(results) == {"task1", "task2"}
+
+
+@pytest.mark.asyncio
+async def test_background_task_completes_independently():
+    """Test background task completes independently from the current task."""
+    result = []
+    task_started = asyncio.Event()
+
+    async def long_running_task():
+        task_started.set()
+        await asyncio.sleep(0.05)
+        result.append("done")
+
+    task = create_background_task(long_running_task)
+
+    # Wait for the background task to start
+    await task_started.wait()
+
+    # Background task is still running, result should be empty
+    assert result == []
+
+    # Wait for the background task to complete
+    await task
+
+    assert result == ["done"]
+
+
+@pytest.mark.asyncio
+async def test_background_task_exception():
+    """Test exception in background task doesn't crash the event loop."""
+    result = []
+
+    # Temporarily set custom exception handler to avoid noisy logs during test
+    loop = asyncio.get_running_loop()
+    exceptions = []
+    def custom_exception_handler(loop, context):
+        exceptions.append(context.get("exception"))
+
+    old_handler = loop.get_exception_handler()
+    loop.set_exception_handler(custom_exception_handler)
+
+    try:
+        async def failing_task():
+            result.append("started")
+            raise ValueError("Intentional background error")
+
+        task = create_background_task(failing_task)
+
+        # Wait for task to finish - we have to use asyncio.wait to avoid the exception being re-raised to us
+        done, _ = await asyncio.wait([task])
+
+        assert result == ["started"]
+
+        # We can extract the exception from the task
+        t = done.pop()
+        assert isinstance(t.exception(), ValueError)
+        assert str(t.exception()) == "Intentional background error"
+    finally:
+        loop.set_exception_handler(old_handler)
