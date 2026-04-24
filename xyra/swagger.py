@@ -56,7 +56,7 @@ def infer_response_schema(handler_func) -> dict[str, Any]:
                 "items": {"type": "object"},
             }
         elif return_annotation is str:
-            responses["200"]["content"]["text/plain"]["schema"] = {"type": "string"}
+            responses["200"]["content"]["text/plain"] = {"schema": {"type": "string"}}
 
     return responses
 
