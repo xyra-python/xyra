@@ -68,3 +68,16 @@ def test_query_params_multiple_values():
     params.add("tag", "python")
     params.add("tag", "web")
     assert params.getall("tag") == ["python", "web"]
+
+
+def test_headers_update():
+    # Update from dictionary
+    headers = Headers({"Content-Type": "application/json"})
+    headers.update({"X-Custom": "value"})
+    assert headers["Content-Type"] == "application/json"
+    assert headers["X-Custom"] == "value"
+
+    # Update from another Headers instance
+    other_headers = Headers({"X-Another": "another-value"})
+    headers.update(other_headers)
+    assert headers["X-Another"] == "another-value"
