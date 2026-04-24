@@ -1,9 +1,6 @@
 import inspect
 import re
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    from .application import App
+from typing import Any
 
 
 def extract_parameter_info(docstring: str) -> dict[str, dict[str, Any]]:
@@ -151,7 +148,7 @@ def extract_path_parameters(path: str) -> list[dict[str, Any]]:
 
 
 def generate_swagger(
-    app: "App",
+    app: Any,
     title: str = "Xyra API",
     version: str = "1.0.0",
     description: str = "API documentation for Xyra application",
