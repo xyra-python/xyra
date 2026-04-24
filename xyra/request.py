@@ -475,14 +475,16 @@ class Request:
         if not body:
             return {}
 
-        parsed = None
-        if isinstance(body, bytes):
-            parsed = self.parse_json(body)
-        elif isinstance(body, str):
-            parsed = self.parse_json(body)
+        # Normalize body to a parsable type (bytes or str)
+        if not isinstance(body, (bytes, str)):
+            body = str(body)
+
+        # PERF: Offload large JSON parsing (>10KB) to thread to prevent event loop blocking
+        if len(body) > 1024 * 10:
+            import asyncio
+            parsed = await asyncio.to_thread(self.parse_json, body)
         else:
-            # Fallback for other types
-            parsed = self.parse_json(str(body))
+            parsed = self.parse_json(body)
 
         # Cache parsed JSON
         self._json_cache = parsed
