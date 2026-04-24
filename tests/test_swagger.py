@@ -5,7 +5,6 @@ from xyra.swagger import (
     extract_path_parameters,
     extract_tag_from_path,
     parse_docstring,
-    validate_swagger_spec,
 )
 
 
@@ -73,25 +72,6 @@ def test_extract_tag_from_path():
     assert extract_tag_from_path("/api/users") == "Api"
     assert extract_tag_from_path("/users/{id}") == "Users"
     assert extract_tag_from_path("/") == "Default"
-
-
-def test_validate_swagger_spec_valid():
-    spec = {
-        "openapi": "3.0.0",
-        "info": {"title": "Test API", "version": "1.0.0"},
-        "paths": {},
-    }
-    assert validate_swagger_spec(spec) is True
-
-
-def test_validate_swagger_spec_invalid():
-    # Missing required fields
-    spec = {"info": {"title": "Test"}}
-    assert validate_swagger_spec(spec) is False
-
-    # Missing info fields
-    spec = {"openapi": "3.0.0", "info": {}, "paths": {}}
-    assert validate_swagger_spec(spec) is False
 
 
 def test_generate_swagger_from_app():

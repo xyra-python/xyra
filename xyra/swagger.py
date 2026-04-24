@@ -381,15 +381,3 @@ def add_common_responses(swagger_spec: dict[str, Any]) -> dict[str, Any]:
     return swagger_spec
 
 
-def validate_swagger_spec(spec: dict[str, Any]) -> bool:
-    """Basic validation of OpenAPI specification."""
-    required_fields = ["openapi", "info", "paths"]
-
-    for field in required_fields:
-        if field not in spec:
-            return False
-
-    if "title" not in spec["info"] or "version" not in spec["info"]:
-        return False
-
-    return True
