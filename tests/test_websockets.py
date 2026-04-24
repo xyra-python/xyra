@@ -6,6 +6,14 @@ import pytest
 from xyra.websockets import WebSocket
 
 
+from unittest.mock import patch
+
+@pytest.fixture
+def mock_fallback_ws():
+    # A mock without the standard websocket methods
+    # so hasattr(self._ws, "send") will be False
+    return Mock(spec=[])
+
 @pytest.fixture
 def mock_socketify_ws():
     ws = Mock()
@@ -152,3 +160,77 @@ def test_websocket_message_handling():
     # Test binary message
     on_message(b"binary", True)
     assert received_messages[1] == (b"binary", True)
+
+@patch("xyra.websockets.lib")
+def test_websocket_fallback_send_str(mock_lib, mock_fallback_ws):
+    ws = WebSocket(mock_fallback_ws)
+    ws.send("Hello", False)
+
+    # "Hello".encode('utf-8')
+    mock_lib.xyra_ws_send.assert_called_once_with(mock_fallback_ws, b"Hello", 5, False)
+
+@patch("xyra.websockets.lib")
+def test_websocket_fallback_send_bytes(mock_lib, mock_fallback_ws):
+    ws = WebSocket(mock_fallback_ws)
+    ws.send_binary(b"binary data")
+
+    mock_lib.xyra_ws_send.assert_called_once_with(mock_fallback_ws, b"binary data", 11, True)
+
+@patch("xyra.websockets.lib")
+def test_websocket_fallback_close(mock_lib, mock_fallback_ws):
+    ws = WebSocket(mock_fallback_ws)
+    ws.close(1000, "Normal closure")
+
+    mock_lib.xyra_ws_close.assert_called_once_with(mock_fallback_ws)
+
+@patch("xyra.websockets.lib")
+def test_websocket_fallback_publish_str(mock_lib, mock_fallback_ws):
+    ws = WebSocket(mock_fallback_ws)
+    ws.publish("topic", "message", False, compress=True)
+
+    mock_lib.xyra_ws_publish.assert_called_once_with(mock_fallback_ws, b"topic", 5, b"message", 7, False, True)
+
+@patch("xyra.websockets.lib")
+def test_websocket_fallback_publish_bytes(mock_lib, mock_fallback_ws):
+    ws = WebSocket(mock_fallback_ws)
+    ws.publish("topic", b"message", True, compress=False)
+
+    mock_lib.xyra_ws_publish.assert_called_once_with(mock_fallback_ws, b"topic", 5, b"message", 7, True, False)
+
+@patch("xyra.websockets.lib")
+def test_websocket_fallback_subscribe(mock_lib, mock_fallback_ws):
+    ws = WebSocket(mock_fallback_ws)
+    ws.subscribe("chat")
+
+    mock_lib.xyra_ws_subscribe.assert_called_once_with(mock_fallback_ws, b"chat", 4)
+
+@patch("xyra.websockets.lib")
+def test_websocket_fallback_unsubscribe(mock_lib, mock_fallback_ws):
+    ws = WebSocket(mock_fallback_ws)
+    ws.unsubscribe("chat")
+
+    mock_lib.xyra_ws_unsubscribe.assert_called_once_with(mock_fallback_ws, b"chat", 4)
+
+@patch("xyra.websockets.ffi")
+@patch("xyra.websockets.lib")
+def test_websocket_fallback_closed(mock_lib, mock_ffi, mock_fallback_ws):
+    ws = WebSocket(mock_fallback_ws)
+
+    mock_ffi.new.return_value = "dummy_ptr"
+    mock_lib.xyra_ws_get_remote_address_bytes.return_value = 0
+    assert ws.closed is True
+    mock_lib.xyra_ws_get_remote_address_bytes.assert_called_once_with(mock_fallback_ws, "dummy_ptr")
+
+    mock_lib.xyra_ws_get_remote_address_bytes.reset_mock()
+    mock_lib.xyra_ws_get_remote_address_bytes.return_value = 10
+    assert ws.closed is False
+    mock_lib.xyra_ws_get_remote_address_bytes.assert_called_once_with(mock_fallback_ws, "dummy_ptr")
+
+@patch("xyra.websockets.ffi")
+@patch("xyra.websockets.lib")
+def test_websocket_fallback_closed_exception(mock_lib, mock_ffi, mock_fallback_ws):
+    ws = WebSocket(mock_fallback_ws)
+
+    # Exception during the check means it's considered closed
+    mock_ffi.new.side_effect = Exception("Test Exception")
+    assert ws.closed is True
