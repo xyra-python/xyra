@@ -78,14 +78,24 @@ class Request:
     @property
     def scheme(self) -> str:
         """
-        Get the request scheme (http or https).
-        Defaults to 'http' unless updated by middleware (e.g. ProxyHeadersMiddleware).
-
-        Returns:
-            Scheme string ('http' or 'https').
+        Get the URL scheme (http or https).
+        First checks X-Forwarded-Proto header, then X-Forwarded-Ssl,
+        then falls back to http.
         """
-        if self._scheme_cache is None:
-            self._scheme_cache = "http"
+        if self._scheme_cache:
+            return self._scheme_cache
+
+        proto = self.get_header("x-forwarded-proto")
+        if proto:
+            self._scheme_cache = proto.split(",")[0].strip().lower()
+            return self._scheme_cache
+
+        ssl = self.get_header("x-forwarded-ssl")
+        if ssl and ssl.lower() == "on":
+            self._scheme_cache = "https"
+            return self._scheme_cache
+
+        self._scheme_cache = "http"
         return self._scheme_cache
 
     @property
