@@ -99,3 +99,24 @@ def test_templating_static_url():
     templating = Templating()
     result = templating.render_string("{{ static('style.css') }}")
     assert result == "/static/style.css"
+
+
+def test_templating_get_template_source(temp_templates_dir):
+    templating = Templating(temp_templates_dir)
+    source, filename, uptodate = templating.get_template_source("test.html")
+    assert source == "<h1>Hello {{ name }}!</h1>"
+    assert filename.endswith("test.html")
+    assert callable(uptodate)
+
+
+def test_templating_get_template_source_not_found(temp_templates_dir):
+    templating = Templating(temp_templates_dir)
+    with pytest.raises(TemplateNotFound):
+        templating.get_template_source("nonexistent.html")
+
+
+def test_templating_get_template_source_no_loader():
+    templating = Templating()
+    templating.env.loader = None
+    with pytest.raises(ValueError, match="Template loader is not set"):
+        templating.get_template_source("test.html")
