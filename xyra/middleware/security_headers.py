@@ -21,37 +21,42 @@ class SecurityHeadersMiddleware:
     PERF: Headers are pre-calculated in __init__ to avoid overhead on every request.
     """
 
-    def __init__(
-        self,
-        hsts_seconds: int = 31536000,
-        hsts_include_subdomains: bool = True,
-        hsts_preload: bool = False,
-        content_security_policy: str | dict | None = None,
-        permissions_policy: str
-        | dict
-        | None = "geolocation=(), camera=(), microphone=()",
-        frame_options: str = "DENY",
-        xss_protection: str = "1; mode=block",
-        content_type_options: str = "nosniff",
-        referrer_policy: str = "strict-origin-when-cross-origin",
-        cross_domain_policy: str = "none",
-        opener_policy: str = "same-origin",
-        resource_policy: str = "same-origin",
-        dns_prefetch_control: str = "off",
-        download_options: str = "noopen",
-    ):
+    def __init__(self, config: dict | None = None, **kwargs):
         self.headers: list[tuple[str, str]] = []
 
+        options = {
+            "hsts_seconds": 31536000,
+            "hsts_include_subdomains": True,
+            "hsts_preload": False,
+            "content_security_policy": None,
+            "permissions_policy": "geolocation=(), camera=(), microphone=()",
+            "frame_options": "DENY",
+            "xss_protection": "1; mode=block",
+            "content_type_options": "nosniff",
+            "referrer_policy": "strict-origin-when-cross-origin",
+            "cross_domain_policy": "none",
+            "opener_policy": "same-origin",
+            "resource_policy": "same-origin",
+            "dns_prefetch_control": "off",
+            "download_options": "noopen",
+        }
+
+        if config:
+            options.update(config)
+        options.update(kwargs)
+
         # HSTS
-        if hsts_seconds > 0:
+        hsts_seconds = options.get("hsts_seconds")
+        if hsts_seconds is not None and hsts_seconds > 0:
             hsts_value = f"max-age={hsts_seconds}"
-            if hsts_include_subdomains:
+            if options.get("hsts_include_subdomains"):
                 hsts_value += "; includeSubDomains"
-            if hsts_preload:
+            if options.get("hsts_preload"):
                 hsts_value += "; preload"
             self.headers.append(("Strict-Transport-Security", hsts_value))
 
         # Content-Security-Policy
+        content_security_policy = options.get("content_security_policy")
         if content_security_policy:
             if isinstance(content_security_policy, dict):
                 policy_parts = []
@@ -69,6 +74,7 @@ class SecurityHeadersMiddleware:
                 )
 
         # Permissions-Policy
+        permissions_policy = options.get("permissions_policy")
         if permissions_policy:
             if isinstance(permissions_policy, dict):
                 policy_parts = []
@@ -109,33 +115,33 @@ class SecurityHeadersMiddleware:
                 self.headers.append(("Permissions-Policy", str(permissions_policy)))
 
         # Other Headers
-        if frame_options:
+        if frame_options := options.get("frame_options"):
             self.headers.append(("X-Frame-Options", frame_options))
 
-        if xss_protection:
+        if xss_protection := options.get("xss_protection"):
             self.headers.append(("X-XSS-Protection", xss_protection))
 
-        if content_type_options:
+        if content_type_options := options.get("content_type_options"):
             self.headers.append(("X-Content-Type-Options", content_type_options))
 
-        if referrer_policy:
+        if referrer_policy := options.get("referrer_policy"):
             self.headers.append(("Referrer-Policy", referrer_policy))
 
-        if cross_domain_policy:
+        if cross_domain_policy := options.get("cross_domain_policy"):
             self.headers.append(
                 ("X-Permitted-Cross-Domain-Policies", cross_domain_policy)
             )
 
-        if opener_policy:
+        if opener_policy := options.get("opener_policy"):
             self.headers.append(("Cross-Origin-Opener-Policy", opener_policy))
 
-        if resource_policy:
+        if resource_policy := options.get("resource_policy"):
             self.headers.append(("Cross-Origin-Resource-Policy", resource_policy))
 
-        if dns_prefetch_control:
+        if dns_prefetch_control := options.get("dns_prefetch_control"):
             self.headers.append(("X-DNS-Prefetch-Control", dns_prefetch_control))
 
-        if download_options:
+        if download_options := options.get("download_options"):
             self.headers.append(("X-Download-Options", download_options))
 
         # SECURITY:
@@ -162,38 +168,8 @@ class SecurityHeadersMiddleware:
             response.header(key, value)
 
 
-def security_headers(
-    hsts_seconds: int = 31536000,
-    hsts_include_subdomains: bool = True,
-    hsts_preload: bool = False,
-    content_security_policy: str | dict | None = None,
-    permissions_policy: str | dict | None = "geolocation=(), camera=(), microphone=()",
-    frame_options: str = "DENY",
-    xss_protection: str = "1; mode=block",
-    content_type_options: str = "nosniff",
-    referrer_policy: str = "strict-origin-when-cross-origin",
-    cross_domain_policy: str = "none",
-    opener_policy: str = "same-origin",
-    resource_policy: str = "same-origin",
-    dns_prefetch_control: str = "off",
-    download_options: str = "noopen",
-):
+def security_headers(config: dict | None = None, **kwargs):
     """
     Create a SecurityHeaders middleware function.
     """
-    return SecurityHeadersMiddleware(
-        hsts_seconds=hsts_seconds,
-        hsts_include_subdomains=hsts_include_subdomains,
-        hsts_preload=hsts_preload,
-        content_security_policy=content_security_policy,
-        permissions_policy=permissions_policy,
-        frame_options=frame_options,
-        xss_protection=xss_protection,
-        content_type_options=content_type_options,
-        referrer_policy=referrer_policy,
-        cross_domain_policy=cross_domain_policy,
-        opener_policy=opener_policy,
-        resource_policy=resource_policy,
-        dns_prefetch_control=dns_prefetch_control,
-        download_options=download_options,
-    )
+    return SecurityHeadersMiddleware(config, **kwargs)
