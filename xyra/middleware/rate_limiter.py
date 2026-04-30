@@ -42,13 +42,18 @@ class RateLimiter:
         """Remove empty keys and expired requests."""
         current_time = time.monotonic()
         with self._lock:
-            # Iterate over a copy of keys to allow deletion
-            for key in list(self._requests.keys()):
-                self._cleanup_old_requests(key, current_time)
-                # If key was removed by _cleanup_old_requests (because it didn't exist)
-                # or is now empty, delete it.
-                if key in self._requests and not self._requests[key]:
-                    del self._requests[key]
+            cutoff = current_time - self.window
+            keys_to_delete = []
+
+            for key, timestamps in self._requests.items():
+                while timestamps and timestamps[0] <= cutoff:
+                    timestamps.popleft()
+
+                if not timestamps:
+                    keys_to_delete.append(key)
+
+            for key in keys_to_delete:
+                del self._requests[key]
 
     def _cleanup_old_requests(self, key: str, current_time: float):
         """Remove requests outside the current window."""
