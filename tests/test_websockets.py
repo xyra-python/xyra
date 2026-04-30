@@ -1,12 +1,10 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 
 # from socketify import OpCode
 from xyra.websockets import WebSocket
 
-
-from unittest.mock import patch
 
 @pytest.fixture
 def mock_fallback_ws():
