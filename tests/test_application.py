@@ -1,4 +1,6 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
+
+import pytest
 
 from xyra import App
 from xyra.request import Request
@@ -114,3 +116,50 @@ def test_dependency_injection_simulation() -> None:
         mock_res.end_json.assert_called()
     else:
         mock_res.end.assert_called()
+
+
+@pytest.mark.asyncio
+async def test_async_final_handler_exception_fallback() -> None:
+    """Test the fallback exception handler in async_final_handler when sending 500 fails."""
+    app = App()
+
+    async def buggy_handler(req, res):
+        raise ValueError("Oops!")
+
+    final_handler = app._create_final_handler(
+        buggy_handler,
+        param_names=[],
+        middlewares=[],
+        parsed_path="/"
+    )
+
+    mock_res = Mock()
+    mock_req = Mock()
+
+    # Prevent truncating headers code block from raising
+    mock_req.headers_truncated = False
+
+    # Mock the native behavior used during Request initialization
+    mock_req.get_parameter = Mock(return_value=None)
+    mock_req.get_method.return_value = "GET"
+    mock_req.get_url.return_value = "/"
+    mock_req.get_header.return_value = ""
+    mock_req.for_each_header = Mock()
+
+    # Set up res.write_status to raise an exception, simulating a native failure
+    mock_res.write_status.side_effect = Exception("Native exception!")
+
+    with patch("xyra.application.get_logger") as mock_get_logger:
+        mock_logger = Mock()
+        mock_get_logger.return_value = mock_logger
+
+        await final_handler(mock_res, mock_req)
+
+        # Verify the original exception is logged
+        mock_logger.error.assert_any_call("Error in async handler: Oops!")
+
+        # Verify the fallback exception logic for sending a 500 error is caught and logged
+        mock_logger.debug.assert_called_with(
+            "Failed to send 500 Internal Server Error response",
+            exc_info=True,
+        )
