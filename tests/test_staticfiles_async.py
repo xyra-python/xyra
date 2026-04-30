@@ -75,3 +75,47 @@ async def test_static_files_non_blocking():
         # The function name is 'read_file'
         # read_call = any(call.args[0].__name__ == "read_file" for call in calls)
         # assert read_call, "File reading should be offloaded to thread"
+
+
+@pytest.mark.asyncio
+async def test_static_files_read_errors():
+    """
+    Verify that static files handler properly catches and handles
+    OSError and Exception when reading files.
+    """
+    app = App()
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        test_file_path = os.path.join(temp_dir, "test.txt")
+        with open(test_file_path, "wb") as f:
+            f.write(b"hello")
+
+        app.static_files("/static", temp_dir)
+
+        # Find the handler
+        handler = None
+        for route in app.router.routes:
+            if route["path"] == "/static/*":
+                handler = route["handler"]
+                break
+
+        assert handler is not None, "Static file handler not found in router"
+
+        # Mock Request
+        req = MagicMock(spec=Request)
+        req.get_parameter.return_value = "test.txt"
+
+        # Test OSError (e.g. Permission denied) -> 404
+        res = MagicMock(spec=Response)
+        with patch('os.fstat', side_effect=OSError("Permission denied")):
+            await handler(req, res)
+            res.status.assert_called_with(404)
+            res.status.return_value.text.assert_called_with("Not Found")
+
+        # Test generic Exception -> 500
+        res = MagicMock(spec=Response)
+        with patch('os.fstat', side_effect=Exception("Generic error")):
+            await handler(req, res)
+            res.status.assert_called_with(500)
+            res.status.return_value.text.assert_called_with("Internal Server Error")
