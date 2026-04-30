@@ -3,6 +3,7 @@ try:
     from .request import Request
     from .response import Response
     from .routing import Router
+    from .exceptions import HTTPException
 except ImportError:
     pass
 from .websockets import WebSocket
