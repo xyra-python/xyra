@@ -52,6 +52,7 @@ def test_response_send_string(mock_socketify_response):
         mock_socketify_response.end.assert_called_once_with("Hello World")
     assert response._ended is True
 
+
 def test_response_send_bytes(mock_socketify_response):
     response = Response(mock_socketify_response)
     response.send(b"Hello World")
@@ -319,8 +320,9 @@ def test_response_set_cookie_same_site_none_secure(mock_socketify_response):
     assert "SameSite=none" in cookie
     assert "Secure" in cookie
 
-@patch('xyra.response.ffi')
-@patch('xyra.response.lib')
+
+@patch("xyra.response.ffi")
+@patch("xyra.response.lib")
 def test_format_cookie_cffi_fallback(mock_lib, mock_ffi):
     # Testing the fallback path in xyra.response.format_cookie when buffer slice throws
     from xyra.response import format_cookie
