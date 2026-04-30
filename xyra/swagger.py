@@ -147,6 +147,99 @@ def extract_path_parameters(path: str) -> list[dict[str, Any]]:
     return parameters
 
 
+def _build_base_swagger_spec(
+    title: str,
+    version: str,
+    description: str,
+    contact: dict[str, str] | None,
+    license_info: dict[str, str] | None,
+    servers: list[dict[str, str]] | None,
+) -> dict[str, Any]:
+    """Build the base OpenAPI specification structure."""
+    swagger_spec: dict[str, Any] = {
+        "openapi": "3.0.0",
+        "info": {
+            "title": title,
+            "version": version,
+            "description": description,
+        },
+        "paths": {},
+        "components": {
+            "schemas": {},
+            "responses": {},
+            "parameters": {},
+            "examples": {},
+            "requestBodies": {},
+            "headers": {},
+            "securitySchemes": {},
+            "links": {},
+            "callbacks": {},
+        },
+    }
+
+    if contact:
+        swagger_spec["info"]["contact"] = contact
+
+    if license_info:
+        swagger_spec["info"]["license"] = license_info
+
+    if servers:
+        swagger_spec["servers"] = servers
+    else:
+        swagger_spec["servers"] = [
+            {
+                "url": "http://localhost:8000",
+                "description": "Development server",
+            }
+        ]
+
+    return swagger_spec
+
+
+def _process_routes(swagger_spec: dict[str, Any], app: Any) -> None:
+    """Process app routes and add them to the swagger specification."""
+    if not (hasattr(app, "router") and hasattr(app.router, "routes")):
+        return
+
+    for route in app.router.routes:
+        path = route["path"]
+        method = route["method"].lower()
+        handler = route["handler"]
+
+        # Convert path to OpenAPI format
+        openapi_path = convert_path_to_openapi(path)
+
+        # Initialize path object if not exists
+        if openapi_path not in swagger_spec["paths"]:
+            swagger_spec["paths"][openapi_path] = {}
+
+        # Parse handler docstring
+        docstring_info = parse_docstring(inspect.getdoc(handler))
+
+        # Extract path parameters
+        path_parameters = extract_path_parameters(path)
+
+        # Build operation object
+        operation = {
+            "summary": docstring_info["summary"] or f"{method.upper()} {path}",
+            "description": docstring_info["description"],
+            "parameters": path_parameters,
+            "responses": infer_response_schema(handler),
+            "tags": [extract_tag_from_path(path)],
+        }
+
+        request_body = extract_request_body_schema(handler, method)
+        if request_body:
+            operation["requestBody"] = request_body
+
+        # Add query parameters if detected
+        query_params = extract_query_parameters(handler)
+        if query_params:
+            operation["parameters"].extend(query_params)
+
+        swagger_spec["paths"][openapi_path][method] = operation
+
+
 def generate_swagger(
     app: Any,
     title: str = "Xyra API",
@@ -176,82 +269,11 @@ def generate_swagger(
     if getattr(app, "_swagger_cache", None) is not None:
         return app._swagger_cache
 
-    # Base OpenAPI structure
-    swagger_spec = {
-        "openapi": "3.0.0",
-        "info": {
-            "title": title,
-            "version": version,
-            "description": description,
-        },
-        "paths": {},
-        "components": {
-            "schemas": {},
-            "responses": {},
-            "parameters": {},
-            "examples": {},
-            "requestBodies": {},
-            "headers": {},
-            "securitySchemes": {},
-            "links": {},
-            "callbacks": {},
-        },
-    }
+    swagger_spec = _build_base_swagger_spec(
+        title, version, description, contact, license_info, servers
+    )
 
-    # Add optional info fields
-    if contact:
-        swagger_spec["info"]["contact"] = contact
-
-    if license_info:
-        swagger_spec["info"]["license"] = license_info
-
-    # Add servers
-    if servers:
-        swagger_spec["servers"] = servers
-    else:
-        swagger_spec["servers"] = [
-            {"url": "http://localhost:8000", "description": "Development server"}
-        ]
-
-    # Process routes
-    if hasattr(app, "router") and hasattr(app.router, "routes"):
-        for route in app.router.routes:
-            path = route["path"]
-            method = route["method"].lower()
-            handler = route["handler"]
-
-            # Convert path to OpenAPI format
-            openapi_path = convert_path_to_openapi(path)
-
-            # Initialize path object if not exists
-            if openapi_path not in swagger_spec["paths"]:
-                swagger_spec["paths"][openapi_path] = {}
-
-            # Parse handler docstring
-            docstring_info = parse_docstring(inspect.getdoc(handler))
-
-            # Extract path parameters
-            path_parameters = extract_path_parameters(path)
-
-            # Build operation object
-            operation = {
-                "summary": docstring_info["summary"] or f"{method.upper()} {path}",
-                "description": docstring_info["description"],
-                "parameters": path_parameters,
-                "responses": infer_response_schema(handler),
-                "tags": [extract_tag_from_path(path)],
-            }
-
-            request_body = extract_request_body_schema(handler, method)
-            if request_body:
-                operation["requestBody"] = request_body
-
-            # Add query parameters if detected
-            query_params = extract_query_parameters(handler)
-            if query_params:
-                operation["parameters"].extend(query_params)
-
-            swagger_spec["paths"][openapi_path][method] = operation
+    _process_routes(swagger_spec, app)
 
     # Add any additional kwargs to the spec
     for key, value in kwargs.items():
@@ -379,5 +401,3 @@ def add_common_responses(swagger_spec: dict[str, Any]) -> dict[str, Any]:
 
     swagger_spec["components"]["responses"].update(common_responses)
     return swagger_spec
-
-
