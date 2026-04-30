@@ -31,47 +31,22 @@ async def test_static_files_non_blocking():
     # Mock Response
     res = MagicMock(spec=Response)
 
-    # Mock asyncio.to_thread
-    with patch("asyncio.to_thread", new_callable=AsyncMock) as mock_to_thread:
-        # Setup side_effect to simulate successful file operations
-        def side_effect(func, *args, **kwargs):
-            # Inspect the function being offloaded
-            if func == os.path.exists:
-                return True
-            if func == os.path.isfile:
-                return True
-            if func == os.path.getsize:
-                return 1024  # 1KB
+    # Mock aiofiles
+    import stat
+    mock_file = AsyncMock()
+    mock_file.read.return_value = b"file content"
+    mock_file.fileno = MagicMock(return_value=1)
 
-            # For lambdas (path resolution)
-            if callable(func) and func.__name__ == "<lambda>":
-                # Execute the lambda to get the path
-                return func()
+    mock_fstat = MagicMock()
+    mock_st = MagicMock()
+    mock_st.st_mode = stat.S_IFREG
+    mock_st.st_size = 1024
+    mock_fstat.return_value = mock_st
 
-            # For file reading (local function 'read_file' or 'read_file_safely')
-            if func.__name__ in ("read_file", "read_file_safely"):
-                return b"file content", 200
+    with patch("aiofiles.open", new_callable=MagicMock) as mock_open:
+        mock_open.return_value.__aenter__.return_value = mock_file
+        with patch("os.fstat", mock_fstat):
+            await handler(req, res)
 
-            return None
-
-        mock_to_thread.side_effect = side_effect
-
-        await handler(req, res)
-
-        # Verify that to_thread was called for critical operations
-        calls = mock_to_thread.call_args_list
-
-        # With TOCTOU fix we don't do exists/isfile/getsize in to_thread individually
-
-        # Check if read_file_safely was offloaded
-        read_call = any(call.args[0].__name__ == "read_file_safely" for call in calls if hasattr(call.args[0], "__name__"))
-        assert read_call, "read_file_safely should be offloaded to thread"
-
-        # The previous checks are commented out
-        # getsize_call = any(call.args[0] == os.path.getsize for call in calls)
-        # assert getsize_call, "os.path.getsize should be offloaded to thread"
-
-        # Check if file reading was offloaded
-        # The function name is 'read_file'
-        # read_call = any(call.args[0].__name__ == "read_file" for call in calls)
-        # assert read_call, "File reading should be offloaded to thread"
+            mock_open.assert_called_once()
+            mock_file.read.assert_awaited_once()

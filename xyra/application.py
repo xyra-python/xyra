@@ -324,6 +324,9 @@ class App:
         if not path.startswith("/"):
             path = "/" + path
 
+        # Pre-calculate absolute directory to avoid blocking OS calls on every request
+        abs_directory = os.path.join(os.path.realpath(directory), "")
+
         async def static_handler(req: Request, res: Response):
             # SECURITY: Use req.get_parameter(0) with wildcard '*' to support
             # nested directories and ensure full path is captured.
@@ -343,11 +346,6 @@ class App:
 
             # SECURITY: Prevent Path Traversal
             try:
-                # Ensure directory path ends with a separator to prevent partial name match
-                # Use to_thread for blocking OS calls to prevent loop blocking
-                abs_directory = await asyncio.to_thread(
-                    lambda: os.path.join(os.path.realpath(directory), "")
-                )
                 # Normalize file_path and join securely
                 import ntpath
                 import posixpath
@@ -363,9 +361,8 @@ class App:
                 # then use posixpath.normpath to resolve `.` and `..` consistently.
                 stripped_path = posixpath.normpath(stripped_path.lstrip("/")).lstrip("/")
 
-                abs_path = await asyncio.to_thread(
-                    lambda: os.path.realpath(os.path.join(abs_directory, stripped_path))
-                )
+                # os.path.realpath is fast because of OS VFS cache; run it synchronously
+                abs_path = os.path.realpath(os.path.join(abs_directory, stripped_path))
 
                 # Verify the resolved path is within the static directory
                 if not os.path.commonpath([abs_directory, abs_path]) == os.path.normpath(abs_directory):
@@ -385,23 +382,26 @@ class App:
 
             # SECURITY: Prevent TOCTOU (Time-of-Check to Time-of-Use) attacks
             # by checking file properties using the file descriptor after opening.
-            def read_file_safely():
-                import stat
+            import stat
+            import aiofiles
 
-                try:
-                    with open(full_path, "rb") as f:
-                        st = os.fstat(f.fileno())
-                        if not stat.S_ISREG(st.st_mode):
-                            return None, 404
-                        if st.st_size > MAX_BODY_SIZE:
-                            return None, 413
-                        return f.read(), 200
-                except OSError:
-                    return None, 404
-                except Exception:
-                    return None, 500
-
-            content, status_code = await asyncio.to_thread(read_file_safely)
+            content = None
+            status_code = 500
+            try:
+                async with aiofiles.open(full_path, "rb") as f:
+                    # fileno() works natively with aiofiles proxy object
+                    st = os.fstat(f.fileno())
+                    if not stat.S_ISREG(st.st_mode):
+                        status_code = 404
+                    elif st.st_size > MAX_BODY_SIZE:
+                        status_code = 413
+                    else:
+                        content = await f.read()
+                        status_code = 200
+            except OSError:
+                status_code = 404
+            except Exception:
+                status_code = 500
 
             if status_code == 413:
                 res.status(413).text("Payload Too Large")

@@ -30,6 +30,7 @@ dependencies = [
     "orjson>=3.11.3; python_implementation != 'PyPy'",
     "ujson; python_implementation == 'PyPy'",
     "cffi>=1.15.0",
+    "aiofiles",
 ]
 
 [project.optional-dependencies]
