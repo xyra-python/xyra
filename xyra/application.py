@@ -499,7 +499,6 @@ class App:
         middleware_chain = []
         for middleware in middlewares:
             handler_to_inspect = middleware
-            # FIX RUFF B004: Use callable() instead of hasattr(..., "__call__")
             if not inspect.isfunction(middleware) and callable(middleware):
                 handler_to_inspect = middleware.__call__
 
