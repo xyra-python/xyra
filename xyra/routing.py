@@ -73,6 +73,12 @@ class Router:
         route_key = f"{method}:{parsed_path}"
         self._route_map[route_key] = route_dict
 
+    def _create_route_decorator(self, method: str, path: str):
+        def decorator(handler):
+            self.add_route(method, path, handler)
+            return handler
+        return decorator
+
     def get(self, path: str):
         """
         Register a GET route.
@@ -83,51 +89,22 @@ class Router:
         Returns:
             Decorator function that registers the handler.
         """
-
-        def decorator(handler):
-            self.add_route("GET", path, handler)
-            return handler
-
-        return decorator
+        return self._create_route_decorator("GET", path)
 
     def post(self, path: str):
-        def decorator(handler):
-            self.add_route("POST", path, handler)
-            return handler
-
-        return decorator
+        return self._create_route_decorator("POST", path)
 
     def put(self, path: str):
-        def decorator(handler):
-            self.add_route("PUT", path, handler)
-            return handler
-
-        return decorator
+        return self._create_route_decorator("PUT", path)
 
     def delete(self, path: str):
-        def decorator(handler):
-            self.add_route("DELETE", path, handler)
-            return handler
-
-        return decorator
+        return self._create_route_decorator("DELETE", path)
 
     def patch(self, path: str):
-        def decorator(handler):
-            self.add_route("PATCH", path, handler)
-            return handler
-
-        return decorator
+        return self._create_route_decorator("PATCH", path)
 
     def head(self, path: str):
-        def decorator(handler):
-            self.add_route("HEAD", path, handler)
-            return handler
-
-        return decorator
+        return self._create_route_decorator("HEAD", path)
 
     def options(self, path: str):
-        def decorator(handler):
-            self.add_route("OPTIONS", path, handler)
-            return handler
-
-        return decorator
+        return self._create_route_decorator("OPTIONS", path)
