@@ -368,7 +368,7 @@ class App:
                 )
 
                 # Verify the resolved path is within the static directory
-                if not abs_path.startswith(abs_directory):
+                if not os.path.commonpath([abs_directory, abs_path]) == os.path.normpath(abs_directory):
                     res.status(403).text("Forbidden")
                     return
 
