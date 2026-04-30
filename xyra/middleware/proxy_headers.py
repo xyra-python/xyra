@@ -148,13 +148,13 @@ class ProxyHeadersMiddleware:
         else:
             # Standard logic using IP whitelist
             # Iterate right to left
-            for i in reversed(range(len(ips))):
-                if self._is_trusted(ips[i]):
+            for i in range(len(ips) - 1, -1, -1):
+                ip = ips[i]
+                if self._is_trusted(ip):
                     continue
-                else:
-                    client_ip = ips[i]
-                    client_index = i
-                    break
+                client_ip = ip
+                client_index = i
+                break
             else:
                 # All IPs in XFF are trusted (and remote_addr is trusted).
                 # This implies the client itself is a trusted entity (e.g. internal service)
