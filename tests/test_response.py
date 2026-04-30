@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -318,3 +318,33 @@ def test_response_set_cookie_same_site_none_secure(mock_socketify_response):
     cookie = response.headers["Set-Cookie"]
     assert "SameSite=none" in cookie
     assert "Secure" in cookie
+
+@patch('xyra.response.ffi')
+@patch('xyra.response.lib')
+def test_format_cookie_cffi_fallback(mock_lib, mock_ffi):
+    # Testing the fallback path in xyra.response.format_cookie when buffer slice throws
+    from xyra.response import format_cookie
+
+    class BrokenCffiBuf:
+        def __getitem__(self, key):
+            raise Exception("Simulated bytes cast error")
+
+    broken_buf = BrokenCffiBuf()
+
+    # We must explicitly delete the side_effect on mock_ffi.string
+    # to bypass the first mock-specific block
+    del mock_ffi.string.side_effect
+
+    def ffi_new_mock(type_str, size=None):
+        if "char[]" in type_str:
+            return broken_buf
+        return [10]
+
+    mock_ffi.new.side_effect = ffi_new_mock
+    mock_ffi.string.return_value = b"mocked=fallback_value"
+    mock_ffi.NULL = None
+
+    res = format_cookie("mocked", "value")
+
+    assert res == "mocked=fallback_value"
+    mock_ffi.string.assert_called_once_with(broken_buf, 10)
