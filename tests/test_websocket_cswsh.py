@@ -54,3 +54,12 @@ def test_websocket_default_upgrade_handler():
     # 4. Origin present but no Host -> Deny
     req = create_request({"Origin": "https://example.com"})
     assert upgrade_handler(req) is False
+
+    # 5. Malformed Origin -> Deny (Coverage for exception path)
+    # Using 'http://]' which causes ValueError: Invalid IPv6 URL in urlparse
+    req = create_request({"Host": "example.com", "Origin": "http://]"})
+    assert upgrade_handler(req) is False
+
+    # 6. Origin has port but Host does not -> Allow (Coverage for line 264)
+    req = create_request({"Host": "localhost", "Origin": "http://localhost:8000"})
+    assert upgrade_handler(req) is True
