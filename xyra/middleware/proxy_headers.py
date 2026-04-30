@@ -126,7 +126,9 @@ class ProxyHeadersMiddleware:
         # The first untrusted IP we encounter is the client IP.
 
         client_ip = remote_addr  # Default fallback if logic fails or all trusted
-        client_index = -1  # Index in the `ips` list (from left) that corresponds to the client
+        client_index = (
+            -1
+        )  # Index in the `ips` list (from left) that corresponds to the client
 
         if self.trust_all:
             # SECURITY: If trusting all, we rely on trusted_proxy_count to limit recursion.
@@ -241,10 +243,10 @@ class ProxyHeadersMiddleware:
                 if end != -1:
                     if len(host) > end + 1 and host[end + 1] == ":":
                         try:
-                            req._port_cache = int(host[end + 2:])
+                            req._port_cache = int(host[end + 2 :])
                         except ValueError:
                             pass
-                    req._host_cache = host[:end + 1]
+                    req._host_cache = host[: end + 1]
                 else:
                     req._host_cache = host
             elif ":" in host:
