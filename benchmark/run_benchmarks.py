@@ -1,9 +1,9 @@
 import os
 import re
+import shlex
+import signal
 import subprocess
 import time
-import signal
-import shlex
 
 
 def kill_process_on_port(port):

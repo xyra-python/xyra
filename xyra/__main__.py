@@ -1,7 +1,7 @@
 import argparse
-import importlib.util
 import os
 import sys
+from importlib.util import module_from_spec, spec_from_file_location
 
 
 def load_app_from_file(file_path: str):
@@ -29,14 +29,14 @@ def load_app_from_file(file_path: str):
         module_name = os.path.splitext(os.path.basename(file_path))[0]
 
         # Create module spec for dynamic loading
-        spec = importlib.util.spec_from_file_location(module_name, file_path)
+        spec = spec_from_file_location(module_name, file_path)
 
         if spec is None or spec.loader is None:
             print(f"Error: Could not load module from '{file_path}'")
             sys.exit(1)
 
         # Create and execute the module
-        module = importlib.util.module_from_spec(spec)
+        module = module_from_spec(spec)
         sys.modules[module_name] = module
         spec.loader.exec_module(module)
 
