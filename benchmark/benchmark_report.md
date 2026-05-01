@@ -12,34 +12,34 @@ A performance comparison between FastAPI, Flask, Go Gin, Go Native, Robyn, Socke
 
 | Framework | Requests/sec | Avg Latency |
 |-----------|--------------|-------------|
-| FastAPI | 2,128.26 | 61.75ms |
-| Flask | 1,867.83 | 53.18ms |
-| Go Gin | 75,263.97 | 1.69ms |
-| Go Native | 59,385.06 | 2.13ms |
-| Robyn | 11,823.58 | 8.43ms |
-| Socketify | 18,193.66 | 5.48ms |
-| Xyra | 29,750.15 | 3.86ms |
+| FastAPI | 2,047.53 | 66.82ms |
+| Flask | 1,833.10 | 54.09ms |
+| Go Gin | 68,959.80 | 1.85ms |
+| Go Native | 71,985.62 | 1.80ms |
+| Robyn | 10,636.50 | 9.36ms |
+| Socketify | 16,635.86 | 5.99ms |
+| Xyra | 34,330.92 | 2.90ms |
 
 ## Results (Plain Text)
 
 | Framework | Requests/sec | Avg Latency |
 |-----------|--------------|-------------|
-| FastAPI | 2,244.37 | 73.94ms |
-| Flask | 1,970.56 | 50.38ms |
-| Go Gin | 83,312.40 | 1.50ms |
-| Go Native | 76,070.76 | 1.67ms |
-| Robyn | 11,881.48 | 8.39ms |
-| Socketify | 20,513.22 | 4.85ms |
-| Xyra | 39,052.35 | 2.55ms |
+| FastAPI | 1,810.58 | 78.29ms |
+| Flask | 1,967.97 | 50.41ms |
+| Go Gin | 76,091.05 | 1.60ms |
+| Go Native | 75,554.80 | 1.67ms |
+| Robyn | 10,493.90 | 9.51ms |
+| Socketify | 20,717.55 | 4.83ms |
+| Xyra | 28,994.62 | 3.43ms |
 
 ## Results (HTML)
 
 | Framework | Requests/sec | Avg Latency |
 |-----------|--------------|-------------|
-| FastAPI | 2,234.49 | 73.70ms |
-| Flask | 1,990.40 | 49.84ms |
-| Go Gin | 80,137.23 | 1.55ms |
-| Go Native | 83,011.69 | 1.52ms |
-| Robyn | 12,743.48 | 7.83ms |
-| Socketify | 25,205.91 | 3.95ms |
-| Xyra | 22,990.01 | 4.33ms |
+| FastAPI | 1,736.36 | 85.44ms |
+| Flask | 1,975.55 | 50.29ms |
+| Go Gin | 75,051.54 | 1.63ms |
+| Go Native | 76,886.24 | 1.63ms |
+| Robyn | 11,180.00 | 8.91ms |
+| Socketify | 19,893.58 | 5.02ms |
+| Xyra | 19,908.08 | 5.01ms |
