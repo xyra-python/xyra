@@ -3,6 +3,7 @@ from xyra.swagger import (
     convert_path_to_openapi,
     extract_parameter_info,
     extract_path_parameters,
+    extract_query_parameters,
     extract_tag_from_path,
     parse_docstring,
 )
@@ -148,3 +149,51 @@ def test_add_common_responses():
         updated_spec["components"]["responses"]["500"]["description"]
         == "Internal Server Error"
     )
+
+
+def test_extract_query_parameters():
+    def handler_func(
+        req,
+        res,
+        untyped_param,
+        int_param: int,
+        float_param: float,
+        bool_param: bool,
+        str_param: str,
+        default_param: int = 42,
+    ):
+        pass
+
+    params = extract_query_parameters(handler_func)
+
+    assert len(params) == 6
+
+    # Verify untyped parameter
+    assert params[0]["name"] == "untyped_param"
+    assert params[0]["in"] == "query"
+    assert params[0]["required"] is True
+    assert params[0]["schema"]["type"] == "string"
+
+    # Verify typed parameters
+    assert params[1]["name"] == "int_param"
+    assert params[1]["schema"]["type"] == "integer"
+
+    assert params[2]["name"] == "float_param"
+    assert params[2]["schema"]["type"] == "number"
+
+    assert params[3]["name"] == "bool_param"
+    assert params[3]["schema"]["type"] == "boolean"
+
+    assert params[4]["name"] == "str_param"
+    assert params[4]["schema"]["type"] == "string"
+
+    # Verify parameter with default value
+    assert params[5]["name"] == "default_param"
+    assert params[5]["required"] is False
+    assert params[5]["schema"]["type"] == "integer"
+
+
+def test_extract_query_parameters_exception():
+    # Test with non-callable to trigger exception handling
+    params = extract_query_parameters(None)
+    assert params == []
