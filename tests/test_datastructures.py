@@ -1,3 +1,8 @@
+import sys
+from unittest.mock import patch
+
+import pytest
+
 from xyra.datastructures import Headers, QueryParams, has_control_chars
 
 
@@ -81,3 +86,84 @@ def test_headers_update():
     other_headers = Headers({"X-Another": "another-value"})
     headers.update(other_headers)
     assert headers["X-Another"] == "another-value"
+
+
+def test_headers_setdefault():
+    headers = Headers()
+
+    # Test setting a new value
+    val = headers.setdefault("Content-Type", "text/plain")
+    assert val == "text/plain"
+    assert headers["Content-Type"] == "text/plain"
+
+    # Test getting an existing value
+    val2 = headers.setdefault("Content-Type", "application/json")
+    assert val2 == "text/plain"
+    assert headers["Content-Type"] == "text/plain"
+
+    # Test setitem (via dict literal and direct assignment)
+    headers["X-Custom"] = "custom_value"
+    assert headers["X-Custom"] == "custom_value"
+
+    # Test with control characters
+    with pytest.raises(ValueError, match="Invalid characters in header"):
+        headers.setdefault("Bad-Header\n", "value")
+
+    with pytest.raises(ValueError, match="Invalid characters in header"):
+        headers.setdefault("Bad-Header", "value\r")
+
+    with pytest.raises(ValueError, match="Invalid characters in header"):
+        headers["Bad-Header\n"] = "value"
+
+
+def test_fallback_cimultidict_setdefault():
+    # We patch sys.modules to simulate missing dependencies
+    with patch.dict(
+        sys.modules,
+        {
+            "multidict": None,
+            "xyra._libxyra": None,
+            "xyra.datastructures._libxyra": None,
+        },
+    ):
+        # Remove datastructures from cache to force reload
+        if "xyra.datastructures" in sys.modules:
+            del sys.modules["xyra.datastructures"]
+
+        from xyra.datastructures import CIMultiDict, Headers, has_control_chars
+
+        # Verify it's the fallback class
+        assert issubclass(CIMultiDict, dict)
+
+        # Verify has_control_chars fallback logic
+        assert has_control_chars("") is False
+        assert has_control_chars("normal") is False
+        assert has_control_chars("bad\n") is True
+
+        d = CIMultiDict()
+        val = d.setdefault("key", "value")
+        assert val == "value"
+        assert d["key"] == "value"
+
+        val2 = d.setdefault("key", "new_value")
+        assert val2 == "value"
+        assert d["key"] == "value"
+
+        # Also test Headers setdefault in fallback mode
+        h = Headers()
+        val3 = h.setdefault("Content-Type", "text/plain")
+        assert val3 == "text/plain"
+        assert h["Content-Type"] == "text/plain"
+
+        h["X-Custom"] = "custom"
+        assert h["X-Custom"] == "custom"
+
+        with pytest.raises(ValueError, match="Invalid characters in header"):
+            h.setdefault("Bad\nKey", "value")
+
+        with pytest.raises(ValueError, match="Invalid characters in header"):
+            h["Bad-Key"] = "value\r"
+
+    # Clean up xyra.datastructures again so future imports reload the original
+    if "xyra.datastructures" in sys.modules:
+        del sys.modules["xyra.datastructures"]
