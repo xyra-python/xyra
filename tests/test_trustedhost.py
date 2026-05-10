@@ -237,3 +237,27 @@ def test_trusted_host_case_insensitive_config(mock_req_res):
     req.port = 80
     middleware(req, res)
     assert not res._ended, "Should accept 'Example.com' when config is 'Example.com'"
+
+
+def test_trusted_host_ipv6_malformed_port(mock_req_res):
+    """Test IPv6 literal with malformed port correctly falls back."""
+    req, res = mock_req_res
+    # Middleware configuration parsing logic catches the ValueError when trying to parse the port
+    middleware = TrustedHostMiddleware(["[2001:db8::1]:malformed"])
+
+    # It should fallback to matching just the domain, accepting any port
+    req.host = "[2001:db8::1]"
+    req.port = 80
+    middleware(req, res)
+    assert not res._ended
+
+    req.host = "[2001:db8::1]"
+    req.port = 8080
+    middleware(req, res)
+    assert not res._ended
+
+    # Different domain should be rejected
+    req.host = "[2001:db8::2]"
+    req.port = 80
+    middleware(req, res)
+    assert res._ended
