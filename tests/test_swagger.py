@@ -148,3 +148,43 @@ def test_add_common_responses():
         updated_spec["components"]["responses"]["500"]["description"]
         == "Internal Server Error"
     )
+
+def test_parse_docstring_whitespace_only():
+    result = parse_docstring("   \n   \n   ")
+    assert result["summary"] == ""
+    assert result["description"] == ""
+
+def test_parse_docstring_single_line():
+    result = parse_docstring("Just a summary")
+    assert result["summary"] == "Just a summary"
+    assert result["description"] == ""
+
+def test_parse_docstring_none():
+    result = parse_docstring(None)
+    assert result["summary"] == ""
+    assert result["description"] == ""
+
+def test_parse_docstring_google_style():
+    docstring = """Fetches a user.
+
+    Args:
+        user_id (int): The ID.
+
+    Returns:
+        dict: The user data.
+    """
+    result = parse_docstring(docstring)
+    assert result["summary"] == "Fetches a user."
+    assert "Args:" in result["description"]
+    assert "user_id (int): The ID." in result["description"]
+
+def test_parse_docstring_sphinx_style():
+    docstring = """Fetches a user.
+
+    :param user_id: The ID.
+    :type user_id: int
+    :returns: The user data.
+    """
+    result = parse_docstring(docstring)
+    assert result["summary"] == "Fetches a user."
+    assert ":param user_id: The ID." in result["description"]
