@@ -119,6 +119,42 @@ def test_dependency_injection_simulation() -> None:
 
 
 @pytest.mark.asyncio
+async def test_async_final_handler_exception() -> None:
+    """Test that an exception in an async handler results in a 500 response."""
+    app = App()
+
+    async def buggy_handler(req, res):
+        raise ValueError("Standard Oops!")
+
+    final_handler = app._create_final_handler(
+        buggy_handler,
+        param_names=[],
+        middlewares=[],
+        parsed_path="/"
+    )
+
+    mock_res = Mock()
+    mock_res._ended = False
+    mock_req = Mock()
+
+    # Prevent truncating headers code block from raising
+    mock_req.headers_truncated = False
+
+    # Mock the native behavior used during Request initialization
+    mock_req.get_parameter = Mock(return_value=None)
+    mock_req.get_method.return_value = "GET"
+    mock_req.get_url.return_value = "/"
+    mock_req.get_header.return_value = ""
+    mock_req.for_each_header = Mock()
+
+    await final_handler(mock_res, mock_req)
+
+    # Verify that a 500 Internal Server Error response is sent
+    mock_res.write_status.assert_called_once_with("500")
+    mock_res.end.assert_called_once_with('{"error": "Internal Server Error"}')
+
+
+@pytest.mark.asyncio
 async def test_async_final_handler_exception_fallback() -> None:
     """Test the fallback exception handler in async_final_handler when sending 500 fails."""
     app = App()
