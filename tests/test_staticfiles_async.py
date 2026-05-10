@@ -119,3 +119,77 @@ async def test_static_files_read_errors():
             await handler(req, res)
             res.status.assert_called_with(500)
             res.status.return_value.text.assert_called_with("Internal Server Error")
+
+
+@pytest.mark.asyncio
+async def test_static_files_oserror_permission():
+    """
+    Verify that an actual OSError (PermissionError) when opening a file
+    results in a 404 response instead of crashing.
+    """
+    app = App()
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        test_file_path = os.path.join(temp_dir, "test.txt")
+        with open(test_file_path, "wb") as f:
+            f.write(b"hello")
+
+        # Remove all permissions to trigger PermissionError (which is an OSError)
+        os.chmod(test_file_path, 0o000)
+
+        app.static_files("/static", temp_dir)
+
+        handler = None
+        for route in app.router.routes:
+            if route["path"] == "/static/*":
+                handler = route["handler"]
+                break
+
+        assert handler is not None
+
+        req = MagicMock(spec=Request)
+        req.get_parameter.return_value = "test.txt"
+        res = MagicMock(spec=Response)
+
+        try:
+            await handler(req, res)
+
+            res.status.assert_called_with(404)
+            res.status.return_value.text.assert_called_with("Not Found")
+        finally:
+            # Restore permissions so the temp directory can be cleaned up
+            os.chmod(test_file_path, 0o777)
+
+
+@pytest.mark.asyncio
+async def test_static_files_oserror_isdir():
+    """
+    Verify that trying to read a directory as a file triggers an OSError
+    (IsADirectoryError) and results in a 404 response.
+    """
+    app = App()
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        test_dir_path = os.path.join(temp_dir, "test_dir")
+        os.makedirs(test_dir_path, exist_ok=True)
+
+        app.static_files("/static", temp_dir)
+
+        handler = None
+        for route in app.router.routes:
+            if route["path"] == "/static/*":
+                handler = route["handler"]
+                break
+
+        assert handler is not None
+
+        req = MagicMock(spec=Request)
+        req.get_parameter.return_value = "test_dir"
+        res = MagicMock(spec=Response)
+
+        await handler(req, res)
+
+        res.status.assert_called_with(404)
+        res.status.return_value.text.assert_called_with("Not Found")
