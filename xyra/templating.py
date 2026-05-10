@@ -185,4 +185,7 @@ class Templating:
         """Get the source code of a template (for debugging)."""
         if self.env.loader is None:
             raise ValueError("Template loader is not set")
-        return self.env.loader.get_source(self.env, template_name)
+        try:
+            return self.env.loader.get_source(self.env, template_name)
+        except TemplateNotFound:
+            raise ValueError(f"Template not found: {template_name}")

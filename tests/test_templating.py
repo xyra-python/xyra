@@ -111,7 +111,7 @@ def test_templating_get_template_source(temp_templates_dir):
 
 def test_templating_get_template_source_not_found(temp_templates_dir):
     templating = Templating(temp_templates_dir)
-    with pytest.raises(TemplateNotFound):
+    with pytest.raises(ValueError, match="Template not found: nonexistent.html"):
         templating.get_template_source("nonexistent.html")
 
 
