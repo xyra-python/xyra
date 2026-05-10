@@ -128,13 +128,14 @@ def test_cors_middleware_no_origin_header():
 
     middleware(request, response)
 
-    # Should still set other CORS headers but not Access-Control-Allow-Origin
-    origin_calls = [
-        call
+    # Should not set any Access-Control headers when origin is missing
+    # except potentially Vary
+    cors_calls = [
+        call[0][0]
         for call in response.header.call_args_list
-        if call[0][0] == "Access-Control-Allow-Origin"
+        if str(call[0][0]).startswith("Access-Control-")
     ]
-    assert len(origin_calls) == 0
+    assert len(cors_calls) == 0
 
 
 def test_cors_middleware_wildcard_origin():
