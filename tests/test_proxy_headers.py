@@ -1,16 +1,17 @@
 import socket
-from unittest.mock import Mock
-
+from unittest.mock import Mock, MagicMock
+import pytest
+import time
 from xyra.middleware.proxy_headers import ProxyHeadersMiddleware, proxy_headers
 from xyra.request import Request
-
+from xyra.response import Response
+from xyra.application import App
 
 def create_request(remote_addr, headers=None):
-    req = Mock()
-    res = Mock()
+    mock_req = Mock()
+    mock_res = Mock()
 
     # Mock remote_addr
-    # Request uses res.get_remote_address_bytes()
     try:
         if ":" in remote_addr:
             addr_bytes = socket.inet_pton(socket.AF_INET6, remote_addr)
@@ -19,17 +20,31 @@ def create_request(remote_addr, headers=None):
     except OSError:
         addr_bytes = b""
 
-    res.get_remote_address_bytes.return_value = addr_bytes
+    mock_res.get_remote_address_bytes.return_value = addr_bytes
 
-    # Mock headers - normalize to lowercase keys as Request expects
+    # Mock headers
     headers = {k.lower(): v for k, v in (headers or {}).items()}
-    req.get_header.side_effect = lambda k, default=None: headers.get(k, default)
+    mock_req.get_header.side_effect = lambda k, default=None: headers.get(k, default)
+    mock_req.get_headers.return_value = headers
+    mock_req.get_method.return_value = "GET"
+    mock_req.get_url.return_value = "/"
+    mock_req.for_each_header = Mock()
 
     # Create Request
-    request = Request(req, res)
-    return request, res
+    request = Request(mock_req, mock_res)
+    return request, mock_res
 
+def test_proxy_headers_factory_init():
+    # Test factory function
+    mw = proxy_headers(["127.0.0.1"])
+    assert isinstance(mw, ProxyHeadersMiddleware)
+    assert not mw.trust_all
 
+def test_proxy_headers_integration_app_registration():
+    app = App()
+    mw = proxy_headers(["10.0.0.1"])
+    app.use(mw)
+    assert mw in app._middlewares
 def test_proxy_headers_basic():
     # Trusted proxy 10.0.0.1, Client 1.2.3.4
     request, response = create_request("10.0.0.1", {"X-Forwarded-For": "1.2.3.4"})
@@ -416,3 +431,120 @@ def test_proxy_headers_valid_chain_resolution():
     mw(request, response)
 
     assert request._host_cache == "client.com"
+def test_proxy_headers_scheme_host_port():
+    # Client (1.2.3.4) -> Nginx (10.0.0.1) -> App
+    # Remote Addr: 10.0.0.1
+    # XFF: 1.2.3.4
+    # XFP: https
+    # XFH: example.com
+    # XFPort: 443
+
+    request, response = create_request(
+        "10.0.0.1",
+        {
+            "x-forwarded-for": "1.2.3.4",
+            "x-forwarded-proto": "https",
+            "x-forwarded-host": "example.com",
+            "x-forwarded-port": "443",
+            "host": "internal-lb:8080",
+        },
+    )
+
+    mw = proxy_headers(["10.0.0.1"])
+    mw(request, response)
+
+    assert request.remote_addr == "1.2.3.4"
+    assert request.scheme == "https"
+    assert request.host == "example.com"
+    assert request.port == 443
+
+
+def test_proxy_headers_chain_scheme():
+    # Chain: Client (1.1.1.1) -> Proxy1 (10.0.0.2) -> Proxy2 (10.0.0.1) -> App
+    # Trusted: Proxy2, Proxy1.
+    # XFF: 1.1.1.1, 10.0.0.2
+    # XFP: http, https
+    # Proxy2 sets remote_addr=10.0.0.1.
+
+    request, response = create_request(
+        "10.0.0.1",
+        {
+            "x-forwarded-for": "1.1.1.1, 10.0.0.2",
+            "x-forwarded-proto": "http, https",
+            "host": "internal-lb:8080",
+        },
+    )
+
+    # Trust both proxies
+    mw = proxy_headers(["10.0.0.1", "10.0.0.2"])
+    mw(request, response)
+
+    # Should resolve to 1.1.1.1
+    # Should resolve scheme to "http" (first one)
+    assert request.remote_addr == "1.1.1.1"
+    assert request.scheme == "http"
+
+
+def test_proxy_headers_malformed_proto():
+    # XFP is malformed or missing
+    request, response = create_request(
+        "10.0.0.1",
+        {
+            "x-forwarded-for": "1.2.3.4",
+            "host": "localhost:8000",
+        },
+    )
+
+    mw = proxy_headers(["10.0.0.1"])
+    mw(request, response)
+
+    # Should default to http
+    assert request.scheme == "http"
+
+
+def test_proxy_headers_trust_all_scheme():
+    # Trust all (*)
+    # Remote: 10.0.0.1 (Trusted)
+    # XFF: 1.2.3.4
+    # XFP: https
+
+    request, response = create_request(
+        "10.0.0.1",
+        {
+            "x-forwarded-for": "1.2.3.4",
+            "x-forwarded-proto": "https",
+        },
+    )
+
+    mw = proxy_headers(["*"])
+    mw(request, response)
+
+    assert request.scheme == "https"
+
+def test_large_xff_dos_mitigation():
+    # 10MB XFF header with no commas
+    large_xff = "A" * (10 * 1024 * 1024)
+    request, response = create_request("10.0.0.1", {"x-forwarded-for": large_xff})
+    mw = ProxyHeadersMiddleware(["10.0.0.1"])
+
+    start = time.time()
+    mw(request, response)
+    end = time.time()
+
+    assert end - start < 0.1
+    # Should ignore XFF because it's too long
+    assert request.remote_addr == "10.0.0.1"
+
+def test_proxy_header_dos_mitigation_many_ips():
+    # Create a massive X-Forwarded-For header with 50,000 IPs
+    xff = ", ".join(["1.1.1.1"] * 50000)
+    request, response = create_request("127.0.0.1", {"x-forwarded-for": xff})
+    middleware = ProxyHeadersMiddleware(trusted_proxies=["0.0.0.0/0"])
+
+    start_time = time.time()
+    middleware(request, response)
+    end_time = time.time()
+
+    assert end_time - start_time < 0.1
+    # Should ignore XFF because it's too long
+    assert request.remote_addr == "127.0.0.1"

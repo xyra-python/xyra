@@ -38,6 +38,9 @@ class ProxyHeadersMiddleware:
         self.trusted_networks = []
         self.trusted_proxy_count = trusted_proxy_count
 
+        if isinstance(trusted_proxies, str):
+            trusted_proxies = [trusted_proxies]
+
         if self.trust_all:
             if self.trusted_proxy_count is None:
                 logger = get_logger("xyra")
@@ -268,13 +271,15 @@ class ProxyHeadersMiddleware:
 
 
 def proxy_headers(
-    trusted_proxies: list[str], trusted_proxy_count: int | None = None
+    trusted_proxies: list[str] | str = "127.0.0.1",
+    trusted_proxy_count: int | None = None,
 ) -> ProxyHeadersMiddleware:
     """
     Create a proxy headers middleware instance.
 
     Args:
-        trusted_proxies: List of trusted proxy IPs or CIDR networks.
+        trusted_proxies: List of trusted proxy IPs or CIDR networks, or a single IP string.
+                         Defaults to "127.0.0.1".
         trusted_proxy_count: Number of trusted proxies (required if using "*").
     """
     return ProxyHeadersMiddleware(trusted_proxies, trusted_proxy_count)
