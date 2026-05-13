@@ -2,7 +2,8 @@ from collections.abc import Callable
 from typing import Any
 
 try:
-    from jinja2 import Environment, FileSystemLoader, TemplateNotFound
+    from jinja2 import FileSystemLoader, TemplateNotFound
+    from jinja2.sandbox import SandboxedEnvironment as Environment
 except ImportError:
     class Environment:
         def __init__(self, *args, **kwargs):
@@ -143,6 +144,12 @@ class Templating:
     def render_string(self, template_string: str, **context) -> str:
         """
         Render a template from a string instead of a file.
+
+        .. note::
+            For security reasons, this method uses a SandboxedEnvironment to
+            prevent Server-Side Template Injection (SSTI). However, you should
+            still avoid passing untrusted user input directly as the
+            `template_string` whenever possible.
 
         Args:
             template_string: Template content as string
