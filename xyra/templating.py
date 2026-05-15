@@ -2,7 +2,8 @@ from collections.abc import Callable
 from typing import Any
 
 try:
-    from jinja2 import Environment, FileSystemLoader, TemplateNotFound
+    from jinja2 import FileSystemLoader, TemplateNotFound
+    from jinja2.sandbox import SandboxedEnvironment as Environment
 except ImportError:
     class Environment:
         def __init__(self, *args, **kwargs):
