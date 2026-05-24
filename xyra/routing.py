@@ -1,3 +1,5 @@
+import re
+
 try:
 
     from ._libxyra import ffi, lib
@@ -16,7 +18,6 @@ try:
         # Convert {param} style back to :param style for uWS matching
         native_path = path_str
         parsed_params = []
-        import re
 
         for param_tuple in params:
             # param_tuple is (name, type)
