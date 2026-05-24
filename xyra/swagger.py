@@ -2,6 +2,11 @@ import inspect
 import re
 from typing import Any
 
+_PARAM_RE = re.compile(r"(\w+)\s*\(([^)]+)\):\s*(.+)")
+_JSON_FIELD_RE = re.compile(r'"(\w+)"')
+_PATH_CONVERT_RE = re.compile(r"\{(\w+):[^}]+\}")
+_PATH_PARAM_RE = re.compile(r"\{(\w+)(?::[^}]+)?\}")
+
 
 def extract_parameter_info(docstring: str) -> dict[str, dict[str, Any]]:
     """Extract parameter information from docstring."""
@@ -16,7 +21,7 @@ def extract_parameter_info(docstring: str) -> dict[str, dict[str, Any]]:
         line = line.strip()
 
         # Look for parameter patterns like "param_name (type): description"
-        param_match = re.match(r"(\w+)\s*\(([^)]+)\):\s*(.+)", line)
+        param_match = _PARAM_RE.match(line)
         if param_match:
             param_name, param_type, description = param_match.groups()
             params[param_name] = {
@@ -80,7 +85,7 @@ def extract_request_body_schema(handler_func, method: str) -> dict[str, Any] | N
         # Look for JSON body descriptions
         if "json" in docstring.lower() or "body" in docstring.lower():
             # Extract field mentions from docstring
-            field_matches = re.findall(r'"(\w+)"', docstring)
+            field_matches = _JSON_FIELD_RE.findall(docstring)
             for field in field_matches:
                 request_body["content"]["application/json"]["schema"]["properties"][
                     field
@@ -122,7 +127,7 @@ def convert_path_to_openapi(path: str) -> str:
     """Convert Flask-style path parameters to OpenAPI format."""
     # Convert {param} to {param} (already in correct format)
     # Handle typed parameters like {param:int} -> {param}
-    openapi_path = re.sub(r"\{(\w+):[^}]+\}", r"{\1}", path)
+    openapi_path = _PATH_CONVERT_RE.sub(r"{\1}", path)
     return openapi_path
 
 
@@ -131,7 +136,7 @@ def extract_path_parameters(path: str) -> list[dict[str, Any]]:
     parameters = []
 
     # Find all {param} patterns
-    param_matches = re.findall(r"\{(\w+)(?::[^}]+)?\}", path)
+    param_matches = _PATH_PARAM_RE.findall(path)
 
     for param_name in param_matches:
         parameters.append(
