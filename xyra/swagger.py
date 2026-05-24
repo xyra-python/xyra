@@ -2,6 +2,8 @@ import inspect
 import re
 from typing import Any
 
+_PATH_PARAM_RE = re.compile(r"\{(\w+)(?::[^}]+)?\}")
+
 
 def extract_parameter_info(docstring: str) -> dict[str, dict[str, Any]]:
     """Extract parameter information from docstring."""
@@ -131,7 +133,7 @@ def extract_path_parameters(path: str) -> list[dict[str, Any]]:
     parameters = []
 
     # Find all {param} patterns
-    param_matches = re.findall(r"\{(\w+)(?::[^}]+)?\}", path)
+    param_matches = _PATH_PARAM_RE.findall(path)
 
     for param_name in param_matches:
         parameters.append(
