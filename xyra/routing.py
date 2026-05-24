@@ -1,33 +1,40 @@
+import re
+
+_PARAM_RE_CACHE: dict[str, re.Pattern] = {}
+
 try:
 
     from ._libxyra import ffi, lib
 
     def parse_path(path_str):
         params = []
+
         @ffi.callback("void(void*, const char*, size_t, const char*, size_t)")
         def _parse_cb(user_data, name_ptr, name_len, type_ptr, type_len):
-            name = ffi.string(name_ptr, name_len).decode('utf-8')
-            type_str = ffi.string(type_ptr, type_len).decode('utf-8')
+            name = ffi.string(name_ptr, name_len).decode("utf-8")
+            type_str = ffi.string(type_ptr, type_len).decode("utf-8")
             params.append((name, type_str))
 
-        path_b = path_str.encode('utf-8')
+        path_b = path_str.encode("utf-8")
         lib.xyra_parse_path(path_b, len(path_b), ffi.NULL, _parse_cb)
 
         # Convert {param} style back to :param style for uWS matching
         native_path = path_str
         parsed_params = []
-        import re
 
         for param_tuple in params:
             # param_tuple is (name, type)
             name = param_tuple[0]
             # simple replacement
-            native_path = re.sub(r'\{' + name + r'(?:-[^}]+)?\}', f':{name}', native_path)
+            if name not in _PARAM_RE_CACHE:
+                _PARAM_RE_CACHE[name] = re.compile(rf"\{{{name}(?:-[^}}]+)?\}}")
+            native_path = _PARAM_RE_CACHE[name].sub(f":{name}", native_path)
             parsed_params.append(name)
 
         return native_path, parsed_params
 
 except ImportError:
+
     def parse_path(path_str):
         return path_str, []
 
@@ -77,6 +84,7 @@ class Router:
         def decorator(handler):
             self.add_route(method, path, handler)
             return handler
+
         return decorator
 
     def get(self, path: str):
