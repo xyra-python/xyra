@@ -249,30 +249,6 @@ class Response:
         if self._ended:
             return
 
-        # PERF: Fast path for simple 200 OK responses
-        if self.status_code == 200 and not self._headers_dict:
-            if hasattr(self._res, "end_fast"):
-                self._res.end_fast(data)
-                self._ended = True
-                return
-            elif lib and hasattr(lib, "xyra_res_end_fast"):
-                if isinstance(data, str):
-                    c_data = data.encode('utf-8')
-                else:
-                    c_data = data
-                self._temp_data_cache = c_data
-                buf = ffi.from_buffer("char[]", self._temp_data_cache)
-                lib.xyra_res_end_fast(self._res, buf, len(self._temp_data_cache))
-                self._ended = True
-                return
-
-        # Write status code
-        status_str = str(self.status_code)
-        if hasattr(self._res, "write_status"):
-            self._res.write_status(status_str)
-        else:
-            lib.xyra_res_write_status(self._res, status_str.encode('utf-8'), len(status_str.encode('utf-8')))
-
         # SECURITY: Set default Content-Type if missing to prevent MIME sniffing/XSS.
         # Browsers may sniff "text/html" from response body if Content-Type is missing.
         # Default to safe types: text/plain for strings, application/octet-stream for bytes.
@@ -281,6 +257,13 @@ class Response:
                 self._header_fast("Content-Type", "text/plain; charset=utf-8")
             else:
                 self._header_fast("Content-Type", "application/octet-stream")
+
+        # Write status code
+        status_str = str(self.status_code)
+        if hasattr(self._res, "write_status"):
+            self._res.write_status(status_str)
+        else:
+            lib.xyra_res_write_status(self._res, status_str.encode('utf-8'), len(status_str.encode('utf-8')))
 
         # Write headers
         self._write_headers()
