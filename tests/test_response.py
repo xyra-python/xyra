@@ -46,19 +46,13 @@ def test_response_header(mock_socketify_response):
 def test_response_send_string(mock_socketify_response):
     response = Response(mock_socketify_response)
     response.send("Hello World")
-    if hasattr(mock_socketify_response, "end_fast"):
-        mock_socketify_response.end_fast.assert_called_once_with("Hello World")
-    else:
-        mock_socketify_response.end.assert_called_once_with("Hello World")
+    mock_socketify_response.end.assert_called_once_with("Hello World")
     assert response._ended is True
 
 def test_response_send_bytes(mock_socketify_response):
     response = Response(mock_socketify_response)
     response.send(b"Hello World")
-    if hasattr(mock_socketify_response, "end_fast"):
-        mock_socketify_response.end_fast.assert_called_once_with(b"Hello World")
-    else:
-        mock_socketify_response.end.assert_called_once_with(b"Hello World")
+    mock_socketify_response.end.assert_called_once_with(b"Hello World")
     assert response._ended is True
 
 
