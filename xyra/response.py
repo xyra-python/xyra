@@ -251,20 +251,12 @@ class Response:
 
         # PERF: Fast path for simple 200 OK responses
         if self.status_code == 200 and not self._headers_dict:
-            if hasattr(self._res, "end_fast"):
-                self._res.end_fast(data)
-                self._ended = True
-                return
-            elif lib and hasattr(lib, "xyra_res_end_fast"):
-                if isinstance(data, str):
-                    c_data = data.encode('utf-8')
-                else:
-                    c_data = data
-                self._temp_data_cache = c_data
-                buf = ffi.from_buffer("char[]", self._temp_data_cache)
-                lib.xyra_res_end_fast(self._res, buf, len(self._temp_data_cache))
-                self._ended = True
-                return
+            # SECURITY: Must apply Content-Type to prevent MIME sniffing/XSS.
+            # This populates _headers_dict, bypassing end_fast but keeping it secure.
+            if isinstance(data, str):
+                self._header_fast("Content-Type", "text/plain; charset=utf-8")
+            else:
+                self._header_fast("Content-Type", "application/octet-stream")
 
         # Write status code
         status_str = str(self.status_code)
