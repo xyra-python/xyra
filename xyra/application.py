@@ -643,6 +643,11 @@ class App:
                         _sync_req._scheme_cache = None
                         _sync_req._remote_addr_cache = None
 
+                        # SECURITY: Check for header truncation to prevent security bypasses
+                        if getattr(_sync_req._req, "headers_truncated", False):
+                            _sync_res.status(431).send("Request Header Fields Too Large")
+                            return
+
                         h_func(_sync_req, _sync_res)
 
                         # Fast end for empty text responses and json
