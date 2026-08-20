@@ -127,10 +127,7 @@ async def test_async_final_handler_exception() -> None:
         raise ValueError("Standard Oops!")
 
     final_handler = app._create_final_handler(
-        buggy_handler,
-        param_names=[],
-        middlewares=[],
-        parsed_path="/"
+        buggy_handler, param_names=[], middlewares=[], parsed_path="/"
     )
 
     mock_res = Mock()
@@ -163,10 +160,7 @@ async def test_async_final_handler_exception_fallback() -> None:
         raise ValueError("Oops!")
 
     final_handler = app._create_final_handler(
-        buggy_handler,
-        param_names=[],
-        middlewares=[],
-        parsed_path="/"
+        buggy_handler, param_names=[], middlewares=[], parsed_path="/"
     )
 
     mock_res = Mock()
@@ -199,3 +193,41 @@ async def test_async_final_handler_exception_fallback() -> None:
             "Failed to send 500 Internal Server Error response",
             exc_info=True,
         )
+
+
+@pytest.mark.asyncio
+async def test_sync_route_handler_offloaded_to_thread() -> None:
+    """Test that synchronous route handlers execute successfully via thread offloading."""
+    import threading
+
+    main_thread_id = threading.get_ident()
+    handler_thread_ids = []
+
+    app = App()
+
+    def sync_handler(req, res):
+        handler_thread_ids.append(threading.get_ident())
+        res.status_code = 200
+
+    final_handler = app._create_final_handler(
+        sync_handler,
+        param_names=[],
+        middlewares=[],
+        parsed_path="/",
+    )
+
+    mock_res = Mock()
+    mock_res._ended = False
+    mock_req = Mock()
+    mock_req.headers_truncated = False
+    mock_req.get_parameter = Mock(return_value=None)
+    mock_req.get_method.return_value = "GET"
+    mock_req.get_url.return_value = "/"
+    mock_req.get_header.return_value = ""
+    mock_req.for_each_header = Mock()
+
+    await final_handler(mock_res, mock_req)
+
+    assert len(handler_thread_ids) == 1
+    # Handler should have run on a separate thread via asyncio.to_thread
+    assert handler_thread_ids[0] != main_thread_id

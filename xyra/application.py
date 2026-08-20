@@ -280,15 +280,17 @@ class App:
             def _open_cb(ws_ptr, user_data):
                 if "open" in ws_config:
                     ws_config["open"](ws_ptr)
+
             self._cffi_callbacks.append(_open_cb)
 
             @ffi.callback("void(xyra_websocket_t*, const char*, size_t, int, void*)")
             def _msg_cb(ws_ptr, msg_ptr, msg_len, opcode, user_data):
                 if "message" in ws_config:
                     msg = ffi.buffer(msg_ptr, msg_len)[:]
-                    if opcode == 1: # TEXT
-                        msg = msg.decode('utf-8')
+                    if opcode == 1:  # TEXT
+                        msg = msg.decode("utf-8")
                     ws_config["message"](ws_ptr, msg, opcode)
+
             self._cffi_callbacks.append(_msg_cb)
 
             @ffi.callback("bool(xyra_response_t*, xyra_request_t*, void*)")
@@ -298,6 +300,7 @@ class App:
                     req = Request(req_ptr, None)
                     return ws_config["upgrade"](req)
                 return True
+
             self._cffi_callbacks.append(_upgrade_cb)
 
             @ffi.callback("void(xyra_websocket_t*, int, const char*, size_t, void*)")
@@ -305,15 +308,24 @@ class App:
                 if "close" in ws_config:
                     msg = ffi.buffer(msg_ptr, msg_len)[:] if msg_ptr else b""
                     ws_config["close"](ws_ptr, code, msg)
+
             self._cffi_callbacks.append(_close_cb)
 
-            path_b = path.encode('utf-8')
+            path_b = path.encode("utf-8")
 
             # Support mock objects in tests which pass an object instead of cdata
-            if hasattr(self._app, '_mock_name'):
+            if hasattr(self._app, "_mock_name"):
                 self._app.ws(path, ws_config)
             else:
-                lib.xyra_app_ws(self._app, path_b, _open_cb, _msg_cb, _upgrade_cb, _close_cb, ffi.NULL)
+                lib.xyra_app_ws(
+                    self._app,
+                    path_b,
+                    _open_cb,
+                    _msg_cb,
+                    _upgrade_cb,
+                    _close_cb,
+                    ffi.NULL,
+                )
         else:
             self._app.ws(path, ws_config)
 
@@ -361,14 +373,18 @@ class App:
 
                 # Strip leading slashes to prevent absolute path interpretation,
                 # then use posixpath.normpath to resolve `.` and `..` consistently.
-                stripped_path = posixpath.normpath(stripped_path.lstrip("/")).lstrip("/")
+                stripped_path = posixpath.normpath(stripped_path.lstrip("/")).lstrip(
+                    "/"
+                )
 
                 abs_path = await asyncio.to_thread(
                     lambda: os.path.realpath(os.path.join(abs_directory, stripped_path))
                 )
 
                 # Verify the resolved path is within the static directory
-                if not os.path.commonpath([abs_directory, abs_path]) == os.path.normpath(abs_directory):
+                if not os.path.commonpath(
+                    [abs_directory, abs_path]
+                ) == os.path.normpath(abs_directory):
                     res.status(403).text("Forbidden")
                     return
 
@@ -431,7 +447,7 @@ class App:
             if is_async_handler:
                 await route_handler(req, res)
             else:
-                route_handler(req, res)
+                await asyncio.to_thread(route_handler, req, res)
             return res
 
         next_call = run_route_handler
@@ -593,7 +609,9 @@ class App:
             def wrap_async(handler):
                 def sync_handler(res, req):
                     asyncio.run_coroutine_threadsafe(handler(res, req), self._loop)
+
                 return sync_handler
+
             return wrap_async
 
         wrap_async = create_wrap_async()
@@ -645,7 +663,9 @@ class App:
 
                         # SECURITY: Check for header truncation to prevent security bypasses
                         if getattr(_sync_req._req, "headers_truncated", False):
-                            _sync_res.status(431).send("Request Header Fields Too Large")
+                            _sync_res.status(431).send(
+                                "Request Header Fields Too Large"
+                            )
                             return
 
                         h_func(_sync_req, _sync_res)
@@ -661,9 +681,11 @@ class App:
             # Use the app methods to register routes
             if self._is_cffi:
                 if has_middleware or is_async_handler or route["param_names"]:
+
                     @ffi.callback("void(xyra_response_t*, xyra_request_t*, void*)")
                     def _route_cb(res_ptr, req_ptr, user_data, _cb=cb_wrapper):
                         _cb(res_ptr, req_ptr)
+
                 else:
                     # Optimize the fast path by eliminating the closure lookup
                     @ffi.callback("void(xyra_response_t*, xyra_request_t*, void*)")
@@ -673,11 +695,13 @@ class App:
                 self._cffi_callbacks.append(_route_cb)
 
                 c_method_name = f"xyra_app_{method}"
-                if hasattr(self._app, '_mock_name'):
+                if hasattr(self._app, "_mock_name"):
                     getattr(self._app, method)(parsed_path, _route_cb)
                 elif hasattr(lib, c_method_name):
                     c_method = getattr(lib, c_method_name)
-                    c_method(self._app, parsed_path.encode('utf-8'), _route_cb, ffi.NULL)
+                    c_method(
+                        self._app, parsed_path.encode("utf-8"), _route_cb, ffi.NULL
+                    )
             else:
                 if hasattr(self._app, method):
                     getattr(self._app, method)(parsed_path, cb_wrapper)
@@ -694,12 +718,14 @@ class App:
         )
         if self._is_cffi:
             cb_wrapper = wrap_async(final_handler)
+
             @ffi.callback("void(xyra_response_t*, xyra_request_t*, void*)")
             def _any_cb(res_ptr, req_ptr, user_data, _cb=cb_wrapper):
                 _cb(res_ptr, req_ptr)
+
             self._cffi_callbacks.append(_any_cb)
             # Support mock objects in tests which pass an object instead of cdata
-            if hasattr(self._app, '_mock_name'):
+            if hasattr(self._app, "_mock_name"):
                 self._app.any("/*", _any_cb)
             else:
                 lib.xyra_app_any(self._app, b"/*", _any_cb, ffi.NULL)
@@ -770,13 +796,16 @@ class App:
                 req_logger = get_logger("xyra")
                 req_logger.error(f"Failed to generate Swagger spec: {str(e)}")
                 res.status(500).json(
-                    {"error": "Failed to generate Swagger spec", "message": "An internal error occurred while generating the documentation."}
+                    {
+                        "error": "Failed to generate Swagger spec",
+                        "message": "An internal error occurred while generating the documentation.",
+                    }
                 )
 
         self.get(swagger_json_path, get_swagger_json)
 
         # SECURITY: Escape HTML characters to prevent XSS when interpolated in inline script tag
-        safe_swagger_url = json.dumps(swagger_json_path).replace('<', '\\u003c')
+        safe_swagger_url = json.dumps(swagger_json_path).replace("<", "\\u003c")
 
         swagger_ui_html = f"""
         <!DOCTYPE html>
@@ -904,17 +933,21 @@ class App:
             logger.info(f"API docs available at http://{host}:{port}{swagger_ui_path}")
 
         if self._is_cffi:
+
             @ffi.callback("void(bool, void*)")
             def _listen_cb(success, user_data):
                 if success:
                     logger.info(f"Listening on port {port}")
                 else:
                     logger.error(f"Failed to listen on port {port}")
+
             self._cffi_callbacks.append(_listen_cb)
             lib.xyra_app_listen(self._app, port, _listen_cb, ffi.NULL)
             lib.xyra_app_run(self._app)
         else:
-            self._app.listen(port, lambda config: logger.info(f"Listening on port {port}"))
+            self._app.listen(
+                port, lambda config: logger.info(f"Listening on port {port}")
+            )
             self._app.run()
 
     def listen(
