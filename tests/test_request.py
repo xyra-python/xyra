@@ -354,3 +354,38 @@ def test_request_query_params_fallback(mock_sys_modules):
     request = Request(req, res)
 
     assert request.query_params == {"key": ["value"]}
+
+
+def test_request_port_ipv6_host_header():
+    """Test port property parsing for IPv6 host header with valid, invalid, and malformed ports."""
+    res = Mock()
+
+    # Valid IPv6 host with port
+    req_valid = Mock()
+    req_valid.get_header.side_effect = lambda key, default=None: "[::1]:8080" if key == "host" else default
+    request_valid = Request(req_valid, res)
+    assert request_valid.port == 8080
+
+    # Invalid IPv6 host port (non-integer string) -> fallback to default HTTP port (80)
+    req_invalid = Mock()
+    req_invalid.get_header.side_effect = lambda key, default=None: "[::1]:abc" if key == "host" else default
+    request_invalid = Request(req_invalid, res)
+    assert request_invalid.port == 80
+
+    # Invalid IPv6 host port with HTTPS scheme -> fallback to default HTTPS port (443)
+    req_https_invalid = Mock()
+    def get_header_https(key, default=None):
+        if key == "host":
+            return "[::1]:abc"
+        if key == "x-forwarded-proto":
+            return "https"
+        return default
+    req_https_invalid.get_header.side_effect = get_header_https
+    request_https_invalid = Request(req_https_invalid, res)
+    assert request_https_invalid.port == 443
+
+    # Malformed IPv6 host header without closing bracket -> fallback to default port (80)
+    req_malformed = Mock()
+    req_malformed.get_header.side_effect = lambda key, default=None: "[::1" if key == "host" else default
+    request_malformed = Request(req_malformed, res)
+    assert request_malformed.port == 80
