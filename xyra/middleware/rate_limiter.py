@@ -122,12 +122,13 @@ class RateLimiter:
     def get_reset_time(self, key: str) -> float:
         """Get time until reset (next window)."""
         with self._lock:
-            if key not in self._requests or not self._requests[key]:
+            timestamps = self._requests.get(key)
+            if not timestamps:
                 return 0
 
             current_time = time.monotonic()
             # PERF: Requests are ordered by time, so the first element is always the oldest
-            oldest_request = self._requests[key][0]
+            oldest_request = timestamps[0]
             return max(0, self.window - (current_time - oldest_request))
 
 
