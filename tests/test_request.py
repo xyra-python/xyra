@@ -354,3 +354,28 @@ def test_request_query_params_fallback(mock_sys_modules):
     request = Request(req, res)
 
     assert request.query_params == {"key": ["value"]}
+
+
+def test_request_port_invalid_ipv4_or_domain():
+    """Test fallback to default port when IPv4/domain host header contains non-numeric port."""
+    req = Mock()
+    res = Mock()
+    req.get_header.return_value = "127.0.0.1:xyz"
+    request = Request(req, res)
+
+    # For http (default), port should fall back to 80
+    assert request.port == 80
+
+    req_https = Mock()
+    def get_header(key, default=None):
+        if key == "host":
+            return "example.com:invalid"
+        if key == "x-forwarded-proto":
+            return "https"
+        return default
+
+    req_https.get_header.side_effect = get_header
+    request_https = Request(req_https, res)
+
+    # For https, port should fall back to 443
+    assert request_https.port == 443
