@@ -186,7 +186,7 @@ class Request:
             # CFFI fallback
             out_ptr = ffi.new("char**")
             length = lib.xyra_req_get_method(self._req, out_ptr)
-            method = ffi.string(out_ptr[0], length).decode('utf-8')
+            method = ffi.string(out_ptr[0], length).decode("utf-8")
         else:
             method = "GET"
 
@@ -205,7 +205,7 @@ class Request:
             elif ffi:
                 out_ptr = ffi.new("char**")
                 length = lib.xyra_req_get_url(self._req, out_ptr)
-                url = ffi.string(out_ptr[0], length).decode('utf-8')
+                url = ffi.string(out_ptr[0], length).decode("utf-8")
             else:
                 url = "/"
             if url is None:
@@ -264,16 +264,19 @@ class Request:
                 self._headers_cache = self._req.get_headers()
             elif hasattr(self._req, "for_each_header"):
                 headers = {}
+
                 def cb(k, v):
                     headers[k.lower()] = v
+
                 self._req.for_each_header(cb)
                 self._headers_cache = headers
             elif ffi:
                 headers = {}
+
                 @ffi.callback("void(void*, const char*, size_t, const char*, size_t)")
                 def _cb(user_data, key_ptr, key_len, val_ptr, val_len):
-                    k = ffi.string(key_ptr, key_len).decode('utf-8').lower()
-                    v = ffi.string(val_ptr, val_len).decode('utf-8')
+                    k = ffi.string(key_ptr, key_len).decode("utf-8").lower()
+                    v = ffi.string(val_ptr, val_len).decode("utf-8")
                     headers[k] = v
 
                 lib.xyra_req_get_headers(self._req, ffi.NULL, _cb)
@@ -297,7 +300,7 @@ class Request:
                 out_ptr = ffi.new("char**")
                 length = lib.xyra_req_get_full_query(self._req, out_ptr)
                 if length > 0:
-                    self._query_cache = ffi.string(out_ptr[0], length).decode('utf-8')
+                    self._query_cache = ffi.string(out_ptr[0], length).decode("utf-8")
                 else:
                     self._query_cache = ""
             else:
@@ -337,10 +340,13 @@ class Request:
                     self._query_params_cache = self._req.get_queries()
                 elif ffi and getattr(lib, "xyra_req_get_queries", None) is not None:
                     queries = {}
-                    @ffi.callback("void(void*, const char*, size_t, const char*, size_t)")
+
+                    @ffi.callback(
+                        "void(void*, const char*, size_t, const char*, size_t)"
+                    )
                     def _cb(user_data, key_ptr, key_len, val_ptr, val_len):
-                        k = ffi.string(key_ptr, key_len).decode('utf-8')
-                        v = ffi.string(val_ptr, val_len).decode('utf-8')
+                        k = ffi.string(key_ptr, key_len).decode("utf-8")
+                        v = ffi.string(val_ptr, val_len).decode("utf-8")
                         if k not in queries:
                             queries[k] = []
                         queries[k].append(v)
@@ -375,7 +381,7 @@ class Request:
         out_ptr = ffi.new("char**")
         length = lib.xyra_req_get_parameter(self._req, index, out_ptr)
         if length > 0:
-            return ffi.string(out_ptr[0], length).decode('utf-8')
+            return ffi.string(out_ptr[0], length).decode("utf-8")
         return None
 
     def get_query(self, key: str, default: str | None = None) -> str | None:
@@ -397,10 +403,10 @@ class Request:
 
         if ffi:
             out_ptr = ffi.new("char**")
-            c_key = key.encode('utf-8')
+            c_key = key.encode("utf-8")
             length = lib.xyra_req_get_query(self._req, c_key, out_ptr)
             if length > 0:
-                return ffi.string(out_ptr[0], length).decode('utf-8')
+                return ffi.string(out_ptr[0], length).decode("utf-8")
 
         return default
 
@@ -416,10 +422,10 @@ class Request:
             return value if value else default
 
         out_ptr = ffi.new("char**")
-        c_name = name.lower().encode('utf-8')
+        c_name = name.lower().encode("utf-8")
         length = lib.xyra_req_get_header(self._req, c_name, out_ptr)
         if length > 0:
-            return ffi.string(out_ptr[0], length).decode('utf-8')
+            return ffi.string(out_ptr[0], length).decode("utf-8")
         return default
 
     async def text(self) -> str:
@@ -467,10 +473,10 @@ class Request:
             content_type = ""
         media_type = content_type.split(";")[0].strip().lower()
         if not media_type or not (
-            media_type == "application/json" or
-            media_type.endswith("+json")
+            media_type == "application/json" or media_type.endswith("+json")
         ):
             from .exceptions import bad_request
+
             raise bad_request(
                 f"Invalid Content-Type for JSON parsing: '{content_type}'. "
                 f"Expected 'application/json' or similar '+json' media type. "
@@ -494,6 +500,7 @@ class Request:
                 parsed = json_lib.loads(str(body))
         except Exception as e:
             from .exceptions import bad_request
+
             logger = get_logger("xyra")
             logger.warning(f"Failed to parse JSON: {e}")
             # SECURITY: Raise HTTP 400 Bad Request instead of ValueError to prevent 500 error logs DoS
@@ -531,7 +538,6 @@ class Request:
         if not text_content:
             return {}
 
-
         # Optimized form parsing using urllib.parse.parse_qsl for proper URL decoding
         try:
             # SECURITY: Limit max_num_fields to 1000 to prevent DoS via Hash Collision / CPU Exhaustion
@@ -540,13 +546,19 @@ class Request:
 
             if lib and hasattr(lib, "xyra_parse_qsl"):
                 try:
-                    @ffi.callback("void(void*, const char*, size_t, const char*, size_t)")
+
+                    @ffi.callback(
+                        "void(void*, const char*, size_t, const char*, size_t)"
+                    )
                     def _cb(user_data, key_ptr, key_len, val_ptr, val_len):
-                        k = ffi.string(key_ptr, key_len).decode('utf-8')
-                        v = ffi.string(val_ptr, val_len).decode('utf-8')
+                        k = ffi.string(key_ptr, key_len).decode("utf-8")
+                        v = ffi.string(val_ptr, val_len).decode("utf-8")
                         parsed_pairs.append((k, v))
-                    content_b = text_content.encode('utf-8')
-                    lib.xyra_parse_qsl(content_b, len(content_b), True, 1000, ffi.NULL, _cb)
+
+                    content_b = text_content.encode("utf-8")
+                    lib.xyra_parse_qsl(
+                        content_b, len(content_b), True, 1000, ffi.NULL, _cb
+                    )
                     parsed = True
                 except Exception:  # nosec B110
                     pass
@@ -556,6 +568,7 @@ class Request:
                 # if we hit a mocked exception
                 try:
                     from .libxyra import parse_qsl as cpp_parse_qsl
+
                     parsed_pairs = cpp_parse_qsl(
                         text_content, keep_blank_values=True, max_num_fields=1000
                     )
@@ -567,9 +580,12 @@ class Request:
                 parsed_qs = parse_qs(
                     text_content, keep_blank_values=True, max_num_fields=1000
                 )
-                parsed_pairs = []
-                for k, v in parsed_qs.items():
-                    parsed_pairs.append((k, v[-1] if isinstance(v, list) and v else v))
+                form_data = {
+                    k: v[-1] if isinstance(v, list) and v else v
+                    for k, v in parsed_qs.items()
+                }
+                self._form_cache = form_data
+                return form_data
 
             # Convert list of tuples to dict, handling multiple values appropriately if needed.
             # parse_qs returns a dict of lists, parse_qsl returns list of tuples.
