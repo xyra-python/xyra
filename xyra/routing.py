@@ -1,3 +1,4 @@
+import asyncio
 import re
 
 try:
@@ -67,6 +68,7 @@ class Router:
             "parsed_path": parsed_path,
             "param_names": param_names,
             "handler": handler,
+            "is_async": asyncio.iscoroutinefunction(handler),
         }
         self.routes.append(route_dict)
 
