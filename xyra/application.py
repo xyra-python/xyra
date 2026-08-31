@@ -627,7 +627,9 @@ class App:
                 method = "del"
             parsed_path = route["parsed_path"]
 
-            is_async_handler = asyncio.iscoroutinefunction(route["handler"])
+            is_async_handler = route.get("is_async")
+            if is_async_handler is None:
+                is_async_handler = asyncio.iscoroutinefunction(route["handler"])
             has_middleware = len(self._middlewares) > 0
 
             # Only use the slow path if we have middleware, async handlers, or URL params
