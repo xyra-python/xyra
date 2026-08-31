@@ -4,11 +4,21 @@ Proxy Headers Middleware for Xyra Framework
 Safely resolves the client IP address when running behind trusted proxies.
 """
 
-from ipaddress import ip_address, ip_network
+from functools import lru_cache
+from ipaddress import IPv4Address, IPv6Address, ip_address, ip_network
 
 from ..logger import get_logger
 from ..request import Request
 from ..response import Response
+
+
+@lru_cache(maxsize=1024)
+def _parse_ip(ip_str: str) -> IPv4Address | IPv6Address | None:
+    """Parse an IP address string with LRU caching to eliminate redundant parsing overhead."""
+    try:
+        return ip_address(ip_str)
+    except ValueError:
+        return None
 
 
 class ProxyHeadersMiddleware:
@@ -63,19 +73,22 @@ class ProxyHeadersMiddleware:
                     # Invalid IP/CIDR, skip it
                     continue
 
-    def _is_trusted(self, ip_str: str) -> bool:
+    def _is_trusted(self, ip_str: str | IPv4Address | IPv6Address) -> bool:
         """Check if an IP address is trusted."""
         if self.trust_all:
             return True
 
-        try:
-            ip = ip_address(ip_str)
-            for network in self.trusted_networks:
-                if ip in network:
-                    return True
-            return False
-        except ValueError:
-            return False
+        if isinstance(ip_str, (IPv4Address, IPv6Address)):
+            ip = ip_str
+        else:
+            ip = _parse_ip(ip_str)
+            if ip is None:
+                return False
+
+        for network in self.trusted_networks:
+            if ip in network:
+                return True
+        return False
 
     def __call__(self, req: Request, res: Response) -> None:
         """
@@ -166,12 +179,10 @@ class ProxyHeadersMiddleware:
 
         # Update the request's remote_addr cache
         # Validate that the resolved IP is a valid IP string
-        try:
-            # Ensure it's a valid IP address
-            ip_address(client_ip)
+        if _parse_ip(client_ip) is not None:
             # Set the cache directly
             req._remote_addr_cache = client_ip
-        except ValueError:
+        else:
             # SECURITY: If IP is invalid, we MUST NOT leave remote_addr as the trusted proxy IP.
             # This would allow attackers to bypass IP-based rate limits or blocklists by
             # making their requests appear to come from the trusted proxy itself.
