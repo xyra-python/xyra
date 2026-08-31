@@ -24,7 +24,17 @@ class TrustedHostMiddleware:
         # This prevents bypasses where config is "Example.com" but request is "example.com".
         self.allowed_hosts = [host.lower() for host in allowed_hosts]
         # Pre-parse allowed hosts for performance
-        self._patterns = [self._parse_host(host) for host in self.allowed_hosts]
+        parsed = [self._parse_host(host) for host in self.allowed_hosts]
+        self._patterns = []
+        for domain, port in parsed:
+            if domain == "*":
+                self._patterns.append(("*", None, None, port))
+            elif domain.startswith("*."):
+                suffix = domain[2:]
+                self._patterns.append(("wildcard", suffix, "." + suffix, port))
+            else:
+                self._patterns.append(("exact", domain, None, port))
+
         # SECURITY: Invalid characters for host headers
         self._invalid_chars = {"/", "?", "#", "\\", "@"}
 
@@ -82,21 +92,13 @@ class TrustedHostMiddleware:
         req_domain = host.lower()
 
         is_allowed = False
-        for allowed_domain, allowed_port in self._patterns:
-            if allowed_domain == "*":
-                is_allowed = True
-                break
-
-            # Check domain match
-            domain_match = False
-            if allowed_domain.startswith("*."):
-                # Wildcard subdomain matching
-                suffix = allowed_domain[2:]
-                # Matches "sub.example.com" AND "example.com"
-                if req_domain == suffix or req_domain.endswith("." + suffix):
-                    domain_match = True
-            elif allowed_domain == req_domain:
+        for ptype, val1, val2, allowed_port in self._patterns:
+            if ptype == "*":
                 domain_match = True
+            elif ptype == "exact":
+                domain_match = (req_domain == val1)
+            else:  # wildcard
+                domain_match = (req_domain == val1 or req_domain.endswith(val2))
 
             # Check port match if domain matched
             if domain_match:
