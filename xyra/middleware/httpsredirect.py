@@ -29,6 +29,17 @@ class HTTPSRedirectMiddleware:
         self.redirect_status_code = redirect_status_code
         self.trust_proxy = trust_proxy
         self.allowed_hosts = allowed_hosts
+        self._patterns = []
+        if allowed_hosts:
+            for allowed in allowed_hosts:
+                if allowed == "*":
+                    self._patterns.append(("*", None, None))
+                elif allowed.startswith("*."):
+                    suffix = allowed[2:]
+                    self._patterns.append(("wildcard", suffix, "." + suffix))
+                else:
+                    self._patterns.append(("exact", allowed, None))
+
         # SECURITY: Invalid characters for host headers
         self._invalid_chars = {"/", "?", "#", "\\", "@"}
 
@@ -71,21 +82,19 @@ class HTTPSRedirectMiddleware:
             return
 
         # 2. Check against allowed_hosts if configured
-        if self.allowed_hosts:
+        if self._patterns:
             is_allowed = False
 
-            hostname = host
-
-            for allowed in self.allowed_hosts:
-                if allowed == "*":
+            for ptype, val1, val2 in self._patterns:
+                if ptype == "*":
                     is_allowed = True
                     break
-                if allowed == host or allowed == hostname:
-                    is_allowed = True
-                    break
-                if allowed.startswith("*."):
-                    domain = allowed[2:]
-                    if hostname == domain or hostname.endswith("." + domain):
+                if ptype == "exact":
+                    if host == val1:
+                        is_allowed = True
+                        break
+                elif ptype == "wildcard":
+                    if host == val1 or host.endswith(val2):
                         is_allowed = True
                         break
 
