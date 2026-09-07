@@ -1,4 +1,25 @@
+import importlib
+import sys
+from unittest.mock import patch
+
+import xyra.routing
 from xyra.routing import Router
+
+
+def test_parse_path_fallback_when_cffi_missing():
+    try:
+        with patch.dict(sys.modules, {"xyra._libxyra": None}):
+            if "xyra.routing" in sys.modules:
+                del sys.modules["xyra.routing"]
+            fallback_routing = importlib.import_module("xyra.routing")
+            path, params = fallback_routing.parse_path("/users/{id}")
+            assert path == "/users/{id}"
+            assert params == []
+    finally:
+        if "xyra.routing" in sys.modules:
+            del sys.modules["xyra.routing"]
+        sys.modules["xyra.routing"] = xyra.routing
+        importlib.reload(xyra.routing)
 
 
 def test_router_creation():
