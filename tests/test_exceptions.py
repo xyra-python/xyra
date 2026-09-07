@@ -27,6 +27,12 @@ def test_xyra_exception():
     assert exc.message == "Test error"
 
 
+def test_xyra_exception_default_message():
+    exc = XyraException()
+    assert str(exc) == "An error occurred"
+    assert exc.message == "An error occurred"
+
+
 def test_http_exception():
     exc = HTTPException(404, "Custom not found")
     assert exc.status_code == 404
