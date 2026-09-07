@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -312,3 +312,24 @@ def test_response_set_cookie_same_site_none_secure(mock_socketify_response):
     cookie = response.headers["Set-Cookie"]
     assert "SameSite=none" in cookie
     assert "Secure" in cookie
+
+
+@pytest.mark.asyncio
+async def test_get_data_cffi_callback_mock():
+    mock_res = Mock(spec=["on_data", "on_aborted"])
+    def fake_on_data(cb):
+        cb(b"hello world", True)
+    def fake_on_aborted(cb):
+        pass
+    mock_res.on_data = fake_on_data
+    mock_res.on_aborted = fake_on_aborted
+
+    response = Response(mock_res)
+    with patch.dict("sys.modules", {"xyra._libxyra": None}):
+        with patch("xyra.response.ffi", None):
+            data = await response.get_data()
+            assert data == b"hello world"
+            assert response._cffi_data_cb is not None
+            assert response._cffi_abort_cb is not None
+            assert response._cffi_data_cb(None, 0, False) is None
+            assert response._cffi_abort_cb() is None
