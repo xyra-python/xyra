@@ -633,6 +633,9 @@ class Response:
             def cffi_on_abort(user_data=None):
                 pass
 
+            self._cffi_data_cb = cffi_on_data
+            self._cffi_abort_cb = cffi_on_abort
+
         def sync_on_data(chunk, is_last):
             if aborted[0]:
                 return
