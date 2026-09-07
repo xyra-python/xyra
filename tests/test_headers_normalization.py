@@ -1,7 +1,6 @@
 
 import threading
 import time
-import urllib.error
 import urllib.request
 
 from xyra import App, Request, Response
