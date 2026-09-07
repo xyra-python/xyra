@@ -148,13 +148,11 @@ class SecurityHeadersMiddleware:
         Check if the policy value is safe from injection.
         Disallows unquoted ')' characters.
         """
-        in_quote = False
-        for char in val:
-            if char == '"':
-                in_quote = not in_quote
-            elif char == ')' and not in_quote:
-                return False
-        return True
+        if ")" not in val:
+            return True
+        if '"' not in val:
+            return False
+        return not any(")" in part for part in val.split('"')[::2])
 
     def __call__(self, request: Request, response: Response):
         # PERF: Iterate over pre-calculated headers
