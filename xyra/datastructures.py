@@ -54,17 +54,17 @@ class Headers(CIMultiDict):
         self._validate(key, default)
         return super().setdefault(key, default)
 
-    def update(self, *args, **kwargs):
+    def _prepare_temp(self, *args, **kwargs):
         temp = CIMultiDict(*args, **kwargs)
         for key, value in temp.items():
             self._validate(key, value)
-        super().update(temp)
+        return temp
+
+    def update(self, *args, **kwargs):
+        super().update(self._prepare_temp(*args, **kwargs))
 
     def extend(self, *args, **kwargs):
-        temp = CIMultiDict(*args, **kwargs)
-        for key, value in temp.items():
-            self._validate(key, value)
-        super().extend(temp)
+        super().extend(self._prepare_temp(*args, **kwargs))
 
     def __init__(self, *args, **kwargs):
         super().__init__()
