@@ -54,14 +54,10 @@ class SecurityHeadersMiddleware:
         # Content-Security-Policy
         if content_security_policy:
             if isinstance(content_security_policy, dict):
-                policy_parts = []
-                for directive, sources in content_security_policy.items():
-                    if isinstance(sources, list):
-                        sources_str = " ".join(sources)
-                    else:
-                        sources_str = str(sources)
-                    policy_parts.append(f"{directive} {sources_str}")
-                csp_value = "; ".join(policy_parts)
+                csp_value = "; ".join([
+                    f"{directive} {' '.join(sources) if isinstance(sources, list) else sources}"
+                    for directive, sources in content_security_policy.items()
+                ])
                 self.headers.append(("Content-Security-Policy", csp_value))
             else:
                 self.headers.append(
