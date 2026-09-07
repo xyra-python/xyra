@@ -11,6 +11,7 @@ def test_get_logger():
 
 def test_get_logger_default():
     logger = get_logger()
+    assert isinstance(logger, logging.Logger)
     assert logger.name == "xyra"
 
 
